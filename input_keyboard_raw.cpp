@@ -254,9 +254,11 @@ InputKeyboardRawWorker::~InputKeyboardRawWorker()
 */
 void InputKeyboardRawWorker::tick()
 {
+    qDebug() << "keyboard raw ticking";
     // https://stackoverflow.com/questions/20943322/accessing-keys-from-linux-input-device
     
     this->n = read(this->fd, &this->ev, sizeof this->ev);
+    qDebug() << "kkkk";
     
     if (this->n != (ssize_t)-1 && this->n == sizeof this->ev)
     {

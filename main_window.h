@@ -26,7 +26,6 @@
 
 #include "input_keyboard_qt.h"
 #include "input_keyboard_raw.h"
-#include "input_keyboard_xcb.h"
 #include "combo_keyboard_select.h"
 
 #include "midi_key_shift_widget.h"
@@ -72,13 +71,11 @@ private:
     int keyboard_selection;
     
     InputKeyboardQt *inputQt = new InputKeyboardQt;
-    InputKeyboardXCB *inputXCB = nullptr;
     
     MIDIKeyShiftGlobal *global_key_shift_widget = new MIDIKeyShiftGlobal;
 
 protected:
     bool eventFilter(QObject *obj, QEvent *ev) override;
-    bool nativeEvent(const QByteArray &eventType, void *message, long *result) override;
 
 private slots:
     void saveParamsQuick();

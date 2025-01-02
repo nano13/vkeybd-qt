@@ -107,18 +107,19 @@ InputKeyboardRawController::~InputKeyboardRawController()
 {
     keyboardRelease();
     
-    QMetaObject::invokeMethod(this->worker, "finish", Qt::QueuedConnection);
-    /*
+    //QMetaObject::invokeMethod(this->worker, "finish", Qt::QueuedConnection);
+
     this->worker->finish();
     
-    //disconnect(this->thread);
+    disconnect(this->thread);
+    this->thread->terminate();
     this->thread->quit();
     //this->thread->exit();
     //this->thread->deleteLater();
     
     //this->thread->requestInterruption();
-    this->thread->wait();
-    */
+    //this->thread->wait();
+
     //this->thread->deleteLater();
     //this->thread->wait();
 }
@@ -283,6 +284,7 @@ void InputKeyboardRawWorker::finish()
 {
     //this->timer->disconnect();
     //disconnect(this->timer);
+    /*
     if (this->timer)
     {
         if (this->timer->isActive())
@@ -290,9 +292,9 @@ void InputKeyboardRawWorker::finish()
             this->timer->stop();
         }
         
-        delete this->timer;
+        //delete this->timer;
         this->timer = nullptr;
     }
-    
-    emit finished();
+    */
+    //emit finished();
 }

@@ -1,6 +1,7 @@
 #!/usr/bin/bash
 
-qmake-qt5 -o Makefile vkeybd-qt.pro 
+#qmake-qt5 -o Makefile vkeybd-qt.pro
+qmake6 -o Makefile vkeybd-qt.pro 
 make -j $(nproc)
 
 if [ $? -eq 0 ]

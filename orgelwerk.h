@@ -49,7 +49,7 @@ signals:
 
 #include <QDebug>
 //#include <QApplication>
-#include <QDesktopWidget>
+#include <QScreen>
 #include <QGuiApplication>
 #include <QScrollBar>
 #include <QScreen>

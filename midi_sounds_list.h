@@ -5,6 +5,7 @@
 #include <QList>
 #include <QStringList>
 #include <QMap>
+#include <QVariant>
 #include <QDebug>
 
 class MIDISoundsList

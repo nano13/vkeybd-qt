@@ -13,6 +13,7 @@
 #include <QEvent>
 #include <QKeyEvent>
 #include <QVariant>
+#include <QFile>
 
 #include <QHideEvent>
 

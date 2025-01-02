@@ -1,8 +1,8 @@
 QT  += core\
     gui\
     svg\
-    network\
-    x11extras
+    svgwidgets\
+    network
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -28,7 +28,6 @@ SOURCES += \
     input_keyboard_raw.cpp \
     input_keyboard_select.cpp \
     input_keyboard_udp.cpp \
-    input_keyboard_xcb.cpp \
     input_midi.cpp \
     interface_alsa.cpp \
     interface_audio.cpp \
@@ -63,7 +62,6 @@ HEADERS += \
     input_keyboard_raw.h \
     input_keyboard_select.h \
     input_keyboard_udp.h \
-    input_keyboard_xcb.h \
     input_midi.h \
     interface_alsa.h \
     interface_audio.h \

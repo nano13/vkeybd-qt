@@ -426,6 +426,7 @@ void Orgelwerk::volumeSliderMoved(int value)
 
 void Orgelwerk::showChannelDetails()
 {
+    /*
     QDesktopWidget *desktop = new QDesktopWidget;
     int screen_number = desktop->screenNumber(this);
     QSize screen_size = QGuiApplication::screens().at(screen_number)->size();
@@ -449,6 +450,7 @@ void Orgelwerk::showChannelDetails()
     }
     
     this->scroll_channels->show();
+    */
 }
 
 void Orgelwerk::channelsDialogRejected()

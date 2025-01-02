@@ -42,11 +42,7 @@ MainWindow::MainWindow(OutputSystem output, int number_of_keyboards, QWidget *pa
     {
         layout->addWidget(newKeyboardInstance(i, output));
     }
-    
-    this->inputXCB = new InputKeyboardXCB;
-    connect(this->inputXCB, &InputKeyboardXCB::rawKeyPressedSignal, this, &MainWindow::rawKeyPressed);
-    connect(this->inputXCB, &InputKeyboardXCB::rawKeyReleasedSignal, this, &MainWindow::rawKeyReleased);
-    
+
     connect(this->inputQt, &InputKeyboardQt::keyPressSignal, this, &MainWindow::rawKeyPressed);
     connect(this->inputQt, &InputKeyboardQt::keyReleaseSignal, this, &MainWindow::rawKeyReleased);                    
     
@@ -316,19 +312,6 @@ void MainWindow::showActionChanged(GUIElements elements, bool is_checked)
 bool MainWindow::eventFilter(QObject *obj, QEvent *ev)
 {
     return this->inputQt->callEventFilter(obj, ev);
-}
-
-bool MainWindow::nativeEvent(const QByteArray &eventType, void *message, long *result)
-{
-    Q_UNUSED(result);
-    
-    //if (this->input_kbd_qt_native)
-    if (this->keyboard_selection == KeyboardSelection::Native && this->inputXCB->isX11Running())
-    {
-        return this->inputXCB->xcbEvent(eventType, message, result);
-    }
-    
-    return false;
 }
 
 void MainWindow::keyboardSelectionChanged(int selection, bool locked)

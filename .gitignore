@@ -1,8 +1,10 @@
 # This file is used to ignore files which are generated
 # ----------------------------------------------------------------------------
 
+build
 debug
 release
+.qtc_clangd
 *~
 *.autosave
 *.a

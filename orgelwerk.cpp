@@ -426,31 +426,28 @@ void Orgelwerk::volumeSliderMoved(int value)
 
 void Orgelwerk::showChannelDetails()
 {
-    /*
-    QDesktopWidget *desktop = new QDesktopWidget;
-    int screen_number = desktop->screenNumber(this);
-    QSize screen_size = QGuiApplication::screens().at(screen_number)->size();
+    QScreen *screen = QGuiApplication::primaryScreen();
+    QSize screen_size = screen->availableVirtualSize();
     
     QMargins margins = this->scroll_channels->contentsMargins();
     
-    if (this->channels->size().width() > screen_size.width())
+    if (! this->scroll_channels->horizontalScrollBar()->isHidden())
     {
         int scroll_bar_height = this->scroll_channels->horizontalScrollBar()->sizeHint().height();
         this->scroll_channels->resize(
-                    screen_size.width(),
-                    this->channels->height() + margins.top() + margins.bottom() + scroll_bar_height
-                    );
+                screen_size.width(),
+                this->channels->height() + margins.top() + margins.bottom() + scroll_bar_height
+            );
     }
     else
     {
         this->scroll_channels->resize(
-                    this->channels->width() + margins.left() + margins.right(),
-                    this->channels->height() + margins.top() + margins.bottom()
-                    );
+                this->channels->width() + margins.left() + margins.right(),
+                this->channels->height() + margins.top() + margins.bottom()
+            );
     }
     
     this->scroll_channels->show();
-    */
 }
 
 void Orgelwerk::channelsDialogRejected()

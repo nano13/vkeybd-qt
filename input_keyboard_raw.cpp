@@ -109,11 +109,14 @@ InputKeyboardRawController::~InputKeyboardRawController()
     
     //QMetaObject::invokeMethod(this->worker, "finish", Qt::QueuedConnection);
 
-    this->worker->finish();
+    //this->worker->finish();
     
-    disconnect(this->thread);
-    this->thread->terminate();
-    this->thread->quit();
+    if (this->thread != nullptr)
+    {
+        //disconnect(this->thread);
+        this->thread->terminate();
+        this->thread->quit();
+    }
     //this->thread->exit();
     //this->thread->deleteLater();
     

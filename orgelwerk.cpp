@@ -103,6 +103,7 @@ void Orgelwerk::drawPianoKeyboard(int grid_row)
     this->piano = new KeyboardPiano;
     
     this->grid->addWidget(this->piano, grid_row, 0, 1, 2);
+    this->grid->setAlignment(this->piano, Qt::AlignHCenter);
     this->piano->hide();
 }
 void Orgelwerk::drawPCKeyboard(int grid_row)

@@ -20,7 +20,9 @@ int main(int argc, char *argv[])
     
     QPixmap pixmap(":/splash");
     QSplashScreen splash(pixmap, Qt::WindowStaysOnTopHint);
+    app.processEvents();
     splash.show();
+    app.processEvents();
     splash.showMessage("Starting vkeybd-qt");
     app.processEvents();
     

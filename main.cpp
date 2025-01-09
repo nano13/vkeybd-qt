@@ -3,6 +3,7 @@
 #include <QApplication>
 #include <QCommandLineParser>
 #include <QCommandLineOption>
+#include <QSplashScreen>
 
 #include <QDebug>
 
@@ -16,6 +17,12 @@ int main(int argc, char *argv[])
     QApplication::setApplicationName("vkeybd-qt");
     //qDebug() << 
     //app.inputMethod()->show();
+    
+    QPixmap pixmap(":/splash");
+    QSplashScreen splash(pixmap, Qt::WindowStaysOnTopHint);
+    splash.show();
+    splash.showMessage("Starting vkeybd-qt");
+    app.processEvents();
     
     Config *config = new Config;
     int config_number_of_keyboards = config->getNumberOfKeyboards();
@@ -45,7 +52,6 @@ int main(int argc, char *argv[])
     });
     
     parser.process(app);
-    
     
     int number_of_keyboards = parser.value("number-of-keyboards").toInt();
     if (number_of_keyboards == -1)
@@ -78,7 +84,7 @@ int main(int argc, char *argv[])
         output_system = config_output_system;
     }
     
-    if ((output_system != "alsa") & (output_system != "jack") & (output_system != "network"))
+    if ((output_system != "alsa") && (output_system != "jack") && (output_system != "network"))
     {
         fprintf(stderr, "%s\n", qPrintable(QCoreApplication::translate("main", "ERROR: Option \"-o\" / \"--output\" has to be one of: \"alsa\", \"jack\" or \"network\".")));
         fprintf(stderr, "\n");
@@ -88,6 +94,8 @@ int main(int argc, char *argv[])
     }
     else
     {
+        app.processEvents();
+        
         OutputSystem output;
         output = OutputSystem::Alsa;
         if (output_system == "alsa")
@@ -97,8 +105,15 @@ int main(int argc, char *argv[])
         else if (output_system == "network")
             output = OutputSystem::Network;
         
+        app.processEvents();
         MainWindow win(output, number_of_keyboards);
+        app.processEvents();
         win.show();
+        app.processEvents();
+        
+        splash.finish(&win);
+        
         return app.exec();
     }
 }
+

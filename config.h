@@ -21,7 +21,8 @@ public:
     void saveChannelSettings(QSettings *settings, int id, QString label, QList<QMap<QString, QVariant> > channels);
     void loadChannelSettings(QSettings *settings);
     void saveParams(QSettings *settings, int id, QString label, QString channel, QMap<QString,QVariant> params);
-
+    
+    QSettings *openAutoloadFile();
     QSettings *openQuicksaveFile(int number_of_keyboards);
     QSettings *openSaveFile(QString filepath);
     void saveLastSavePath(QString path);

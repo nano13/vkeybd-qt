@@ -31,8 +31,7 @@ void HelpAboutWidget::showLibraries()
     QTextEdit *text = new QTextEdit();
     text->setText("Qt 6\n\
 asound\n\
-jack\n\
-");
+jack\n");
     
     text->setReadOnly(true);
     this->tab_widget->addTab(text, "Libraries");

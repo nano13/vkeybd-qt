@@ -16,6 +16,7 @@ Config::Config(QObject *parent) : QObject(parent)
     if (! config_file->exists())
     {
         this->config->setValue("default/quicksave-path-n1", config_dir->absoluteFilePath("quicksave_n1.ini"));
+        this->config->setValue("default/autoload-config", false);
         this->config->setValue("default/number-of-keyboards", 1);
         this->config->setValue("default/number-of-layers", 2);
         this->config->setValue("default/output", "alsa");
@@ -23,12 +24,22 @@ Config::Config(QObject *parent) : QObject(parent)
     }
 }
 
+QSettings *Config::openAutoloadFile()
+{
+    QString path = "default/autoload-config";
+    if (!this->config->contains(path))
+    {
+        this->config->setValue(path, false);
+    }
+    
+    return new QSettings(this->config->value(path).toString(), QSettings::IniFormat);
+}
 QSettings *Config::openQuicksaveFile(int number_of_keyboards)
 {
     QString path = "default/quicksave-path-n"+QString::number(number_of_keyboards);
     if (!this->config->contains(path))
     {
-        this->config->setValue(path, config_dir->absoluteFilePath("quicksave_n"+QString::number(number_of_keyboards)+".ini"));
+        this->config->setValue(path, this->config_dir->absoluteFilePath("quicksave_n"+QString::number(number_of_keyboards)+".ini"));
     }
     
     return new QSettings(this->config->value(path).toString(), QSettings::IniFormat);

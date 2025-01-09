@@ -80,6 +80,7 @@ protected:
 private slots:
     void saveParamsQuick();
     void loadParamsQuick();
+    void loadParamsAuto();
     void saveParams();
     void loadParams();
     //void openAllParams();

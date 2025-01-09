@@ -47,6 +47,8 @@ MainWindow::MainWindow(OutputSystem output, int number_of_keyboards, QWidget *pa
     connect(this->inputQt, &InputKeyboardQt::keyReleaseSignal, this, &MainWindow::rawKeyReleased);                    
     
     connect(this->global_key_shift_widget, &MIDIKeyShiftGlobal::signalKeyShiftChanged, this, &MainWindow::globalKeyShiftValueChanged);
+    
+    this->loadParamsAuto();
 }
 
 MainWindow::~MainWindow()
@@ -226,6 +228,11 @@ void MainWindow::saveParamsQuick()
 void MainWindow::loadParamsQuick()
 {
     QSettings *settings = this->config->openQuicksaveFile(this->number_of_keyboards);
+    this->config->loadChannelSettings(settings);
+}
+void MainWindow::loadParamsAuto()
+{
+    QSettings *settings = this->config->openAutoloadFile();
     this->config->loadChannelSettings(settings);
 }
 void MainWindow::restoreParams(int maintab, QString tab, QMap<QString, QVariant> data)

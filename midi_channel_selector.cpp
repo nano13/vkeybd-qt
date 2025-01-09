@@ -444,7 +444,7 @@ void MIDIChannelSelector::instrumentGroupChanged(int channel, QComboBox *combo_g
 
 void MIDIChannelSelector::instrumentChanged(int channel, QString instrument)
 {
-    qDebug() << "changed-: "+instrument;
+    //qDebug() << "changed-: "+instrument;
     
     QMap<QString,int> codes = this->midi_sounds_list->getMIDICodesForInstrument(instrument);
     int instrument_msb = codes["msb"] - 1;
@@ -459,12 +459,12 @@ void MIDIChannelSelector::instrumentChangedNumeric(int channel, int instrument_m
     InterfaceAudio *audio = selectedAudioInterface(channel);
     audio->setProgramChangeEvent(this->port, channel, instrument_msb, instrument_lsb);
     
-    qDebug() << "changed+: "+QString::number(channel)+" "+QString::number(instrument_msb)+" "+QString::number(instrument_lsb);
+    //qDebug() << "changed+: "+QString::number(channel)+" "+QString::number(instrument_msb)+" "+QString::number(instrument_lsb);
     audio->setProgramChangeEvent(this->port, channel, instrument_msb, instrument_lsb);
     
     // change spin boxes for group and bank accordingly
     QMap<QString,QString> names = this->midi_sounds_list->getInstrumentForMIDICodes(instrument_msb, instrument_lsb);
-    qDebug() << names;
+    //qDebug() << names;
     
     this->list_of_instrument_banks.at(channel)->blockSignals(true);
     if (names["group"] == "")

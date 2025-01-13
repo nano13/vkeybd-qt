@@ -2,6 +2,7 @@
     <qresource prefix="/">
         <file alias="gpl">LICENSE</file>
         <file alias="splash">assets/img/splash2.png</file>
+        <file alias="icon">assets/img/icon.png</file>
         
         <file alias="bass_violin">assets/svg/bass_violin.svg</file>
         <file alias="clef_bass">assets/svg/clef_bass.svg</file>

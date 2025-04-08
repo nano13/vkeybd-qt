@@ -92,7 +92,14 @@ QString InputKeyboardRawMeta::getPathForName(QString name)
 }
 QString InputKeyboardRawMeta::getKeyboardName(QMap<QString,QString> keyboard)
 {
-    return keyboard["Name"] + "@" + keyboard["dev"];
+    if (keyboard["Uniq"].length() > 0)
+    {
+        return keyboard["Name"] + "@" + keyboard["Uniq"];
+    }
+    else
+    {
+        return keyboard["Name"] + "@" + keyboard["dev"];
+    }
 }
 
 

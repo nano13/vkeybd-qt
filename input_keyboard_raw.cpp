@@ -24,8 +24,10 @@ QList<QMap<QString,QString>> InputKeyboardRawMeta::detectKeyboards()
             
             if (line.isEmpty())
             {
+                QString ev = device["EV"];
+                int evi = ev.toUInt(nullptr, 16);
                 // https://unix.stackexchange.com/questions/74903/explain-ev-in-proc-bus-input-devices-data
-                if (device["EV"] == "120013")
+                if ((evi & 0x120013) == 0x120013)
                 {
                     keyboards.append(device);
                 }
@@ -178,6 +180,7 @@ void InputKeyboardRawController::keyboardHelper(QString devpath, KeyboardMode mo
     }
     else
     {
+        qDebug() << "ERROR: device not available";
         emit deviceNotAvailable("evdev open");
     }
 }

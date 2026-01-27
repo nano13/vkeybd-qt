@@ -128,15 +128,24 @@ void InterfaceAlsa::keySoftEvent(int port, int channel, bool pressed)
 
 void InterfaceAlsa::setProgramChangeEvent(int port, int channel, int program, int bank)
 {
+    int msb = (bank >> 7) & 0x7F;  // Bank / 128
+    int lsb = bank & 0x7F;         // Bank % 128
+    
     snd_seq_ev_set_source(&this->ev, port);
     
-    snd_seq_ev_set_controller(&this->ev, channel, MIDI_CTL_MSB_BANK, 121);
+    // MSB senden
+    snd_seq_ev_set_controller(&this->ev, channel, MIDI_CTL_MSB_BANK, msb);
     sendEvent(false);
-    snd_seq_ev_set_controller(&this->ev, channel, MIDI_CTL_LSB_BANK, bank);
+    
+    // LSB senden
+    snd_seq_ev_set_controller(&this->ev, channel, MIDI_CTL_LSB_BANK, lsb);
     sendEvent(false);
+    
+    // Program Change
     snd_seq_ev_set_pgmchange(&this->ev, channel, program);
     sendEvent(true);
 }
+
 
 void InterfaceAlsa::setVolumeChangeEvent(int port, int channel, int volume)
 {

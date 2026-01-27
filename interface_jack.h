@@ -40,6 +40,7 @@ public:
     void keySostenutoEvent(int port, int channel, bool pressed) override;
     void keySoftEvent(int port, int channel, bool pressed) override;
     void setProgramChangeEvent(int port, int channel, int program, int bank) override;
+    void setControlChangeEvent(int port, int channel, int cc, int value) override;
     void setVolumeChangeEvent(int port, int channel, int volume) override;
     void setPanChangeEvent(int port, int channel, int value) override;
     void setPortamentoChanged(int port, int channel, int value) override;

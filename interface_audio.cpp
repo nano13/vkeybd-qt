@@ -85,6 +85,14 @@ void InterfaceAudio::setProgramChangeEvent(int port, int channel, int program, i
     Q_UNUSED(bank);
 }
 
+void InterfaceAudio::setControlChangeEvent(int port, int channel, int cc, int value)
+{
+    Q_UNUSED(port);
+    Q_UNUSED(channel);
+    Q_UNUSED(cc);
+    Q_UNUSED(value);
+}
+
 void InterfaceAudio::setVolumeChangeEvent(int port, int channel, int volume)
 {
     Q_UNUSED(port);

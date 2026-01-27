@@ -147,6 +147,10 @@ void InterfaceAlsa::setProgramChangeEvent(int port, int channel, int program, in
     sendEvent(true);
 }
 
+void InterfaceAlsa::setControlChangeEvent(int port, int channel, int cc, int value)
+{
+    
+}
 
 void InterfaceAlsa::setVolumeChangeEvent(int port, int channel, int volume)
 {

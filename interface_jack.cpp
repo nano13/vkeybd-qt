@@ -182,6 +182,16 @@ void InterfaceJack::setProgramChangeEvent(int port, int channel, int program, in
     pushEvent({port, channel, 3, program & 0x7F, 0});
 }
 
+void InterfaceJack::setControlChangeEvent(int port, int channel, int cc, int value)
+{
+    // Clamp to valid MIDI range just to be safe
+    cc &= 0x7F;
+    value &= 0x7F;
+    
+    // CC event (type = 2)
+    pushEvent({port, channel, 2, cc, value});
+}
+
 void InterfaceJack::setVolumeChangeEvent(int port, int channel, int volume)
 {
     pushEvent({port, channel, 2, 7, volume});

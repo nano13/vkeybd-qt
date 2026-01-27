@@ -24,6 +24,7 @@ public:
     virtual void keySostenutoEvent(int port, int channel, bool pressed);
     virtual void keySoftEvent(int port, int channel, bool pressed);
     virtual void setProgramChangeEvent(int port, int channel, int program, int bank);
+    virtual void setControlChangeEvent(int port, int channel, int cc, int value);
     virtual void setVolumeChangeEvent(int port, int channel, int volume);
     virtual void setPanChangeEvent(int port, int channel, int value);
     virtual void setPortamentoChanged(int port, int channel, int value);

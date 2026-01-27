@@ -129,18 +129,23 @@ void Orgelwerk::showChannelsSummary(int grid_row)
     
     this->midi_channels_summary = new MIDIChannelsSummary;
     
-    this->button_channels_dialog->setText("Edit MIDI Channels");
+    this->button_channels_dialog->setText("Edit Channels");
     connect(button_channels_dialog, &QPushButton::clicked, this, &Orgelwerk::showChannelDetails);
     
-    this->button_resend_midi->setText("Resend MIDI Settings [Ins]");
+    this->button_resend_midi->setText("Resend Settings");
+    this->button_resend_midi->setToolTip("Resend MIDI Settings [Ins]");
     connect(button_resend_midi, &QPushButton::clicked, this, &Orgelwerk::resendMIDIControls);
     
     this->check_resend_midi_auto->setToolTip("Automatically resend MIDI settings if tab activated");
     
-    layout_channels->addWidget(this->midi_channels_summary, 0, 0, 1, 3);
+    this->button_cc_map->setText("CC-Map");
+    connect(button_cc_map, &QPushButton::clicked, this, &Orgelwerk::showCCMap);
+    
+    layout_channels->addWidget(this->midi_channels_summary, 0, 0, 1, 4);
     layout_channels->addWidget(button_channels_dialog, 1, 0);
     layout_channels->addWidget(button_resend_midi, 1, 1);
     layout_channels->addWidget(this->check_resend_midi_auto, 1, 2);
+    layout_channels->addWidget(this->button_cc_map, 1, 3);
     
     this->grid->addWidget(group_channels, grid_row, 0, 1, 2);
     
@@ -383,6 +388,10 @@ void Orgelwerk::showChannelDetails()
     }
     
     this->scroll_channels->show();
+}
+void Orgelwerk::showCCMap()
+{
+    
 }
 
 void Orgelwerk::channelsDialogRejected()

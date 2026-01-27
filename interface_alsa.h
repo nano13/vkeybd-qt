@@ -39,6 +39,7 @@ public:
     void keySostenutoEvent(int port, int channel, bool pressed);
     void keySoftEvent(int port, int channel, bool pressed);
     void setProgramChangeEvent(int port, int channel, int program, int bank);
+    void setControlChangeEvent(int port, int channel, int cc, int value);
     void setVolumeChangeEvent(int port, int channel, int volume);
     void setPanChangeEvent(int port, int channel, int value);
     void setPortamentoChanged(int port, int channel, int value);

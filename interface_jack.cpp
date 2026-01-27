@@ -118,6 +118,12 @@ void InterfaceJack::processRingBuffer(jack_nframes_t nframes)
             midi[1] = ev.data1 & 0x7F;
             jack_midi_event_write(buf, 0, midi, 2);
             break;
+        case 4: // Pitch Bend
+            midi[0] = 0xE0 | (ev.channel & 0x0F); // status byte
+            midi[1] = ev.data1 & 0x7F;           // LSB
+            midi[2] = ev.data2 & 0x7F;           // MSB
+            jack_midi_event_write(buf, 0, midi, 3);
+            break;
         }
     }
 }
@@ -147,9 +153,18 @@ void InterfaceJack::keyStopAllEvent(int port, int channel)
 
 void InterfaceJack::keyPitchbendEvent(int port, int channel, int pitch)
 {
-    int bend = pitch - 8192;
-    pushEvent({port, channel, 2, 0xE0, bend & 0x7F});
+    // Clamp pitch to 0–16383 (14-bit)
+    if (pitch < 0) pitch = 0;
+    if (pitch > 16383) pitch = 16383;
+    
+    // Split into LSB / MSB for 14-bit pitch bend
+    uint8_t lsb = pitch & 0x7F;
+    uint8_t msb = (pitch >> 7) & 0x7F;
+    
+    // Type 4 = pitch bend
+    pushEvent({port, channel, 4, lsb, msb});
 }
+
 
 void InterfaceJack::keySustainEvent(int port, int channel, bool pressed)
 {

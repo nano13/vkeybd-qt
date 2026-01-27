@@ -131,24 +131,24 @@ void InterfaceJack::processRingBuffer(jack_nframes_t nframes)
 // Event handlers remain unchanged
 void InterfaceJack::keyPressEvent(int port, int channel, int midicode, int velocity)
 {
-    pushEvent({port, channel, 0, midicode, velocity});
+    pushEvent({port, channel, MidiEvent::NOTE_ON, midicode, velocity});
 }
 
 void InterfaceJack::keyReleaseEvent(int port, int channel, int midicode, int velocity)
 {
-    pushEvent({port, channel, 1, midicode, velocity});
+    pushEvent({port, channel, MidiEvent::NOTE_OFF, midicode, velocity});
 }
 
 void InterfaceJack::keyPanicEvent(int port, int channel)
 {
     for (int i = 0; i < 128; ++i)
-        pushEvent({port, channel, 1, i, 127});
+        pushEvent({port, channel, MidiEvent::NOTE_OFF, i, 127});
 }
 
 void InterfaceJack::keyStopAllEvent(int port, int channel)
 {
     for (int i = 0; i < 128; ++i)
-        pushEvent({port, channel, 2, 120, 127});
+        pushEvent({port, channel, MidiEvent::CC, 120, 127});
 }
 
 void InterfaceJack::keyPitchbendEvent(int port, int channel, int pitch)
@@ -162,23 +162,23 @@ void InterfaceJack::keyPitchbendEvent(int port, int channel, int pitch)
     uint8_t msb = (pitch >> 7) & 0x7F;
     
     // Type 4 = pitch bend
-    pushEvent({port, channel, 4, lsb, msb});
+    pushEvent({port, channel, MidiEvent::PITCH_BEND, lsb, msb});
 }
 
 
 void InterfaceJack::keySustainEvent(int port, int channel, bool pressed)
 {
-    pushEvent({port, channel, 2, 64, pressed ? 127 : 0});
+    pushEvent({port, channel, MidiEvent::CC, 64, pressed ? 127 : 0});
 }
 
 void InterfaceJack::keySostenutoEvent(int port, int channel, bool pressed)
 {
-    pushEvent({port, channel, 2, 66, pressed ? 127 : 0});
+    pushEvent({port, channel, MidiEvent::CC, 66, pressed ? 127 : 0});
 }
 
 void InterfaceJack::keySoftEvent(int port, int channel, bool pressed)
 {
-    pushEvent({port, channel, 2, 67, pressed ? 127 : 0});
+    pushEvent({port, channel, MidiEvent::CC, 67, pressed ? 127 : 0});
 }
 
 void InterfaceJack::setProgramChangeEvent(int port, int channel, int program, int bank)
@@ -187,14 +187,14 @@ void InterfaceJack::setProgramChangeEvent(int port, int channel, int program, in
     
     // Bank MSB (CC0)
     int bankMSB = (bank >> 7) & 0x7F;
-    pushEvent({port, channel, 2, 0, bankMSB});
+    pushEvent({port, channel, MidiEvent::CC, 0, bankMSB});
     
     // Bank LSB (CC32)
     int bankLSB = bank & 0x7F;
-    pushEvent({port, channel, 2, 32, bankLSB});
+    pushEvent({port, channel, MidiEvent::CC, 32, bankLSB});
     
     // Program Change
-    pushEvent({port, channel, 3, program & 0x7F, 0});
+    pushEvent({port, channel, MidiEvent::PROGRAM, program & 0x7F, 0});
 }
 
 void InterfaceJack::setControlChangeEvent(int port, int channel, int cc, int value)
@@ -204,35 +204,35 @@ void InterfaceJack::setControlChangeEvent(int port, int channel, int cc, int val
     value &= 0x7F;
     
     // CC event (type = 2)
-    pushEvent({port, channel, 2, cc, value});
+    pushEvent({port, channel, MidiEvent::CC, cc, value});
 }
 
 void InterfaceJack::setVolumeChangeEvent(int port, int channel, int volume)
 {
-    pushEvent({port, channel, 2, 7, volume});
+    pushEvent({port, channel, MidiEvent::CC, 7, volume});
 }
 
 void InterfaceJack::setPanChangeEvent(int port, int channel, int value)
 {
-    pushEvent({port, channel, 2, 10, value});
+    pushEvent({port, channel, MidiEvent::CC, 10, value});
 }
 
 void InterfaceJack::setPortamentoChanged(int port, int channel, int value)
 {
-    pushEvent({port, channel, 2, 5, value});
+    pushEvent({port, channel, MidiEvent::CC, 5, value});
 }
 
 void InterfaceJack::setAttackChanged(int port, int channel, int value)
 {
-    pushEvent({port, channel, 2, 73, value});
+    pushEvent({port, channel, MidiEvent::CC, 73, value});
 }
 
 void InterfaceJack::setReleaseChanged(int port, int channel, int value)
 {
-    pushEvent({port, channel, 2, 72, value});
+    pushEvent({port, channel, MidiEvent::CC, 72, value});
 }
 
 void InterfaceJack::setTremoloChanged(int port, int channel, int value)
 {
-    pushEvent({port, channel, 2, 1, value});
+    pushEvent({port, channel, MidiEvent::CC, 1, value});
 }

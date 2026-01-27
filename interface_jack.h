@@ -14,13 +14,22 @@
 // Simple MIDI ring buffer for queued events
 #pragma pack(push, 1)
 struct MidiEvent {
+    enum EventType : uint8_t {
+        NOTE_ON     = 0,
+        NOTE_OFF    = 1,
+        CC          = 2,
+        PROGRAM     = 3,
+        PITCH_BEND  = 4
+    };
+    
     int port;
     int channel;
-    int type;      // 0=noteon, 1=noteoff, 2=cc, 3=pgm, etc.
-    uint8_t data1;     // note number or controller number or program
-    uint8_t data2;     // velocity or value
+    EventType type;  // Use the enum now
+    uint8_t data1;   // note number, controller number, or LSB
+    uint8_t data2;   // velocity, value, or MSB
 };
 #pragma pack(pop)
+
 
 class InterfaceJack : public InterfaceAudio
 {

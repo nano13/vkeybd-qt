@@ -1,6 +1,7 @@
 #include "interface_audio.h"
 
-InterfaceAudio::InterfaceAudio(QObject *parent) : QObject(parent)
+InterfaceAudio::InterfaceAudio(int id, QObject *parent)
+    : QObject(parent), id(id)
 {
     
 }

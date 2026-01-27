@@ -17,7 +17,6 @@ Orgelwerk::Orgelwerk(int keyboard_id, int tab_id, InterfaceAudio *interface_audi
 void Orgelwerk::drawGUI()
 {
     this->channels = new MIDIChannelSelector(this->interface_audio, this->tab_id);
-    connect(this->channels, &MIDIChannelSelector::newAudioInterfaceRequested, this, &Orgelwerk::addNewAudioInterface);
     this->keys = new MIDIKeySelector;
     this->pitch = new MIDIPitchWheel;
     this->volume = new MIDIMasterVolume;
@@ -159,22 +158,6 @@ Orgelwerk::~Orgelwerk()
 {
     //this->thread_input->quit();
     //this->thread_input->exit();
-}
-
-void Orgelwerk::addNewAudioInterface(QString label)
-{
-    /*
-    if (this->audio_system == OutputSystem::Alsa)
-    {
-        this->list_of_audio_interfaces.append(new InterfaceAlsa(label));
-    }
-    else if (this->audio_system == OutputSystem::Jack)
-    {
-        this->list_of_audio_interfaces.append(new InterfaceJack(label));
-    }
-    
-    this->channels->setListOfAudioOutputs(this->list_of_audio_interfaces);
-    */
 }
 
 void Orgelwerk::keyDownRaw(int keycode)

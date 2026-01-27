@@ -161,8 +161,6 @@ private:
     void showEvent(QShowEvent *event);
     
 private slots:
-    void addNewAudioInterface(QString label);
-    
     void keyMIDIDown(int midicode);
     void keyMIDIUp(int midicode);
     void pitchWheelMoved(int pitch);

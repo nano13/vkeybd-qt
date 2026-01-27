@@ -8,11 +8,11 @@ MainTabs::MainTabs(QList<QString> labels, int id, Config *config, OutputSystem o
     
     if (output == OutputSystem::Alsa)
     {
-        this->interface_audio = new InterfaceAlsa();
+        this->interface_audio = new InterfaceAlsa(id);
     }
     else if (output == OutputSystem::Jack)
     {
-        this->interface_audio = new InterfaceJack();
+        this->interface_audio = new InterfaceJack(id);
     }
     else if (output == OutputSystem::Network)
     {
@@ -20,7 +20,7 @@ MainTabs::MainTabs(QList<QString> labels, int id, Config *config, OutputSystem o
     }
     else
     {
-        this->interface_audio = new InterfaceAudio();
+        this->interface_audio = new InterfaceAudio(id);
     }
     
     connect(input_keyboard_select, &InputKeyboardSelect::keyRawPressedSignal, this, &MainTabs::rawKeyPressed);

@@ -8,7 +8,8 @@
  * https://www.alsa-project.org/alsa-doc/alsa-lib/seq.html
  */
 
-InterfaceAlsa::InterfaceAlsa(InterfaceAudio *parent) : InterfaceAudio(parent)
+InterfaceAlsa::InterfaceAlsa(int id, InterfaceAudio *parent)
+    : InterfaceAudio(id, parent)
 {
     //this->label_string = label;
     

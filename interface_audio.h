@@ -8,7 +8,7 @@ class InterfaceAudio : public QObject
 {
     Q_OBJECT
 public:
-    explicit InterfaceAudio(QObject *parent = nullptr);
+    explicit InterfaceAudio(int id = 0, QObject *parent = nullptr);
     ~InterfaceAudio();
     
     virtual QString label();
@@ -33,6 +33,9 @@ public:
     
     virtual void saveMIDISettings();
     virtual void loadMIDISettings();
+    
+protected:
+    int id;
     
 signals:
     

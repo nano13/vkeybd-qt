@@ -25,7 +25,7 @@ class InterfaceJack : public InterfaceAudio
 {
     Q_OBJECT
 public:
-    explicit InterfaceJack(InterfaceAudio *parent = nullptr);
+    explicit InterfaceJack(int id = 0, InterfaceAudio *parent = nullptr);
     ~InterfaceJack();
     
     void createNewPort(QString label) override;

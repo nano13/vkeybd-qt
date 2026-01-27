@@ -25,7 +25,7 @@ class InterfaceAlsa : public InterfaceAudio
 {
     Q_OBJECT
 public:
-    explicit InterfaceAlsa(InterfaceAudio *parent = nullptr);
+    explicit InterfaceAlsa(int id = 0, InterfaceAudio *parent = nullptr);
     ~InterfaceAlsa();
     
     void createNewPort(QString label);

@@ -311,15 +311,6 @@ void Orgelwerk::keyShiftMapRemove(int key, int keycode)
     qDebug() << "UP: " << this->map_of_keys_down;
 }
 
-void Orgelwerk::notePlay(int interface_index, int channel, int note)
-{
-    //this->list_of_audio_interfaces.at(interface_index)->keyPressEvent(channel, note);
-}
-void Orgelwerk::noteStop(int interface_index, int channel, int note)
-{
-    //this->list_of_audio_interfaces.at(interface_index)->keyReleaseEvent(channel, note);
-}
-
 // to move pitch wheel by keyboard
 void Orgelwerk::movePitchWheel(int key)
 {

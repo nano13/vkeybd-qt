@@ -94,9 +94,6 @@ private:
     QGroupBox *group_keys;
     QGroupBox *group_pitch;
     
-    void notePlay(int interface_index, int channel, int note);
-    void noteStop(int interface_index, int channel, int note);
-    
     QGridLayout *grid;
     
     QPushButton *button_channels;

@@ -448,6 +448,7 @@ void MainTabs::rawKeyReleased(int keycode)
     {
         MIDISignal(MIDISignalTypes::VolumeReleased);
     }
+    /*
     else
     {
         // we want to have a smooth way of switching between tabs (=presets) during playing
@@ -456,6 +457,9 @@ void MainTabs::rawKeyReleased(int keycode)
             this->list_of_tabs.at(i)->keyUpRaw(keycode);
         }
     }
+    */
+    Orgelwerk *o = static_cast<Orgelwerk*>(currentWidget()->layout()->itemAt(0)->widget());
+    o->keyUpRaw(keycode);
 }
 
 void MainTabs::MIDISignal(MIDISignalTypes type)

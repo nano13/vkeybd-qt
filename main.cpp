@@ -46,7 +46,7 @@ int main(int argc, char *argv[])
         {{"l", "number-of-layers"},
             QCoreApplication::translate("main", "Nubmer of Layers. '1' gives you 12 layers, '2' gives 24 layers"), "number", "-1"},
         {{"o", "output"},
-            QCoreApplication::translate("main", "Which Audio System to use: \"alsa\" (default), \"jack\" (not implemented yet) or \"network\" (remote control another vkeybd-qt instance)"), "string", "config"},
+            QCoreApplication::translate("main", "Which Audio System to use: \"alsa\" (default), \"jack\" or \"network\" (remote control another vkeybd-qt instance)"), "string", "config"},
         {{"k", "keyboard-config"},
             QCoreApplication::translate("main", "Keyboard Configs and Mappings to use"), "string", "builtin"},
         {{"q", "quicksave-path"},

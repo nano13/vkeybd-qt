@@ -278,7 +278,7 @@ void Orgelwerk::keyMIDIHelper(int midicode, MIDIMode mode, MIDIOrigin origin)
             this->piano->keyReleased(midicode);
     }
     
-    // to avioid loops: we want to send this event only the signal originated from this instance
+    // to avoid loops: we want to send this event only if the signal originated from this instance
     if (origin == MIDIOrigin::This)
         emit signalMIDIEvent(this->tab_id, midicode, mode);
 }

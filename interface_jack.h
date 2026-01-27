@@ -6,20 +6,21 @@
 #include <QObject>
 #include <QDebug>
 #include <jack/jack.h>
+#include <jack/ringbuffer.h>
 #include <jack/midiport.h>
-#include <vector>
-#include <mutex>
 
 #include "interface_audio.h"
 
 // Simple MIDI ring buffer for queued events
+#pragma pack(push, 1)
 struct MidiEvent {
     int port;
     int channel;
     int type;      // 0=noteon, 1=noteoff, 2=cc, 3=pgm, etc.
-    int data1;     // note number or controller number or program
-    int data2;     // velocity or value
+    uint8_t data1;     // note number or controller number or program
+    uint8_t data2;     // velocity or value
 };
+#pragma pack(pop)
 
 class InterfaceJack : public InterfaceAudio
 {
@@ -50,8 +51,7 @@ private:
     jack_client_t *client;
     std::vector<jack_port_t*> outputPorts;
     
-    std::vector<MidiEvent> ringBuffer;
-    std::mutex bufferMutex;
+    jack_ringbuffer_t* ringBuffer = nullptr;
     
     void pushEvent(const MidiEvent &event);
     void processRingBuffer(jack_nframes_t nframes);

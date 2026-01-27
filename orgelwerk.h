@@ -2,39 +2,6 @@
 #define ORGELWERK_H
 
 #include <QObject>
-
-#include <QThread>
-#include <QTimer>
-#include <QRandomGenerator>
-class TremoloWorker : public QObject
-{
-    Q_OBJECT
-public:
-    explicit TremoloWorker(int interface_index, int delay, int channel, int note, QObject *parent = 0);
-    
-private:
-    int interface_index;
-    QTimer *timer;
-    int delay;
-    int channel;
-    int note;
-    
-    QRandomGenerator *random = new QRandomGenerator;
-    
-public slots:
-    void tick();
-    
-signals:
-    void notePlay(int interface_index, int channel, int note);
-    void noteStop(int interface_index, int channel, int note);
-    
-};
-
-
-
-
-
-#include <QObject>
 #include <QWidget>
 
 #include <QVBoxLayout>
@@ -139,8 +106,6 @@ private:
     
     //QThread *thread_input;
     InterfaceAudio *interface_audio;
-    QMap<QString, TremoloWorker*> map_of_tremolo_workers;
-    QMap<QString, QThread*> map_of_tremolo_threads;
     
     // We want to be able to switch between tabs and keys smoothly during play
     // The desired behaviour is:

@@ -237,15 +237,8 @@ void Orgelwerk::keyMIDIHelper(int midicode, MIDIMode mode, MIDIOrigin origin)
                 {
                     int m_code_shifted = m_code + key_shift + master_key_shift;
                     
-                    if (tremolo == 0)
-                    {
-                        //this->list_of_audio_interfaces.at(interface_index)->keyPressEvent(channel, m_code_shifted);
-                        this->interface_audio->keyPressEvent(this->tab_id, channel, m_code_shifted, velocity);
-                    }
-                    else
-                    {
-                        tremoloThreadStart(interface_index, channel, m_code_shifted, tremolo);
-                    }
+                    //this->list_of_audio_interfaces.at(interface_index)->keyPressEvent(channel, m_code_shifted);
+                    this->interface_audio->keyPressEvent(this->tab_id, channel, m_code_shifted, velocity);
                     
                     if (this->notes)
                         this->notes->keyPressed(m_code_shifted);
@@ -261,8 +254,6 @@ void Orgelwerk::keyMIDIHelper(int midicode, MIDIMode mode, MIDIOrigin origin)
                         int m_code_shifted = m_code + key_shift + master_key_shift;
                         
                         this->interface_audio->keyReleaseEvent(this->tab_id, channel, m_code_shifted, velocity);
-                        
-                        tremoloThreadStop(channel, m_code_shifted);
                         
                         if (this->notes)
                             this->notes->keyReleased(m_code_shifted);
@@ -302,37 +293,6 @@ void Orgelwerk::keyMIDIUp(int midicode)
 void Orgelwerk::injectExternalMIDIEvent(int midicode, MIDIMode mode)
 {
     keyMIDIHelper(midicode, mode, MIDIOrigin::External);
-}
-void Orgelwerk::tremoloThreadStart(int interface_index, int channel, int m_code_shifted, int tremolo)
-{
-    QString worker_code = QString::number(channel)+"_"+QString::number(m_code_shifted);
-    if (!this->map_of_tremolo_threads.contains(worker_code))
-    {
-        TremoloWorker *worker = new TremoloWorker(
-                    interface_index,
-                    tremolo,
-                    channel,
-                    m_code_shifted
-                    );
-        connect(worker, &TremoloWorker::notePlay, this, &Orgelwerk::notePlay);
-        connect(worker, &TremoloWorker::noteStop, this, &Orgelwerk::noteStop);
-        
-        QThread *thread = new QThread(this);
-        worker->moveToThread(thread);
-        thread->start();
-        
-        this->map_of_tremolo_threads[worker_code] = thread;
-    }
-}
-void Orgelwerk::tremoloThreadStop(int channel, int m_code_shifted)
-{
-    QString worker_code = QString::number(channel)+"_"+QString::number(m_code_shifted);
-    if (this->map_of_tremolo_threads.contains(worker_code))
-    {
-        this->map_of_tremolo_threads[worker_code]->quit();
-        this->map_of_tremolo_threads[worker_code]->deleteLater();
-        this->map_of_tremolo_threads.remove(worker_code);
-    }
 }
 void Orgelwerk::keyShiftMapAdd(int keycode)
 {
@@ -572,37 +532,4 @@ bool Orgelwerk::eventFilter(QObject *obj, QEvent *ev)
     }
     
     return false;
-}
-
-
-
-TremoloWorker::TremoloWorker(int interface_index, int delay, int channel, int note, QObject *parent)
-    : QObject(parent)
-{
-    this->interface_index = interface_index;
-    this->delay = delay;
-    this->channel = channel;
-    this->note = note;
-    
-    this->timer = new QTimer(this);
-    this->timer->setInterval(delay);
-    this->timer->setTimerType(Qt::PreciseTimer);
-    
-    connect(this->timer, &QTimer::timeout, this, &TremoloWorker::tick, Qt::DirectConnection);
-    
-    this->timer->start();
-}
-
-void TremoloWorker::tick()
-{
-    emit noteStop(this->interface_index, this->channel, this->note);
-    emit notePlay(this->interface_index, this->channel, this->note);
-    
-    // make the tremolo effect feeling a bit more natural by not having all the time the exact same delay but just modify it a little bit
-    int rnd = this->random->bounded(
-                0,
-                int(this->delay * .5)
-                );
-    int interval = this->delay + rnd;
-    this->timer->setInterval(interval);
 }

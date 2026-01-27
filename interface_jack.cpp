@@ -145,7 +145,18 @@ void InterfaceJack::keySoftEvent(int port, int channel, bool pressed)
 
 void InterfaceJack::setProgramChangeEvent(int port, int channel, int program, int bank)
 {
-    pushEvent({port, channel, 3, program, bank});
+    if (bank < 0) bank = 0;
+    
+    // Bank MSB (CC0)
+    int bankMSB = (bank >> 7) & 0x7F; // obere 7 Bits
+    pushEvent({port, channel, 2, 0, bankMSB});
+    
+    // Bank LSB (CC32)
+    int bankLSB = bank & 0x7F; // untere 7 Bits
+    pushEvent({port, channel, 2, 32, bankLSB});
+    
+    // Program Change
+    pushEvent({port, channel, 3, program & 0x7F, 0}); // data2 wird ignoriert
 }
 
 void InterfaceJack::setVolumeChangeEvent(int port, int channel, int volume)

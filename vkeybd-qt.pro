@@ -7,8 +7,7 @@ QT  += core\
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 LIBS += -lasound \
-    -ljack \
-    -lX11
+    -ljack
 
 CONFIG += \
     c++11 \

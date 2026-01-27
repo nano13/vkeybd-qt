@@ -1,84 +1,59 @@
 #ifndef INPUTKEYBOARDRAW_H
 #define INPUTKEYBOARDRAW_H
 
-// https://unix.stackexchange.com/questions/72483/how-to-distinguish-input-from-different-keyboards
-// https://www.linuxjournal.com/files/linuxjournal.com/linuxjournal/articles/064/6429/6429l4.html
-// https://stackoverflow.com/questions/26373963/distinguish-2-keyboards-keystrokes-using-eventfilter-embedded-linux
-
-#include <linux/input.h>
-
 #include <QObject>
-#include <QTimer>
+#include <QSocketNotifier>
+#include <QThread>
+#include <linux/input.h>
+#include <unistd.h>
+#include "enums_structs.h"
 
+// ---------------- Worker ----------------
 class InputKeyboardRawWorker : public QObject
 {
     Q_OBJECT
 public:
-    explicit InputKeyboardRawWorker(ssize_t n, int fd, QObject *parent = nullptr);
-    //~InputKeyboardRawWorker();
+    explicit InputKeyboardRawWorker(int fd, QObject *parent = nullptr);
+    ~InputKeyboardRawWorker() override;
     
-    
-    
-private:
-    QTimer *timer = nullptr;
-    
-    struct input_event ev;
-    ssize_t n;
-    int fd = -1;
+    void stop();
     
 public slots:
-    // https://mayaposch.wordpress.com/2011/11/01/how-to-really-truly-use-qthreads-the-full-explanation/
-    // "one extremely important thing to note here is that you should NEVER allocate heap objects (using new) in the constructor of the QObject class as this allocation is then performed on the main thread and not on the new QThread instance, meaning that the newly created object is then owned by the main thread and not the QThread instance. This will make your code fail to work."
     void initialize();
-    void finish();
-    
-    void tick();
-    void timerStart();
-    void timerStop();
     
 signals:
-    void finished();
-    
     void rawKeyPressed(int code);
     void rawKeyReleased(int code);
+    void deviceDisconnected();
+    
+private slots:
+    void readEvent(int);
+    
+private:
+    int fd = -1;
+    QSocketNotifier *notifier = nullptr;
 };
 
-
-
+// ---------------- Meta ----------------
 class InputKeyboardRawMeta : public QObject
 {
     Q_OBJECT
 public:
     explicit InputKeyboardRawMeta(QObject *parent = nullptr);
     
-    QList<QMap<QString, QString> > detectKeyboards();
+    QList<QMap<QString, QString>> detectKeyboards();
     QList<QString> getKeyboardNames();
     QString getPathForName(QString name);
     
 private:
-    // in case we have two identical keyboards attached, it is helpful to see the /dev/input/eventXX - eventname as part of the device name
     QString getKeyboardName(QMap<QString, QString> keyboard);
 };
 
 
 
-#include <stdlib.h>
-#include <unistd.h>
-#include <fcntl.h>
-#include <errno.h>
-#include <linux/input.h>
-#include <string.h>
-#include <stdio.h>
 
-#include <QObject>
-#include <QFile>
-#include <QDataStream>
-#include <QThread>
-#include <QMetaObject>
-#include <QDebug>
 
-#include "enums_structs.h"
-
+// ---------------- Controller ----------------
 class InputKeyboardRawController : public QObject
 {
     Q_OBJECT
@@ -91,22 +66,6 @@ public:
     void keyboardHelper(QString devpath, KeyboardMode mode);
     void keyboardRelease();
     
-private:
-    // https://stackoverflow.com/questions/16695432/input-event-structure-description-from-linux-input-h
-    const char *const evval[3] = {
-        "RELEASED",
-        "PRESSED ",
-        "REPEATED"
-    };
-    
-    const char *dev;
-    struct input_event ev;
-    ssize_t n;
-    int fd = -1;
-    
-    QThread *thread = nullptr;
-    InputKeyboardRawWorker *worker;
-    
 private slots:
     void rawKeyPressed(int keycode);
     void rawKeyReleased(int keycode);
@@ -115,6 +74,10 @@ signals:
     void deviceNotAvailable(QString message);
     void signalRawKeyPressed(int keycode);
     void signalRawKeyReleased(int keycode);
+    
+private:
+    QThread *thread = nullptr;
+    InputKeyboardRawWorker *worker = nullptr;
 };
 
 #endif // INPUTKEYBOARDRAW_H

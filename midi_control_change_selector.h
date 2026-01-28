@@ -5,6 +5,15 @@
 
 class QTabWidget;
 
+// ------------------- MIDICCTableWidget -------------------
+class MIDICCTableWidget : public QWidget
+{
+    Q_OBJECT
+public:
+    explicit MIDICCTableWidget(QWidget *parent = nullptr);
+};
+
+// ------------------- MIDIControlChangeSelector -------------------
 class MIDIControlChangeSelector : public QWidget
 {
     Q_OBJECT
@@ -13,9 +22,6 @@ public:
     
 private:
     QTabWidget *tabWidget;
-    
-    // Helper to setup each dynamic tab
-    void setupDynamicTab(int tabIndex);
 };
 
 #endif // MIDI_CONTROL_CHANGE_SELECTOR_H

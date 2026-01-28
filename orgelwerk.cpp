@@ -17,6 +17,7 @@ Orgelwerk::Orgelwerk(int keyboard_id, int tab_id, InterfaceAudio *interface_audi
 void Orgelwerk::drawGUI()
 {
     this->channels = new MIDIChannelSelector(this->interface_audio, this->tab_id);
+    this->control_change = new MIDIControlChangeSelector();
     this->keys = new MIDIKeySelector;
     this->pitch = new MIDIPitchWheel;
     this->volume = new MIDIMasterVolume;
@@ -35,6 +36,9 @@ void Orgelwerk::drawGUI()
     this->scroll_channels->setWidgetResizable(false);
     this->scroll_channels->setWindowTitle("Keyboard " + QString::number(this->keyboard_id) + "-" + this->label);
     connect(this->scroll_channels, &QScrollArea::destroyed, this, &Orgelwerk::channelsSummaryUpdate);
+    
+    this->control_change->setWindowTitle("Keyboard " + QString::number(this->keyboard_id) + "-" + this->label);
+    
     
     this->grid = new QGridLayout;
     setLayout(this->grid);
@@ -391,7 +395,14 @@ void Orgelwerk::showChannelDetails()
 }
 void Orgelwerk::showCCMap()
 {
+    QScreen *screen = QGuiApplication::primaryScreen();
+    QSize screen_size = screen->availableVirtualSize();
     
+    
+    
+    this->control_change->show();
+    
+    //this->interface_audio->setControlChangeEvent(this->tab_id, 2, 70, 127);
 }
 
 void Orgelwerk::channelsDialogRejected()

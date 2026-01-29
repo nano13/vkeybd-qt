@@ -373,29 +373,37 @@ void Orgelwerk::volumeSliderMoved(int value)
 
 void Orgelwerk::showChannelDetails()
 {
-    QScreen *screen = QGuiApplication::primaryScreen();
-    QSize screen_size = screen->availableVirtualSize();
+    if (!this->channels || !this->scroll_channels)
+        return;
     
+    // Get the margins of the scroll area
     QMargins margins = this->scroll_channels->contentsMargins();
     
-    if (! this->scroll_channels->horizontalScrollBar()->isHidden())
+    // Base width and height on the content widget + margins
+    int width = this->channels->width() + margins.left() + margins.right();
+    int height = this->channels->height() + margins.top() + margins.bottom();
+    
+    // Add horizontal scrollbar height if it is visible
+    QScrollBar *hScrollBar = this->scroll_channels->horizontalScrollBar();
+    if (!hScrollBar->isHidden())
     {
-        int scroll_bar_height = this->scroll_channels->horizontalScrollBar()->sizeHint().height();
-        this->scroll_channels->resize(
-                screen_size.width(),
-                this->channels->height() + margins.top() + margins.bottom() + scroll_bar_height
-            );
-    }
-    else
-    {
-        this->scroll_channels->resize(
-                this->channels->width() + margins.left() + margins.right(),
-                this->channels->height() + margins.top() + margins.bottom()
-            );
+        height += hScrollBar->sizeHint().height();
     }
     
+    // Add vertical scrollbar width if it is visible
+    QScrollBar *vScrollBar = this->scroll_channels->verticalScrollBar();
+    if (!vScrollBar->isHidden())
+    {
+        width += vScrollBar->sizeHint().width();
+    }
+    
+    // Resize the scroll area
+    this->scroll_channels->resize(width, height);
+    
+    // Show the scroll area
     this->scroll_channels->show();
 }
+
 void Orgelwerk::showCCMap()
 {
     QScreen *screen = QGuiApplication::primaryScreen();

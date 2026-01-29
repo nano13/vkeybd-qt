@@ -46,30 +46,25 @@ void InputKeyboardRawWorker::readEvent(int)
     else
     {
         qWarning() << "Keyboard read error or disconnected:" << strerror(errno);
-        stop();
         emit deviceDisconnected();
     }
 }
 
 void InputKeyboardRawWorker::stop()
 {
-    if (notifier)
-    {
+    if (notifier) {
         notifier->setEnabled(false);
         notifier->deleteLater();
         notifier = nullptr;
     }
     
-    if (fd != -1)
-    {
+    if (fd != -1) {
+        ioctl(fd, EVIOCGRAB, 0);  // IMPORTANT
         ::close(fd);
         fd = -1;
     }
-    
-    QThread* thr = thread();
-    if (thr && thr->isRunning())
-        thr->quit();
 }
+
 
 
 
@@ -235,19 +230,29 @@ void InputKeyboardRawController::keyboardHelper(QString devpath, KeyboardMode mo
 
 void InputKeyboardRawController::keyboardRelease()
 {
-    if (worker)
-    {
-        QMetaObject::invokeMethod(worker, "stop", Qt::QueuedConnection);
-        worker = nullptr;
-    }
+    if (!worker)
+        return;
     
-    if (thread)
-    {
-        thread->quit();
-        thread->wait();
-        thread = nullptr;
-    }
+    InputKeyboardRawWorker *w = worker;
+    QThread *t = thread;
+    
+    worker = nullptr;
+    thread = nullptr;
+    
+    // Stop notifier + fd inside worker thread, synchronously
+    QMetaObject::invokeMethod(
+        w,
+        &InputKeyboardRawWorker::stop,
+        Qt::BlockingQueuedConnection
+        );
+    
+    t->quit();
+    t->wait();
+    
+    w->deleteLater();
+    t->deleteLater();
 }
+
 
 void InputKeyboardRawController::rawKeyPressed(int keycode)
 {

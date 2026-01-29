@@ -147,6 +147,7 @@ void Orgelwerk::showChannelsSummary(int grid_row)
     this->button_cc_map->setText("CC-Map");
     connect(button_cc_map, &QPushButton::clicked, this, &Orgelwerk::showCCMap);
     
+    layout_channels->setVerticalSpacing(0);
     layout_channels->addWidget(this->midi_channels_summary, 0, 0, 1, 4);
     layout_channels->addWidget(button_channels_dialog, 1, 0);
     layout_channels->addWidget(button_resend_midi, 1, 1);

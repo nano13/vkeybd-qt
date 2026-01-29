@@ -49,6 +49,8 @@ void MIDIChannelsSummary::showData(QList<QMap<QString, QVariant>> data)
         //this->grid->addWidget(label_msb_, j, 5);
         //this->grid->addWidget(label_lsb_, j, 6);
         this->grid->addWidget(label_instrument_, j, 7);
+        
+        this->grid->setVerticalSpacing(0);
     }
     
     styleLabels();

@@ -52,6 +52,8 @@ void Orgelwerk::drawGUI()
     this->group_keys->setLayout(layout_keys);
     this->group_pitch->setLayout(layout_pitch);
     
+    this->group_keys->setMaximumHeight(60);
+    
     QLabel *label_key_shift_master = new QLabel("Key Shift");
     
     layout_keys->addWidget(this->keys);

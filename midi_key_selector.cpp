@@ -29,6 +29,9 @@ MIDIKeySelector::MIDIKeySelector(QWidget *parent) : QWidget(parent)
     }
     
     layout_vertical->addLayout(layout_keys);
+    
+    setMaximumHeight(20);
+    this->setContentsMargins(0, 0, 0, 0);
 }
 
 QList<int> MIDIKeySelector::getListOfSelectedKeys()

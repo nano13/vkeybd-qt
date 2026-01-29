@@ -18,6 +18,7 @@ KeyboardNotes::KeyboardNotes(QWidget *parent) : QWidget(parent)
     drawGUI();
     
     setMinimumHeight(170);
+    setMaximumHeight(170);
 }
 
 void KeyboardNotes::drawGUI()

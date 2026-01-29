@@ -20,7 +20,7 @@ void HelpAboutWidget::showAbout()
     QTextEdit *text = new QTextEdit();
     text->setText("vkeybd-qt - Software MIDI controller with a LOT of features allowing you to use your PC with one or multiple keyboards to be used as a Church Organ. You can also use it as a MIDI-Multiplexer.\n\n\
 - Early Alpha Version -\n\n\
-(c) 2021-2025 The vkeybd-qt Author(s)\n\n");
+(c) 2021-2026 The vkeybd-qt Author(s)\n\n");
     
     text->setReadOnly(true);
     this->tab_widget->addTab(text, "About");

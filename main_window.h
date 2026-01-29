@@ -25,7 +25,6 @@
 #include "help_about_widget.h"
 
 #include "input_keyboard_qt.h"
-#include "input_keyboard_raw.h"
 #include "combo_keyboard_select.h"
 
 #include "midi_key_shift_widget.h"

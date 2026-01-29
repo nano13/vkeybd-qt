@@ -150,6 +150,7 @@ void InputKeyboardSelect::rawKeyboardSelected(int index)
             
             connect(this->map_of_raw_keyboards[name], &InputKeyboardRawController::signalRawKeyPressed, this, &InputKeyboardSelect::keyRawPressed);
             connect(this->map_of_raw_keyboards[name], &InputKeyboardRawController::signalRawKeyReleased, this, &InputKeyboardSelect::keyRawReleased);
+            connect(this->map_of_raw_keyboards[name], &InputKeyboardRawController::deviceNotAvailable, this, &InputKeyboardSelect::keyboardNotAvailable);
         }
     }
 }
@@ -229,6 +230,14 @@ void InputKeyboardSelect::cleanupRawKeyboards()
     }
     
     this->map_of_raw_keyboards.clear();
+}
+
+void InputKeyboardSelect::keyboardNotAvailable()
+{
+    if (this->locked)
+    {
+        this->toggleKeyboardLock();
+    }
 }
 
 void InputKeyboardSelect::keyRawPressed(int keycode)

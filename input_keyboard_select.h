@@ -51,6 +51,7 @@ private:
     void detectDisplayInput();
     
 private slots:
+    void keyboardNotAvailable();
     void keyRawPressed(int keycode);
     void keyRawReleased(int keycode);
     

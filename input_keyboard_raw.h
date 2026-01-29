@@ -64,6 +64,7 @@ public:
     void keyboardListen(QString devpath);
     void keyboardLock(QString devpath);
     void keyboardHelper(QString devpath, KeyboardMode mode);
+    void keyboardDisconnected();
     void keyboardRelease();
     
 private slots:

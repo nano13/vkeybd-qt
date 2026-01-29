@@ -215,11 +215,8 @@ void InputKeyboardRawController::keyboardHelper(QString devpath, KeyboardMode mo
     connect(worker, &InputKeyboardRawWorker::rawKeyReleased,
             this, &InputKeyboardRawController::rawKeyReleased);
     
-    connect(worker, &InputKeyboardRawWorker::deviceDisconnected, this, [this]() {
-        qDebug() << "Keyboard disconnected";
-        emit deviceNotAvailable("Keyboard disconnected");
-        keyboardRelease();
-    });
+    connect(worker, &InputKeyboardRawWorker::deviceDisconnected,
+            this, &InputKeyboardRawController::keyboardDisconnected);
     
     connect(thread, &QThread::started, worker, &InputKeyboardRawWorker::initialize);
     connect(thread, &QThread::finished, worker, &QObject::deleteLater);
@@ -228,6 +225,12 @@ void InputKeyboardRawController::keyboardHelper(QString devpath, KeyboardMode mo
     thread->start();
 }
 
+void InputKeyboardRawController::keyboardDisconnected()
+{
+    qDebug() << "Keyboard disconnected";
+    emit deviceNotAvailable("Keyboard disconnected");
+    keyboardRelease();
+}
 void InputKeyboardRawController::keyboardRelease()
 {
     if (!worker)

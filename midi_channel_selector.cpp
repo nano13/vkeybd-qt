@@ -366,6 +366,9 @@ void MIDIChannelSelector::addNewCCEntryRow(QGridLayout *grid, int channel, int r
     
     QSpinBox *spin_value = new QSpinBox;
     spin_value->setRange(0, 127);
+    connect(spin_value, &QSpinBox::valueChanged, [this, channel, spin_cc, spin_value]{
+        this->interface_audio->setControlChangeEvent(this->port, channel-1, spin_cc->value(), spin_value->value());
+    });
     
     connect(slider_value, &QSlider::valueChanged, spin_value, &QSpinBox::setValue);
     connect(spin_value, &QSpinBox::valueChanged, slider_value, &QSlider::setValue);
@@ -418,7 +421,6 @@ void MIDIChannelSelector::delCCEntryRow(QGridLayout *grid, int rowToRemove)
         }
     }
 }
-
 
 
 

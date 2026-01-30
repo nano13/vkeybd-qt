@@ -341,6 +341,42 @@ void MIDIChannelSelector::restoreParams(QMap<QString,QVariant> data)
         this->list_of_attacks.at(i)->setValue(channel["attack"].toInt());
         this->list_of_releases.at(i)->setValue(channel["release"].toInt());
         this->list_of_tremolos.at(i)->setValue(channel["tremolo"].toInt());
+        
+        QMap<QString,QVariant> cc_map;
+        for (const auto &[key, value] : channel.toStdMap()) {
+            if (key.startsWith("cc_")) {
+                // This key corresponds to a CC entry
+                qDebug() << "Found CC key:" << key << "with value:" << value;
+                
+                int id = key.section('_', 1, 1).toInt();
+                QString name = key.section('_', 2);
+                
+                if (!cc_map.contains("id"))
+                {
+                    // here we handle the first value of three
+                    
+                    cc_map["id"] = id;
+                    cc_map[name] = value;
+                    
+                }
+                else if (cc_map["id"] == id)
+                {
+                    // here we handle second and third value
+                    
+                    cc_map[name] == value;
+                    
+                    // check if we have all three, than load and reset cc_map
+                    if (cc_map.contains("id") && cc_map.contains("key") && cc_map.contains("value"))
+                    {
+                        addNewCCEntry(i);
+                        
+                        
+                        
+                        cc_map.clear();
+                    }
+                }
+            }
+        }
     }
 }
 

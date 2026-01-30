@@ -175,6 +175,13 @@ struct CCEntry
     QSpinBox* key;        // CC number
     QSpinBox* value;      // CC value
 };
-
+struct CCEntryValues
+{
+    int id = -1;
+    int channel = -1;
+    QString label;
+    int key = -1;
+    int value = -1;
+};
 
 #endif // ENUMS_STRUCTS_H

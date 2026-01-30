@@ -22,6 +22,7 @@
 #include "midi_sounds_list.h"
 #include "interface_audio.h"
 #include "midi_key_shift_widget.h"
+#include "enums_structs.h"
 
 class MIDIChannelSelector : public QWidget
 {
@@ -66,6 +67,9 @@ private:
     QList<QSlider*> list_of_releases;
     QList<QSlider*> list_of_tremolos;
     
+    QList<CCEntry> list_of_cc_entries;
+    
+    
 protected:
     bool eventFilter(QObject *obj, QEvent *ev);
     void hideEvent(QHideEvent *ev);
@@ -74,7 +78,7 @@ private slots:
     void checkToggled(QCheckBox *check_master, QCheckBox *check_slave);
     void addNewCCEntry(int channel);
     void addNewCCEntryRow(QGridLayout *grid, int channel, int row);
-    void delCCEntryRow(QGridLayout *grid, int row);
+    void delCCEntryRow(QGridLayout *grid, int channel, int row);
     void volumeSliderMoved(int channel, int volume);
     void panSliderMoved(int channel, int value);
     void instrumentGroupChanged(int channel, QComboBox *combo_group, QComboBox *combo_instrument);

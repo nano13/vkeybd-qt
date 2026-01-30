@@ -1,6 +1,7 @@
 #include "main_tabs.h"
 
-MainTabs::MainTabs(QList<QString> labels, int id, Config *config, OutputSystem output, InputKeyboardSelect *input_keyboard_select, QLineEdit *line_udp_ip, QSpinBox *spin_port, QWidget *parent) : QTabWidget(parent)
+MainTabs::MainTabs(QList<QString> labels, int id, Config *config, OutputSystem output, InputKeyboardSelect *input_keyboard_select, QLineEdit *line_udp_ip, QSpinBox *spin_port, QWidget *parent)
+    : QTabWidget(parent)
 {
     this->list_labels = labels;
     this->id = id;

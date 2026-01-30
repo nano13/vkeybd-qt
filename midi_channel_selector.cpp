@@ -238,61 +238,71 @@ QList<QMap<QString,QVariant>> MIDIChannelSelector::listOfChannels(bool only_acti
 {
     QList<QMap<QString,QVariant>> result;
     
-    for (int i=0; i < this->list_of_checkboxes.length(); i++)
+    for (int channel=0; channel < this->list_of_checkboxes.length(); channel++)
     {
-        QCheckBox *check = this->list_of_checkboxes.at(i);
+        QCheckBox *check = this->list_of_checkboxes.at(channel);
         if (!only_activated || check->isChecked())
         {
             QMap<QString,QVariant> map;
             
-            map["channel"] = i;
+            map["channel"] = channel;
             
-            //map["interface_index"] = this->list_of_midi_output_combos.at(i)->currentIndex();
+            map["activated"] = this->list_of_checkboxes.at(channel)->isChecked();
             
-            map["activated"] = this->list_of_checkboxes.at(i)->isChecked();
-            
-            int volume = this->list_of_volume_sliders.at(i)->value();
+            int volume = this->list_of_volume_sliders.at(channel)->value();
             map["volume"] = volume;
             
-            int pan = this->list_of_pan_sliders.at(i)->value();
+            int pan = this->list_of_pan_sliders.at(channel)->value();
             map["pan"] = pan;
             
-            int key_shift = this->list_of_keyshifts.at(i)->value();
+            int key_shift = this->list_of_keyshifts.at(channel)->value();
             map["key_shift"] = key_shift;
             
-            int key_min = this->list_of_key_mins.at(i)->value();
+            int key_min = this->list_of_key_mins.at(channel)->value();
             map["key_min"] = key_min;
             
-            int key_max = this->list_of_key_maxs.at(i)->value();
+            int key_max = this->list_of_key_maxs.at(channel)->value();
             map["key_max"] = key_max;
             
-            int instrument_msb = this->list_of_msb.at(i)->value();
+            int instrument_msb = this->list_of_msb.at(channel)->value();
             map["instrument_msb"] = instrument_msb;
             
-            int instrument_lsb = this->list_of_lsb.at(i)->value();
+            int instrument_lsb = this->list_of_lsb.at(channel)->value();
             map["instrument_lsb"] = instrument_lsb;
             
-            QString instrument_name = this->list_of_instrument_banks.at(i)->currentText();
+            QString instrument_name = this->list_of_instrument_banks.at(channel)->currentText();
             map["instrument_name"] = instrument_name;
             
-            QString str_velocity = this->list_of_velocities.at(i)->currentText();
+            QString str_velocity = this->list_of_velocities.at(channel)->currentText();
             int velocity = this->midi_sounds_list->getVelocityForString(str_velocity);
             map["velocity"] = velocity;
             
-            int pitch = this->list_of_pitches.at(i)->value();
+            int pitch = this->list_of_pitches.at(channel)->value();
             map["pitch"] = pitch;
             
-            int portamento_time = this->list_of_portamentos.at(i)->value();
+            int portamento_time = this->list_of_portamentos.at(channel)->value();
             map["portamento_time"] = portamento_time;
             
-            int attack = this->list_of_attacks.at(i)->value();
+            int attack = this->list_of_attacks.at(channel)->value();
             map["attack"] = attack;
             
-            int release = this->list_of_releases.at(i)->value();
+            int release = this->list_of_releases.at(channel)->value();
             map["release"] = release;
             
-            int tremolo = this->list_of_tremolos.at(i)->value();
+            int tremolo = this->list_of_tremolos.at(channel)->value();
             map["tremolo"] = tremolo;
+            
+            for (int i = 0; i < list_of_cc_entries.size(); ++i)
+            {
+                CCEntry &entry = list_of_cc_entries[i];
+                
+                // match channel and row using spin_cc properties
+                if (entry.key->property("channel").toInt() == channel)
+                {
+                    QString key = "cc_";
+                    //map[key] =
+                }
+            }
             
             result.append(map);
         }
@@ -353,13 +363,15 @@ void MIDIChannelSelector::addNewCCEntryRow(QGridLayout *grid, int channel, int r
 {
     QPushButton *button_delete = new QPushButton("delete");
     button_delete->setObjectName("button_delete");
-    connect(button_delete, &QPushButton::clicked, [this, grid, channel, row]{ delCCEntryRow(grid, row); });
+    connect(button_delete, &QPushButton::clicked, [this, grid, channel, row]{ delCCEntryRow(grid, channel, row); });
     
     QLineEdit *line_label = new QLineEdit;
     line_label->setPlaceholderText("your label or description");
     
     QSpinBox *spin_cc = new QSpinBox;
     spin_cc->setRange(0, 127);
+    spin_cc->setProperty("channel", channel);
+    spin_cc->setProperty("row", row);
     
     QSlider *slider_value = new QSlider(Qt::Horizontal);
     slider_value->setRange(0, 127);
@@ -378,8 +390,15 @@ void MIDIChannelSelector::addNewCCEntryRow(QGridLayout *grid, int channel, int r
     grid->addWidget(spin_cc, row, 3);
     grid->addWidget(slider_value, row, 4);
     grid->addWidget(spin_value, row, 5);
+    
+    CCEntry entry;
+    entry.channel = channel;
+    entry.label = line_label;
+    entry.key = spin_cc;
+    entry.value = spin_value;
+    this->list_of_cc_entries.append(entry);
 }
-void MIDIChannelSelector::delCCEntryRow(QGridLayout *grid, int rowToRemove)
+void MIDIChannelSelector::delCCEntryRow(QGridLayout *grid, int channel, int row)
 {
     if (!grid) return;
     
@@ -396,12 +415,27 @@ void MIDIChannelSelector::delCCEntryRow(QGridLayout *grid, int rowToRemove)
         return;
     }
     
+    // remove from list_of_cc_entries
+    for (int i = 0; i < list_of_cc_entries.size(); ++i)
+    {
+        CCEntry &entry = list_of_cc_entries[i];
+        
+        // match channel and row using spin_cc properties
+        if (entry.key->property("channel").toInt() == channel &&
+            entry.key->property("row").toInt() == row)
+        {
+            list_of_cc_entries.removeAt(i);
+            break;
+        }
+    }
+    
+    
     int cols = grid->columnCount();
     
     // Remove all widgets in the row
     for (int col = 0; col < cols; ++col)
     {
-        if (QLayoutItem *item = grid->itemAtPosition(rowToRemove, col))
+        if (QLayoutItem *item = grid->itemAtPosition(row, col))
         {
             if (QWidget *w = item->widget())
             {

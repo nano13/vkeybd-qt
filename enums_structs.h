@@ -162,4 +162,18 @@ struct KeyStroke
     uint8_t tab;
 };
 
+
+
+#include <QLineEdit>
+#include <QSpinBox>
+
+struct CCEntry
+{
+    int channel;          // Which MIDI channel this entry belongs to
+    QLineEdit* label;     // Label / name for the CC
+    QSpinBox* key;        // CC number
+    QSpinBox* value;      // CC value
+};
+
+
 #endif // ENUMS_STRUCTS_H

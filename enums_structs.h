@@ -169,6 +169,7 @@ struct KeyStroke
 
 struct CCEntry
 {
+    int row;              // row in the QGridLayout, needed to delete from GUI
     int channel;          // Which MIDI channel this entry belongs to
     QLineEdit* label;     // Label / name for the CC
     QSpinBox* key;        // CC number

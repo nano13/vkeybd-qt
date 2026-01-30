@@ -297,10 +297,18 @@ QList<QMap<QString,QVariant>> MIDIChannelSelector::listOfChannels(bool only_acti
                 CCEntry &entry = list_of_cc_entries[i];
                 
                 // match channel and row using spin_cc properties
-                if (entry.key->property("channel").toInt() == channel)
+                if (entry.channel == channel)
                 {
-                    QString key = "cc_";
-                    //map[key] =
+                    QString istr = QString::number(i);
+                    
+                    QString cc_i_label = "cc_" + istr + "_label";
+                    map[cc_i_label] = entry.label->text();
+                    
+                    QString cc_i_key = "cc_" + istr + "_key";
+                    map[cc_i_key] = QString::number(entry.key->value());
+                    
+                    QString cc_i_value = "cc_" + istr + "_value";
+                    map[cc_i_value] = entry.value->value();
                 }
             }
             
@@ -370,8 +378,6 @@ void MIDIChannelSelector::addNewCCEntryRow(QGridLayout *grid, int channel, int r
     
     QSpinBox *spin_cc = new QSpinBox;
     spin_cc->setRange(0, 127);
-    spin_cc->setProperty("channel", channel);
-    spin_cc->setProperty("row", row);
     
     QSlider *slider_value = new QSlider(Qt::Horizontal);
     slider_value->setRange(0, 127);
@@ -392,6 +398,7 @@ void MIDIChannelSelector::addNewCCEntryRow(QGridLayout *grid, int channel, int r
     grid->addWidget(spin_value, row, 5);
     
     CCEntry entry;
+    entry.row = row;
     entry.channel = channel;
     entry.label = line_label;
     entry.key = spin_cc;
@@ -421,8 +428,8 @@ void MIDIChannelSelector::delCCEntryRow(QGridLayout *grid, int channel, int row)
         CCEntry &entry = list_of_cc_entries[i];
         
         // match channel and row using spin_cc properties
-        if (entry.key->property("channel").toInt() == channel &&
-            entry.key->property("row").toInt() == row)
+        if (entry.channel == channel &&
+            entry.row == row)
         {
             list_of_cc_entries.removeAt(i);
             break;

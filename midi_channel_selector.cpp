@@ -411,6 +411,7 @@ void MIDIChannelSelector::addNewCCEntryRow(QGridLayout *grid, int channel, int r
     connect(button_delete, &QPushButton::clicked, [this, grid, channel, row]{ delCCEntryRow(grid, channel, row); });
     
     QCheckBox *check_active = new QCheckBox;
+    check_active->setToolTip("activate/deactivate this entry");
     if (cc_map.contains("active"))
     {
         if (cc_map["active"].toBool())
@@ -429,6 +430,7 @@ void MIDIChannelSelector::addNewCCEntryRow(QGridLayout *grid, int channel, int r
     
     QSpinBox *spin_cc = new QSpinBox;
     spin_cc->setRange(0, 127);
+    spin_cc->setToolTip("CC Key");
     if (cc_map.contains("key"))
         spin_cc->setValue(cc_map["key"].toInt());
     
@@ -439,6 +441,7 @@ void MIDIChannelSelector::addNewCCEntryRow(QGridLayout *grid, int channel, int r
     
     QSpinBox *spin_value = new QSpinBox;
     spin_value->setRange(0, 127);
+    spin_value->setToolTip("CC Value");
     connect(spin_value, &QSpinBox::valueChanged, [this, channel, spin_cc, spin_value]{
         this->interface_audio->setControlChangeEvent(this->port, channel-1, spin_cc->value(), spin_value->value());
     });

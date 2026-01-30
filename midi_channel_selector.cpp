@@ -20,13 +20,12 @@ MIDIChannelSelector::MIDIChannelSelector(InterfaceAudio *interface_audio, int po
 
 void MIDIChannelSelector::drawGUI()
 {
-    QGridLayout *grid = new QGridLayout;
-    setLayout(grid);
+    setLayout(this->grid);
     grid->setSizeConstraint( QLayout::SetFixedSize );
     
     QLabel *label_channel_a = new QLabel("Channel");
     QLabel *label_channel_b = new QLabel("Channel");
-    QLabel *label_output = new QLabel("Output");
+    QLabel *label_output = new QLabel(""); // nothing, CC-buttons are shown here
     QLabel *label_volume = new QLabel("Volume");
     QLabel *label_pan = new QLabel("Pan");
     QLabel *label_key_shift = new QLabel("Key Shift");
@@ -43,24 +42,24 @@ void MIDIChannelSelector::drawGUI()
     QLabel *label_release = new QLabel("Release");
     QLabel *label_tremolo = new QLabel("Tremolo");
     
-    grid->addWidget(label_channel_a, 0, 0);
-    grid->addWidget(label_output, 0, 1);
-    grid->addWidget(label_volume, 0, 2);
-    grid->addWidget(label_pan, 0, 3);
-    grid->addWidget(label_key_shift, 0, 4);
-    grid->addWidget(label_key_min, 0, 5);
-    grid->addWidget(label_key_max, 0, 6);
-    grid->addWidget(label_instrument_group, 0, 7);
-    grid->addWidget(label_instrument, 0, 8);
-    grid->addWidget(label_midi_group, 0, 9);
-    grid->addWidget(label_midi_bank, 0, 10);
-    grid->addWidget(label_midi_velocity, 0, 11);
-    grid->addWidget(label_midi_pitch, 0, 12);
-    grid->addWidget(label_portamento_time, 0, 13);
-    grid->addWidget(label_attack, 0, 14);
-    grid->addWidget(label_release, 0, 15);
-    grid->addWidget(label_tremolo, 0, 16);
-    grid->addWidget(label_channel_b, 0, 17);
+    this->grid->addWidget(label_channel_a, 0, 0);
+    this->grid->addWidget(label_output, 0, 1);
+    this->grid->addWidget(label_volume, 0, 2);
+    this->grid->addWidget(label_pan, 0, 3);
+    this->grid->addWidget(label_key_shift, 0, 4);
+    this->grid->addWidget(label_key_min, 0, 5);
+    this->grid->addWidget(label_key_max, 0, 6);
+    this->grid->addWidget(label_instrument_group, 0, 7);
+    this->grid->addWidget(label_instrument, 0, 8);
+    this->grid->addWidget(label_midi_group, 0, 9);
+    this->grid->addWidget(label_midi_bank, 0, 10);
+    this->grid->addWidget(label_midi_velocity, 0, 11);
+    this->grid->addWidget(label_midi_pitch, 0, 12);
+    this->grid->addWidget(label_portamento_time, 0, 13);
+    this->grid->addWidget(label_attack, 0, 14);
+    this->grid->addWidget(label_release, 0, 15);
+    this->grid->addWidget(label_tremolo, 0, 16);
+    this->grid->addWidget(label_channel_b, 0, 17);
     
     for (int i=1; i <= 16; i++)
     {
@@ -69,11 +68,8 @@ void MIDIChannelSelector::drawGUI()
         connect(check_a, &QCheckBox::toggled, this, [this, check_a, check_b]{ checkToggled(check_a, check_b); });
         connect(check_b, &QCheckBox::toggled, this, [this, check_b, check_a]{ checkToggled(check_b, check_a); });
         
-        /*
-        QComboBox *combo_midi_output = new QComboBox;
-        connect(combo_midi_output, &QComboBox::currentTextChanged, this, &MIDIChannelSelector::addNewAudioInterface);
-        combo_midi_output->setObjectName("midi_output_selector");
-        */
+        QPushButton *button_cc_add = new QPushButton("add CC");
+        connect(button_cc_add, &QPushButton::clicked, this, [this, i]{ addNewCCEntry(i); });
         
         QSlider *slider_volume = new QSlider;
         slider_volume->setOrientation(Qt::Horizontal);
@@ -190,32 +186,36 @@ void MIDIChannelSelector::drawGUI()
         connect(slider_tremolo, &QSlider::valueChanged, this, [this, i, slider_tremolo]{ MIDIChannelSelector::tremoloChanged(i-1, slider_tremolo->value()); });
         this->list_of_tremolos.append(slider_tremolo);
         
-        grid->addWidget(check_a, i, 0);
-        //grid->addWidget(combo_midi_output, i, 1);
-        grid->addWidget(slider_volume, i, 2);
-        grid->addWidget(slider_pan, i, 3);
-        grid->addWidget(key_shift, i, 4);
         
-        grid->addWidget(key_min, i, 5);
-        grid->addWidget(key_max, i, 6);
+        // insert an empty row after each
+        int row = 2 * i - 1; // odd rows: 1, 3, 5, ..., 31
         
-        grid->addWidget(combo_instrument_group, i, 7);
-        grid->addWidget(combo_instrument, i, 8);
-        grid->addWidget(midi_instrument_msb, i, 9);
-        grid->addWidget(midi_instrument_lsb, i, 10);
+        this->grid->addWidget(check_a, row, 0);
+        this->grid->addWidget(button_cc_add, row, 1);
+        this->grid->addWidget(slider_volume, row, 2);
+        this->grid->addWidget(slider_pan, row, 3);
+        this->grid->addWidget(key_shift, row, 4);
         
-        grid->addWidget(combo_velocity, i, 11);
+        this->grid->addWidget(key_min, row, 5);
+        this->grid->addWidget(key_max, row, 6);
         
-        grid->addWidget(spin_pitch, i, 12);
+        this->grid->addWidget(combo_instrument_group, row, 7);
+        this->grid->addWidget(combo_instrument, row, 8);
+        this->grid->addWidget(midi_instrument_msb, row, 9);
+        this->grid->addWidget(midi_instrument_lsb, row, 10);
         
-        grid->addWidget(slider_portamento, i, 13);
+        this->grid->addWidget(combo_velocity, row, 11);
         
-        grid->addWidget(slider_attack, i, 14);
-        grid->addWidget(slider_release, i, 15);
+        this->grid->addWidget(spin_pitch, row, 12);
         
-        grid->addWidget(slider_tremolo, i, 16);
+        this->grid->addWidget(slider_portamento, row, 13);
         
-        grid->addWidget(check_b, i, 17);
+        this->grid->addWidget(slider_attack, row, 14);
+        this->grid->addWidget(slider_release, row, 15);
+        
+        this->grid->addWidget(slider_tremolo, row, 16);
+        
+        this->grid->addWidget(check_b, row, 17);
         
         if (i==1)
         {
@@ -224,7 +224,6 @@ void MIDIChannelSelector::drawGUI()
         }
         
         this->list_of_checkboxes.append(check_a);
-        //this->list_of_midi_output_combos.append(combo_midi_output);
         this->list_of_keyshifts.append(key_shift);
         this->list_of_key_mins.append(key_min);
         this->list_of_key_maxs.append(key_max);
@@ -233,8 +232,6 @@ void MIDIChannelSelector::drawGUI()
         this->list_of_msb.append(midi_instrument_msb);
         this->list_of_lsb.append(midi_instrument_lsb);
     }
-    
-    //populateAudioCombos();
 }
 
 QList<QMap<QString,QVariant>> MIDIChannelSelector::listOfChannels(bool only_activated)
@@ -326,67 +323,104 @@ void MIDIChannelSelector::restoreParams(QMap<QString,QVariant> data)
         this->list_of_attacks.at(i)->setValue(channel["attack"].toInt());
         this->list_of_releases.at(i)->setValue(channel["release"].toInt());
         this->list_of_tremolos.at(i)->setValue(channel["tremolo"].toInt());
+    }
+}
+
+void MIDIChannelSelector::addNewCCEntry(int channel)
+{
+    int row = 2 * channel; // even rows: 2, 4, 6, ..., 32
+    
+    if (QLayoutItem *item = grid->itemAtPosition(row, 2)) {
+        if (QLayout *layout = item->layout()) {
+            if (QGridLayout *grid = qobject_cast<QGridLayout*>(layout))
+            {
+                int new_row = grid->rowCount();
+                
+                addNewCCEntryRow(grid, channel, new_row);
+            }
+        }
+    }
+    else
+    {
+        QGridLayout *grid = new QGridLayout;
         
-        int audio_interface_index = channel["interface_index"].toInt();
-        if (audio_interface_index >= 1)
+        addNewCCEntryRow(grid, channel, 1);
+        
+        this->grid->addLayout(grid, row, 2, 1, 8);
+    }
+}
+void MIDIChannelSelector::addNewCCEntryRow(QGridLayout *grid, int channel, int row)
+{
+    QPushButton *button_delete = new QPushButton("delete");
+    button_delete->setObjectName("button_delete");
+    connect(button_delete, &QPushButton::clicked, [this, grid, channel, row]{ delCCEntryRow(grid, row); });
+    
+    QLineEdit *line_label = new QLineEdit;
+    line_label->setPlaceholderText("your label or description");
+    
+    QSpinBox *spin_cc = new QSpinBox;
+    spin_cc->setRange(0, 127);
+    
+    QSlider *slider_value = new QSlider(Qt::Horizontal);
+    slider_value->setRange(0, 127);
+    
+    QSpinBox *spin_value = new QSpinBox;
+    spin_value->setRange(0, 127);
+    
+    connect(slider_value, &QSlider::valueChanged, spin_value, &QSpinBox::setValue);
+    connect(spin_value, &QSpinBox::valueChanged, slider_value, &QSlider::setValue);
+    
+    grid->addWidget(button_delete, row, 1);
+    grid->addWidget(line_label, row, 2);
+    grid->addWidget(spin_cc, row, 3);
+    grid->addWidget(slider_value, row, 4);
+    grid->addWidget(spin_value, row, 5);
+}
+void MIDIChannelSelector::delCCEntryRow(QGridLayout *grid, int rowToRemove)
+{
+    if (!grid) return;
+    
+    // Show a confirmation dialog
+    QMessageBox confirm;
+    confirm.setWindowTitle("Confirm Delete");
+    confirm.setText("Really delete this CC entry?");
+    confirm.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+    confirm.setDefaultButton(QMessageBox::No);
+    
+    if (confirm.exec() != QMessageBox::Yes)
+    {
+        // User canceled
+        return;
+    }
+    
+    int cols = grid->columnCount();
+    
+    // Remove all widgets in the row
+    for (int col = 0; col < cols; ++col)
+    {
+        if (QLayoutItem *item = grid->itemAtPosition(rowToRemove, col))
         {
-            addNewAudioInterface(ADD_NEW_AUDIO_OUTPUT_LABEL);
-            this->list_of_midi_output_combos.at(i)->setCurrentIndex(audio_interface_index);
+            if (QWidget *w = item->widget())
+            {
+                grid->removeWidget(w);
+                delete w;
+            }
+            else if (QLayout *l = item->layout())
+            {
+                grid->removeItem(l);
+                delete l;
+            }
+            else
+            {
+                grid->removeItem(item);
+                delete item;
+            }
         }
     }
 }
 
-/*
-void MIDIChannelSelector::populateAudioCombos()
-{
-    QMap<int,QString> map_of_ports = this->interface_audio->getLastCreatedPort();
-    
-    QList<QString> list_of_audio_output_labels;
-    //for (int i=0; i < this->list_of_midi_outputs.length(); i++)
-    for (int i=0; i < map_of_ports.keys().length(); i++)
-    {
-        //list_of_audio_output_labels.append(this->list_of_midi_outputs.at(i)->label());
-        QString port_name = map_of_ports[map_of_ports.keys().at(0)];
-        list_of_audio_output_labels.append(port_name);
-    }
-    list_of_audio_output_labels.append(ADD_NEW_AUDIO_OUTPUT_LABEL);
-    
-    for (int i=0; i < this->list_of_midi_output_combos.length(); i++)
-    {
-        QComboBox *combo = this->list_of_midi_output_combos.at(i);
-        combo->blockSignals(true);
-        int current_index = 0;
-        if (combo->count() > 0)
-        {
-            current_index = combo->currentIndex();
-        }
-        combo->clear();
-        combo->addItems(list_of_audio_output_labels);
-        if (combo->count() > 0)
-        {
-            combo->setCurrentIndex(current_index);
-        }
-        combo->blockSignals(false);
-    }
-}
-*/
 
-void MIDIChannelSelector::addNewAudioInterface(QString text)
-{
-    /*
-    if (text == ADD_NEW_AUDIO_OUTPUT_LABEL)
-    {
-        QString label = this->list_of_midi_outputs.at(0)->label();
-        QString length = QString::number(this->list_of_midi_outputs.length());
-        qDebug() << label;
-        //emit newAudioInterfaceRequested(label+"-"+QString::number(id));
-        emit newAudioInterfaceRequested(label+"-"+length);
-        
-        qDebug() << text << "aaaaaaaaaaaaaaaaaaaaaa";
-        populateAudioCombos();
-    }
-    */
-}
+
 
 InterfaceAudio* MIDIChannelSelector::selectedAudioInterface(int channel)
 {

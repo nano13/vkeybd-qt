@@ -10,6 +10,8 @@
 #include <QDial>
 #include <QComboBox>
 #include <QLabel>
+#include <QLineEdit>
+#include <QMessageBox>
 #include <QEvent>
 #include <QKeyEvent>
 #include <QVariant>
@@ -33,6 +35,8 @@ public:
     void resendMIDIControls();
     
 private:
+    QGridLayout *grid = new QGridLayout;
+    
     MIDISoundsList *midi_sounds_list = new MIDISoundsList;
     int port;
     InterfaceAudio *interface_audio;
@@ -46,8 +50,6 @@ private:
     InterfaceAudio* selectedAudioInterface(int channel);
     
     QList<QCheckBox*> list_of_checkboxes;
-    QList<QComboBox*> list_of_midi_output_combos;
-    //void populateAudioCombos();
     QList<MIDIKeyShiftWidget*> list_of_keyshifts;
     QList<QSpinBox*> list_of_key_mins;
     QList<QSpinBox*> list_of_key_maxs;
@@ -70,7 +72,9 @@ protected:
     
 private slots:
     void checkToggled(QCheckBox *check_master, QCheckBox *check_slave);
-    void addNewAudioInterface(QString text);
+    void addNewCCEntry(int channel);
+    void addNewCCEntryRow(QGridLayout *grid, int channel, int row);
+    void delCCEntryRow(QGridLayout *grid, int row);
     void volumeSliderMoved(int channel, int volume);
     void panSliderMoved(int channel, int value);
     void instrumentGroupChanged(int channel, QComboBox *combo_group, QComboBox *combo_instrument);
@@ -84,7 +88,6 @@ private slots:
     void tremoloChanged(int channel, int value);
     
 signals:
-    void newAudioInterfaceRequested(QString label);
     void eventFiltered(QObject *obj, QEvent *ev);
     void closed();
 };

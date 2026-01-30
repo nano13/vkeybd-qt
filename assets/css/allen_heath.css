@@ -75,6 +75,14 @@ QPushButton#button_panic:pressed {
     color: white;
     background-color: yellow;
 }
+QPushButton#button_delete {
+    color: white;
+    background-color: #67111a;
+}
+QPushButton#button_delete:pressed {
+    color: white;
+    background-color: yellow;
+}
 QPushButton#button_stop {
     color: white;
     background-color: #c18e67;

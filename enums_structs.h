@@ -164,24 +164,18 @@ struct KeyStroke
 
 
 
+#include <QCheckBox>
 #include <QLineEdit>
 #include <QSpinBox>
 
 struct CCEntry
 {
+    QCheckBox* active;          // is this param active?
     int row;              // row in the QGridLayout, needed to delete from GUI
     int channel;          // Which MIDI channel this entry belongs to
     QLineEdit* label;     // Label / name for the CC
     QSpinBox* key;        // CC number
     QSpinBox* value;      // CC value
-};
-struct CCEntryValues
-{
-    int id = -1;
-    int channel = -1;
-    QString label;
-    int key = -1;
-    int value = -1;
 };
 
 #endif // ENUMS_STRUCTS_H

@@ -69,7 +69,8 @@ void MIDIChannelSelector::drawGUI()
         connect(check_b, &QCheckBox::toggled, this, [this, check_b, check_a]{ checkToggled(check_b, check_a); });
         
         QPushButton *button_cc_add = new QPushButton("add CC");
-        connect(button_cc_add, &QPushButton::clicked, this, [this, i]{ addNewCCEntry(i); });
+        QMap<QString,QVariant> cc_map;
+        connect(button_cc_add, &QPushButton::clicked, this, [this, i, cc_map]{ addNewCCEntry(i, cc_map); });
         
         QSlider *slider_volume = new QSlider;
         slider_volume->setOrientation(Qt::Horizontal);
@@ -301,6 +302,9 @@ QList<QMap<QString,QVariant>> MIDIChannelSelector::listOfChannels(bool only_acti
                 {
                     QString istr = QString::number(i);
                     
+                    QString cc_i_active = "cc_" + istr + "_active";
+                    map[cc_i_active] = entry.active->isChecked() ? "true" : "false";
+                    
                     QString cc_i_label = "cc_" + istr + "_label";
                     map[cc_i_label] = entry.label->text();
                     
@@ -346,7 +350,6 @@ void MIDIChannelSelector::restoreParams(QMap<QString,QVariant> data)
         for (const auto &[key, value] : channel.toStdMap()) {
             if (key.startsWith("cc_")) {
                 // This key corresponds to a CC entry
-                qDebug() << "Found CC key:" << key << "with value:" << value;
                 
                 int id = key.section('_', 1, 1).toInt();
                 QString name = key.section('_', 2);
@@ -363,14 +366,12 @@ void MIDIChannelSelector::restoreParams(QMap<QString,QVariant> data)
                 {
                     // here we handle second and third value
                     
-                    cc_map[name] == value;
+                    cc_map[name] = value;
                     
                     // check if we have all three, than load and reset cc_map
                     if (cc_map.contains("id") && cc_map.contains("key") && cc_map.contains("value"))
                     {
-                        addNewCCEntry(i);
-                        
-                        
+                        addNewCCEntry(i, cc_map);
                         
                         cc_map.clear();
                     }
@@ -380,7 +381,7 @@ void MIDIChannelSelector::restoreParams(QMap<QString,QVariant> data)
     }
 }
 
-void MIDIChannelSelector::addNewCCEntry(int channel)
+void MIDIChannelSelector::addNewCCEntry(int channel, QMap<QString,QVariant> cc_map)
 {
     int row = 2 * channel; // even rows: 2, 4, 6, ..., 32
     
@@ -390,7 +391,7 @@ void MIDIChannelSelector::addNewCCEntry(int channel)
             {
                 int new_row = grid->rowCount();
                 
-                addNewCCEntryRow(grid, channel, new_row);
+                addNewCCEntryRow(grid, channel, new_row, cc_map);
             }
         }
     }
@@ -398,42 +399,64 @@ void MIDIChannelSelector::addNewCCEntry(int channel)
     {
         QGridLayout *grid = new QGridLayout;
         
-        addNewCCEntryRow(grid, channel, 1);
+        addNewCCEntryRow(grid, channel, 1, cc_map);
         
         this->grid->addLayout(grid, row, 2, 1, 8);
     }
 }
-void MIDIChannelSelector::addNewCCEntryRow(QGridLayout *grid, int channel, int row)
+void MIDIChannelSelector::addNewCCEntryRow(QGridLayout *grid, int channel, int row, QMap<QString,QVariant> cc_map)
 {
     QPushButton *button_delete = new QPushButton("delete");
     button_delete->setObjectName("button_delete");
     connect(button_delete, &QPushButton::clicked, [this, grid, channel, row]{ delCCEntryRow(grid, channel, row); });
     
+    QCheckBox *check_active = new QCheckBox;
+    if (cc_map.contains("active"))
+    {
+        if (cc_map["active"].toBool())
+            check_active->setChecked(true);
+        else
+            check_active->setChecked(false);
+    }
+    else
+        check_active->setChecked(true);
+        
+    
     QLineEdit *line_label = new QLineEdit;
     line_label->setPlaceholderText("your label or description");
+    if (cc_map.contains("label"))
+        line_label->setText(cc_map["label"].toString());
     
     QSpinBox *spin_cc = new QSpinBox;
     spin_cc->setRange(0, 127);
+    if (cc_map.contains("key"))
+        spin_cc->setValue(cc_map["key"].toInt());
     
     QSlider *slider_value = new QSlider(Qt::Horizontal);
     slider_value->setRange(0, 127);
+    if (cc_map.contains("value"))
+        slider_value->setValue(cc_map["value"].toInt());
     
     QSpinBox *spin_value = new QSpinBox;
     spin_value->setRange(0, 127);
     connect(spin_value, &QSpinBox::valueChanged, [this, channel, spin_cc, spin_value]{
         this->interface_audio->setControlChangeEvent(this->port, channel-1, spin_cc->value(), spin_value->value());
     });
+    if (cc_map.contains("value"))
+        spin_value->setValue(cc_map["value"].toInt());
     
     connect(slider_value, &QSlider::valueChanged, spin_value, &QSpinBox::setValue);
     connect(spin_value, &QSpinBox::valueChanged, slider_value, &QSlider::setValue);
     
     grid->addWidget(button_delete, row, 1);
-    grid->addWidget(line_label, row, 2);
-    grid->addWidget(spin_cc, row, 3);
-    grid->addWidget(slider_value, row, 4);
-    grid->addWidget(spin_value, row, 5);
+    grid->addWidget(check_active, row, 2);
+    grid->addWidget(line_label, row, 3);
+    grid->addWidget(spin_cc, row, 4);
+    grid->addWidget(slider_value, row, 5);
+    grid->addWidget(spin_value, row, 6);
     
     CCEntry entry;
+    entry.active = check_active;
     entry.row = row;
     entry.channel = channel;
     entry.label = line_label;

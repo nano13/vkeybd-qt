@@ -76,8 +76,8 @@ protected:
     
 private slots:
     void checkToggled(QCheckBox *check_master, QCheckBox *check_slave);
-    void addNewCCEntry(int channel);
-    void addNewCCEntryRow(QGridLayout *grid, int channel, int row);
+    void addNewCCEntry(int channel, QMap<QString, QVariant> cc_map);
+    void addNewCCEntryRow(QGridLayout *grid, int channel, int row, QMap<QString, QVariant> cc_map);
     void delCCEntryRow(QGridLayout *grid, int channel, int row);
     void volumeSliderMoved(int channel, int volume);
     void panSliderMoved(int channel, int value);

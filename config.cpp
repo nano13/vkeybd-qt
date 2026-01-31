@@ -42,11 +42,19 @@ QSettings *Config::openQuicksaveFile(int number_of_keyboards)
         this->config->setValue(path, this->config_dir->absoluteFilePath("quicksave_n"+QString::number(number_of_keyboards)+".ini"));
     }
     
-    return new QSettings(this->config->value(path).toString(), QSettings::IniFormat);
+    QSettings* settings = new QSettings(this->config->value(path).toString(), QSettings::IniFormat);
+    
+    settings->clear();
+    
+    return settings;
 }
 QSettings *Config::openSaveFile(QString filepath)
 {
-    return new QSettings(filepath, QSettings::IniFormat);
+    QSettings* settings = new QSettings(filepath, QSettings::IniFormat);
+    
+    settings->clear();
+    
+    return settings;
 }
 
 void Config::saveLastSavePath(QString path)
@@ -127,7 +135,7 @@ void Config::saveChannelSettings(QSettings *settings, int id, QString label, QLi
         {
             QString key = keys.at(k);
             settings->setValue(
-                        QString::number(id)+"/"+label+"/"+QString::number(c)+"/"+key,
+                        QString::number(id)+"/"+label+"/"+pad3(c)+"/"+key,
                         channels.at(c)[key]
                     );
         }
@@ -154,14 +162,16 @@ void Config::saveParams(QSettings *settings, int id, QString label, QString chan
 
 void Config::loadChannelSettings(QSettings *settings)
 {
-    // maintabs is something like ["0", "1"] if vkeybd-qt sarted with -n=2
     QList<QString> maintabs = settings->childGroups();
+    //qDebug() << "Main tabs:" << maintabs;
+    
     for (auto &maintab : maintabs)
     {
         settings->beginGroup(maintab);
-        // tabs is something like ["F1", "F2", ... "F12", "general"]
         QList<QString> tabs = settings->childGroups();
         settings->endGroup();
+        
+        //qDebug() << "Maintab" << maintab << "has tabs:" << tabs;
         
         for (auto &tab : tabs)
         {
@@ -169,47 +179,64 @@ void Config::loadChannelSettings(QSettings *settings)
             {
                 QMap<QString, QVariant> channels_;
                 
-                settings->beginGroup(maintab+"/"+tab);
-                // channels is something like ["1", "2", ... "16"]
+                settings->beginGroup(maintab + "/" + tab);
                 QList<QString> channels = settings->childGroups();
                 settings->endGroup();
                 
+                //qDebug() << "Tab" << tab << "has channels (raw from INI):" << channels;
+                
                 for (auto &channel : channels)
                 {
-                    settings->beginGroup(maintab+"/"+tab+"/"+channel);
-                    // keys is something like ["tremolo", "volume", "msb", "lsb" ...]
+                    settings->beginGroup(maintab + "/" + tab + "/" + channel);
                     QList<QString> keys = settings->childKeys();
                     settings->endGroup();
                     
-                    QMap<QString, QVariant> value_;
+                    //qDebug() << "Channel (raw):" << channel << "keys:" << keys;
                     
+                    QMap<QString, QVariant> value_;
                     for (auto &key : keys)
                     {
-                        QVariant value = settings->value(maintab+"/"+tab+"/"+channel+"/"+key);
+                        QVariant value = settings->value(maintab + "/" + tab + "/" + channel + "/" + key);
+                        value_[key] = value;
                         
-                        value_[key] = value; // e.g: "volume" -> "127"
+                        //qDebug() << "  Key:" << key << "Value:" << value;
                     }
                     
-                    channels_[channel] = value_; // e.g: "1" -> ("volume" -> "127")
+                    // --- FIX: handle both numeric and non-numeric channels ---
+                    QString normalized_channel;
+                    bool ok;
+                    int channel_num = channel.toInt(&ok);
+                    if (ok) {
+                        normalized_channel = QString::number(channel_num); // numeric, strip zeros
+                    } else {
+                        normalized_channel = channel; // non-numeric, keep as-is
+                    }
+                    
+                    //qDebug() << "Channel" << channel << "normalized to" << normalized_channel;
+                    
+                    channels_[normalized_channel] = value_;
                 }
                 
                 emit restoreParams(
-                            maintab.toInt(),
-                            tab,
-                            channels_
-                            );
+                    maintab.toInt(),
+                    tab,
+                    channels_
+                    );
             }
-            else if (tab == "general")
+            else
             {
-                settings->beginGroup(maintab+"/"+tab);
+                settings->beginGroup(maintab + "/" + tab);
                 QList<QString> generals = settings->childKeys();
                 settings->endGroup();
                 
-                QMap<QString,QVariant> generals_;
+                //qDebug() << "General keys in maintab" << maintab << ":" << generals;
+                
+                QMap<QString, QVariant> generals_;
                 for (auto &general : generals)
                 {
-                    QVariant value = settings->value(maintab+"/"+tab+"/"+general);
+                    QVariant value = settings->value(maintab + "/" + tab + "/" + general);
                     generals_[general] = value;
+                    //qDebug() << "  General key:" << general << "Value:" << value;
                 }
                 
                 emit restoreGeneral(maintab.toInt(), generals_);
@@ -217,3 +244,24 @@ void Config::loadChannelSettings(QSettings *settings)
         }
     }
 }
+
+
+
+QString Config::pad3(int n)
+{
+    return QString("%1").arg(n, 3, 10, QLatin1Char('0'));
+}
+
+// Helper function: pad a QString numerically to 3 digits
+QString Config::pad3(const QString &str)
+{
+    bool ok = false;
+    int n = str.toInt(&ok);
+    if (!ok)
+    {
+        // If conversion fails, return original string (safe fallback)
+        return str;
+    }
+    return QString("%1").arg(n, 3, 10, QLatin1Char('0'));
+}
+

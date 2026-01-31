@@ -69,6 +69,7 @@ private:
     
     QList<CCEntry> list_of_cc_entries;
     
+    static QString pad3(int n);
     
 protected:
     bool eventFilter(QObject *obj, QEvent *ev);

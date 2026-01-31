@@ -47,6 +47,8 @@ private:
     QSettings *config;
     // this is the file we use to save/restore our saved presets
     //QSettings *settings;
+    QString pad3(int n);
+    QString pad3(const QString &str);
     
 signals:
     void restoreParams(int maintab, QString tab, QMap<QString, QVariant> data);

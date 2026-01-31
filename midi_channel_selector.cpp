@@ -300,7 +300,7 @@ QList<QMap<QString,QVariant>> MIDIChannelSelector::listOfChannels(bool only_acti
                 // match channel and row using spin_cc properties
                 if (entry.channel == channel)
                 {
-                    QString istr = QString::number(i);
+                    QString istr = pad3(i);
                     
                     QString cc_i_active = "cc_" + istr + "_active";
                     map[cc_i_active] = entry.active->isChecked() ? "true" : "false";
@@ -764,3 +764,7 @@ void MIDIChannelSelector::checkToggled(QCheckBox *check_master, QCheckBox *check
     }
 }
 
+QString MIDIChannelSelector::pad3(int n)
+{
+    return QString("%1").arg(n, 3, 10, QLatin1Char('0'));
+}

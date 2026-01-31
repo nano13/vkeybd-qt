@@ -16,6 +16,7 @@
 #include <QKeyEvent>
 #include <QVariant>
 #include <QFile>
+#include <QTimer>
 
 #include <QHideEvent>
 

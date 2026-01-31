@@ -170,12 +170,13 @@ struct KeyStroke
 
 struct CCEntry
 {
-    QCheckBox* active;          // is this param active?
+    QCheckBox* active;    // is this param active?
     int row;              // row in the QGridLayout, needed to delete from GUI
     int channel;          // Which MIDI channel this entry belongs to
     QLineEdit* label;     // Label / name for the CC
     QSpinBox* key;        // CC number
     QSpinBox* value;      // CC value
+    QSpinBox* delay;      // delay before shooting the CC message
 };
 
 #endif // ENUMS_STRUCTS_H

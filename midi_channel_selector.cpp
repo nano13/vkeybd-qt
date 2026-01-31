@@ -409,7 +409,7 @@ void MIDIChannelSelector::addNewCCEntry(int channel, QMap<QString,QVariant> cc_m
         
         addNewCCEntryRow(grid, channel, 1, cc_map);
         
-        this->grid->addLayout(grid, row, 2, 1, 8);
+        this->grid->addLayout(grid, row, 2, 1, 12);
     }
 }
 void MIDIChannelSelector::addNewCCEntryRow(QGridLayout *grid, int channel, int row, QMap<QString,QVariant> cc_map)
@@ -432,6 +432,7 @@ void MIDIChannelSelector::addNewCCEntryRow(QGridLayout *grid, int channel, int r
         
     
     QLineEdit *line_label = new QLineEdit;
+    line_label->setMinimumWidth(300);
     line_label->setPlaceholderText("your label or description");
     if (cc_map.contains("label"))
         line_label->setText(cc_map["label"].toString());
@@ -444,6 +445,7 @@ void MIDIChannelSelector::addNewCCEntryRow(QGridLayout *grid, int channel, int r
     
     QSlider *slider_value = new QSlider(Qt::Horizontal);
     slider_value->setRange(0, 127);
+    slider_value->setMinimumWidth(300);
     if (cc_map.contains("value"))
         slider_value->setValue(cc_map["value"].toInt());
     
@@ -459,12 +461,20 @@ void MIDIChannelSelector::addNewCCEntryRow(QGridLayout *grid, int channel, int r
     connect(slider_value, &QSlider::valueChanged, spin_value, &QSpinBox::setValue);
     connect(spin_value, &QSpinBox::valueChanged, slider_value, &QSlider::setValue);
     
+    QLabel *label_delay = new QLabel("Delay to previous entry [ms]:");
+    QSpinBox *spin_delay = new QSpinBox;
+    spin_delay->setRange(0, 5000);
+    spin_delay->setToolTip("Some MIDI Devices need a few milliseconds to process control messages. Here you can set up a timer to compensate.");
+    spin_delay->setObjectName("velocity");
+    
     grid->addWidget(button_delete, row, 1);
-    grid->addWidget(check_active, row, 2);
-    grid->addWidget(line_label, row, 3);
-    grid->addWidget(spin_cc, row, 4);
-    grid->addWidget(slider_value, row, 5);
-    grid->addWidget(spin_value, row, 6);
+    grid->addWidget(check_active,  row, 2);
+    grid->addWidget(line_label,    row, 3);
+    grid->addWidget(spin_cc,       row, 4);
+    grid->addWidget(slider_value,  row, 5);
+    grid->addWidget(spin_value,    row, 10);
+    grid->addWidget(label_delay,   row, 11);
+    grid->addWidget(spin_delay,    row, 12);
     
     CCEntry entry;
     entry.active = check_active;
@@ -473,6 +483,7 @@ void MIDIChannelSelector::addNewCCEntryRow(QGridLayout *grid, int channel, int r
     entry.label = line_label;
     entry.key = spin_cc;
     entry.value = spin_value;
+    entry.delay = spin_delay;
     this->list_of_cc_entries.append(entry);
 }
 void MIDIChannelSelector::delCCEntryRow(QGridLayout *grid, int channel, int row)
@@ -732,19 +743,27 @@ void MIDIChannelSelector::resendMIDIControls()
         pitchChanged(channel, channelData["pitch"].toInt());
     }
     
-    // 3️⃣ Send all active CC entries for this channel
+    // 3️⃣ Send all active CC entries for this channel, respecting delays
+    int cumulativeDelay = 0; // ms
+    
     for (const CCEntry &entry : list_of_cc_entries)
     {
-        if (entry.active->isChecked())
-        {
-            this->interface_audio->setControlChangeEvent(
-                this->port,
-                entry.channel,
-                entry.key->value(),
-                entry.value->value()
-            );
-        }
+        if (!entry.active->isChecked())
+            continue;
+        
+        cumulativeDelay += entry.delay->value(); // sum delays
+        
+        // Capture variables by value for the lambda
+        int port = this->port;
+        int channel = entry.channel;
+        int key = entry.key->value();
+        int value = entry.value->value();
+        
+        QTimer::singleShot(cumulativeDelay, this, [this, port, channel, key, value]() {
+            this->interface_audio->setControlChangeEvent(port, channel, key, value);
+        });
     }
+    
 }
 
 

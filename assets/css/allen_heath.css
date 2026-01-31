@@ -287,6 +287,9 @@ QComboBox#midi_output_selector QAbstractItemView {
 QComboBox#velocity_selector {
     background-color: #3c73ed;
 }
+QSpinBox#velocity {
+    background-color: #3c73ed;
+}
 QSpinBox#pitch_selector {
     background-color: #3cb2ed;
 }

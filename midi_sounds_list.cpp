@@ -96,6 +96,27 @@ QList<QString> MIDISoundsList::getInstrumentGroups()
     return result;
 }
 
+int MIDISoundsList::getMIDICodeForBank(QString group)
+{
+    QList<QString> list_raw = getInstrumentsRAWData();
+    
+    for (int i = 0; i < list_raw.length(); i++)
+    {
+        if (list_raw.at(i) == group && i + 1 < list_raw.length())
+        {
+            QString nextLine = list_raw.at(i + 1);
+            if (nextLine.at(0).isDigit())
+            {
+                return nextLine.split(" ", Qt::SkipEmptyParts).at(0).toInt();
+            }
+        }
+    }
+    
+    // fallback if group not found
+    return -1;
+}
+
+
 QMap<QString,int> MIDISoundsList::getMIDICodesForInstrument(QString instrument)
 {
     QMap<QString,int> result;

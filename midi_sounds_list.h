@@ -16,6 +16,7 @@ public:
     QList<QString> getInstrumentGroups();
     QList<QString> getInstrumentsForGroupMIDIv1(QString group);
     QList<QString> getInstrumentsForGroupMIDIv2(QString group);
+    int getMIDICodeForBank(QString group);
     QMap<QString, int> getMIDICodesForInstrument(QString instrument);
     QMap<QString, QString> getInstrumentForMIDICodes(int msb, int lsb);
     

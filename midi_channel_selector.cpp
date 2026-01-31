@@ -121,8 +121,10 @@ void MIDIChannelSelector::drawGUI()
         
         QSpinBox *midi_instrument_msb = new QSpinBox;
         QSpinBox *midi_instrument_lsb = new QSpinBox;
-        midi_instrument_msb->setRange(0, 127);
-        midi_instrument_lsb->setRange(0, 127);
+        midi_instrument_msb->setRange(-1, 127);
+        midi_instrument_lsb->setRange(-1, 127);
+        midi_instrument_msb->setValue(0);
+        midi_instrument_lsb->setValue(0);
         midi_instrument_msb->setObjectName("instrument_selector");
         midi_instrument_lsb->setObjectName("instrument_selector");
         connect(
@@ -578,10 +580,35 @@ void MIDIChannelSelector::instrumentGroupChanged(int channel, QComboBox *combo_g
     combo_instrument->clear();
     
     QString group = combo_group->currentText();
-    //QList<QString> instruments = this->midi_sounds_list->getInstrumentsForGroupMIDIv1(group);
-    QList<QString> instruments = this->midi_sounds_list->getInstrumentsForGroupMIDIv2(group);
     
-    combo_instrument->addItems(instruments);
+    if (group == "[disabled]")
+    {
+        combo_instrument->setEnabled(false);
+        list_of_msb.at(channel)->setEnabled(false);
+        list_of_lsb.at(channel)->setEnabled(false);
+        list_of_msb.at(channel)->setValue(-1);
+        list_of_lsb.at(channel)->setValue(-1);
+    }
+    else
+    {
+        combo_instrument->setEnabled(true);
+        list_of_msb.at(channel)->setEnabled(true);
+        list_of_lsb.at(channel)->setEnabled(true);
+        
+        //QList<QString> instruments = this->midi_sounds_list->getInstrumentsForGroupMIDIv1(group);
+        QList<QString> instruments = this->midi_sounds_list->getInstrumentsForGroupMIDIv2(group);
+        combo_instrument->addItems(instruments);
+        
+        int midi = this->midi_sounds_list->getMIDICodeForBank(combo_group->currentText());
+        list_of_msb.at(channel)->blockSignals(true);
+        list_of_msb.at(channel)->setValue(midi);
+        list_of_msb.at(channel)->blockSignals(false);
+        
+        list_of_lsb.at(channel)->blockSignals(true);
+        list_of_lsb.at(channel)->setValue(0);
+        list_of_lsb.at(channel)->blockSignals(false);
+    }
+    
     combo_instrument->blockSignals(false);
     
     //instrumentChanged(channel, combo_instrument->currentText());
@@ -611,25 +638,32 @@ void MIDIChannelSelector::instrumentChangedNumeric(int channel, int instrument_m
     QMap<QString,QString> names = this->midi_sounds_list->getInstrumentForMIDICodes(instrument_msb, instrument_lsb);
     //qDebug() << names;
     
-    this->list_of_instrument_banks.at(channel)->blockSignals(true);
-    if (names["group"] == "")
+    if (instrument_msb == -1 || instrument_lsb == -1)
     {
-        this->list_of_instrument_groups.at(channel)->setCurrentIndex(-1);
+        this->list_of_instrument_groups.at(channel)->setCurrentText("[disabled]");
     }
     else
-    {
-        this->list_of_instrument_groups.at(channel)->setCurrentText(names["group"]);
+    {    
+        this->list_of_instrument_banks.at(channel)->blockSignals(true);
+        if (names["group"] == "")
+        {
+            this->list_of_instrument_groups.at(channel)->setCurrentIndex(-1);
+        }
+        else
+        {
+            this->list_of_instrument_groups.at(channel)->setCurrentText(names["group"]);
+        }
+        
+        if (names["instrument"] == "")
+        {
+            this->list_of_instrument_banks.at(channel)->setCurrentIndex(-1);
+        }
+        else
+        {
+            this->list_of_instrument_banks.at(channel)->setCurrentText(names["instrument"]);
+        }
+        this->list_of_instrument_banks.at(channel)->blockSignals(false);
     }
-    
-    if (names["instrument"] == "")
-    {
-        this->list_of_instrument_banks.at(channel)->setCurrentIndex(-1);
-    }
-    else
-    {
-        this->list_of_instrument_banks.at(channel)->setCurrentText(names["instrument"]);
-    }
-    this->list_of_instrument_banks.at(channel)->blockSignals(false);
 }
 
 void MIDIChannelSelector::velocityChanged(int channel, QString value)

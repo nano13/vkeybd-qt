@@ -70,7 +70,7 @@ void MIDIChannelSelector::drawGUI()
         
         QPushButton *button_cc_add = new QPushButton("add CC");
         QMap<QString,QVariant> cc_map;
-        connect(button_cc_add, &QPushButton::clicked, this, [this, i, cc_map]{ addNewCCEntry(i, cc_map); });
+        connect(button_cc_add, &QPushButton::clicked, this, [this, i, cc_map]{ addNewCCEntry(i-1, cc_map); });
         
         QSlider *slider_volume = new QSlider;
         slider_volume->setOrientation(Qt::Horizontal);
@@ -103,6 +103,7 @@ void MIDIChannelSelector::drawGUI()
         
         QComboBox *combo_instrument_group = new QComboBox;
         QList<QString> list_instrument_group = this->midi_sounds_list->getInstrumentGroups();
+        list_instrument_group.append("[disabled]");
         combo_instrument_group->addItems(list_instrument_group);
         combo_instrument_group->setPlaceholderText("[non-default MSB/LSB set]");
         combo_instrument_group->setObjectName("instrument_selector");
@@ -271,6 +272,9 @@ QList<QMap<QString,QVariant>> MIDIChannelSelector::listOfChannels(bool only_acti
             int instrument_lsb = this->list_of_lsb.at(channel)->value();
             map["instrument_lsb"] = instrument_lsb;
             
+            QString instrument_group = this->list_of_instrument_groups.at(channel)->currentText();
+            map["instrument_bank"] = instrument_group;
+            
             QString instrument_name = this->list_of_instrument_banks.at(channel)->currentText();
             map["instrument_name"] = instrument_name;
             
@@ -383,9 +387,10 @@ void MIDIChannelSelector::restoreParams(QMap<QString,QVariant> data)
 
 void MIDIChannelSelector::addNewCCEntry(int channel, QMap<QString,QVariant> cc_map)
 {
-    int row = 2 * channel; // even rows: 2, 4, 6, ..., 32
+    int row = 2 * (channel+1); // even rows: 2, 4, 6, ..., 32
     
     if (QLayoutItem *item = grid->itemAtPosition(row, 2)) {
+        // if we have the grid for the cc entries already
         if (QLayout *layout = item->layout()) {
             if (QGridLayout *grid = qobject_cast<QGridLayout*>(layout))
             {
@@ -397,6 +402,7 @@ void MIDIChannelSelector::addNewCCEntry(int channel, QMap<QString,QVariant> cc_m
     }
     else
     {
+        // we need to greate the grid and attach
         QGridLayout *grid = new QGridLayout;
         
         addNewCCEntryRow(grid, channel, 1, cc_map);
@@ -443,7 +449,7 @@ void MIDIChannelSelector::addNewCCEntryRow(QGridLayout *grid, int channel, int r
     spin_value->setRange(0, 127);
     spin_value->setToolTip("CC Value");
     connect(spin_value, &QSpinBox::valueChanged, [this, channel, spin_cc, spin_value]{
-        this->interface_audio->setControlChangeEvent(this->port, channel-1, spin_cc->value(), spin_value->value());
+        this->interface_audio->setControlChangeEvent(this->port, channel, spin_cc->value(), spin_value->value());
     });
     if (cc_map.contains("value"))
         spin_value->setValue(cc_map["value"].toInt());
@@ -664,51 +670,49 @@ void MIDIChannelSelector::tremoloChanged(int channel, int value)
 
 void MIDIChannelSelector::resendMIDIControls()
 {
+    // Get all activated channels
     QList<QMap<QString,QVariant>> channels = listOfChannels(true);
-    for (int i=0; i < channels.length(); i++)
+    
+    for (const auto &channelData : channels)
     {
-        int channel = channels.at(i)["channel"].toInt();
-        
-        // trigger sending current volume value
-        volumeSliderMoved(channel, channels.at(i)["volume"].toInt());
-        // trigger sending current pan value
-        panSliderMoved(channel, channels.at(i)["pan"].toInt());
-        
+        int channel = channelData["channel"].toInt();
         InterfaceAudio *audio = selectedAudioInterface(channel);
-        audio->setProgramChangeEvent(
-                    this->port,
-                    channel,
-                    channels.at(i)["instrument_msb"].toInt(),
-                    channels.at(i)["instrument_lsb"].toInt()
-                    );
-        portamentoChanged(channel, channels.at(i)["portamento_time"].toInt());
-        attackChanged(channel, channels.at(i)["attack"].toInt());
-        releaseChanged(channel, channels.at(i)["release"].toInt());
-    }
-    qDebug() << "aiiiiiiiiiiiiiiiiii";
-    for (int i=0; i < list_of_checkboxes.length(); i++)
-    {
-        if (list_of_checkboxes.at(i)->isChecked())
+        
+        // 1️⃣ Send Program Change first
+        if (channelData["instrument_bank"] != "[disabled]")
         {
-            for (const CCEntry &entry : list_of_cc_entries)
-            {
-                qDebug() << entry.channel << " " << i;
-                if (entry.channel-1 == i)
-                {
-                    if (entry.active->isChecked())
-                    {
-                        this->interface_audio->setControlChangeEvent(
-                            this->port,
-                            entry.channel-1,
-                            entry.key->value(),
-                            entry.value->value()
-                        );
-                    }
-                }
-            }
+            audio->setProgramChangeEvent(
+                this->port,
+                channel,
+                channelData["instrument_msb"].toInt(),
+                channelData["instrument_lsb"].toInt()
+                );
+        }
+        // 2️⃣ Send sliders and other parameters AFTER Program Change
+        volumeSliderMoved(channel, channelData["volume"].toInt());
+        panSliderMoved(channel, channelData["pan"].toInt());
+        portamentoChanged(channel, channelData["portamento_time"].toInt());
+        attackChanged(channel, channelData["attack"].toInt());
+        releaseChanged(channel, channelData["release"].toInt());
+        tremoloChanged(channel, channelData["tremolo"].toInt());
+        pitchChanged(channel, channelData["pitch"].toInt());
+    }
+    
+    // 3️⃣ Send all active CC entries for this channel
+    for (const CCEntry &entry : list_of_cc_entries)
+    {
+        if (entry.active->isChecked())
+        {
+            this->interface_audio->setControlChangeEvent(
+                this->port,
+                entry.channel,
+                entry.key->value(),
+                entry.value->value()
+            );
         }
     }
 }
+
 
 bool MIDIChannelSelector::eventFilter(QObject *obj, QEvent *ev)
 {

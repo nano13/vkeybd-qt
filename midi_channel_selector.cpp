@@ -685,6 +685,29 @@ void MIDIChannelSelector::resendMIDIControls()
         attackChanged(channel, channels.at(i)["attack"].toInt());
         releaseChanged(channel, channels.at(i)["release"].toInt());
     }
+    qDebug() << "aiiiiiiiiiiiiiiiiii";
+    for (int i=0; i < list_of_checkboxes.length(); i++)
+    {
+        if (list_of_checkboxes.at(i)->isChecked())
+        {
+            for (const CCEntry &entry : list_of_cc_entries)
+            {
+                qDebug() << entry.channel << " " << i;
+                if (entry.channel-1 == i)
+                {
+                    if (entry.active->isChecked())
+                    {
+                        this->interface_audio->setControlChangeEvent(
+                            this->port,
+                            entry.channel-1,
+                            entry.key->value(),
+                            entry.value->value()
+                        );
+                    }
+                }
+            }
+        }
+    }
 }
 
 bool MIDIChannelSelector::eventFilter(QObject *obj, QEvent *ev)

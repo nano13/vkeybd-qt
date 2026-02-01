@@ -17,7 +17,6 @@ Orgelwerk::Orgelwerk(int keyboard_id, int tab_id, InterfaceAudio *interface_audi
 void Orgelwerk::drawGUI()
 {
     this->channels = new MIDIChannelSelector(this->interface_audio, this->tab_id);
-    this->control_change = new MIDIControlChangeSelector();
     this->keys = new MIDIKeySelector;
     this->pitch = new MIDIPitchWheel;
     this->volume = new MIDIMasterVolume;
@@ -36,8 +35,6 @@ void Orgelwerk::drawGUI()
     this->scroll_channels->setWidgetResizable(false);
     this->scroll_channels->setWindowTitle("Keyboard " + QString::number(this->keyboard_id) + "-" + this->label);
     connect(this->scroll_channels, &QScrollArea::destroyed, this, &Orgelwerk::channelsSummaryUpdate);
-    
-    this->control_change->setWindowTitle("Keyboard " + QString::number(this->keyboard_id) + "-" + this->label);
     
     
     this->grid = new QGridLayout;
@@ -144,15 +141,11 @@ void Orgelwerk::showChannelsSummary(int grid_row)
     
     this->check_resend_midi_auto->setToolTip("Automatically resend MIDI settings if tab activated");
     
-    this->button_cc_map->setText("CC-Map");
-    connect(button_cc_map, &QPushButton::clicked, this, &Orgelwerk::showCCMap);
-    
     layout_channels->setVerticalSpacing(0);
-    layout_channels->addWidget(this->midi_channels_summary, 0, 0, 1, 4);
+    layout_channels->addWidget(this->midi_channels_summary, 0, 0, 1, 3);
     layout_channels->addWidget(button_channels_dialog, 1, 0);
     layout_channels->addWidget(button_resend_midi, 1, 1);
     layout_channels->addWidget(this->check_resend_midi_auto, 1, 2);
-    layout_channels->addWidget(this->button_cc_map, 1, 3);
     
     this->grid->addWidget(group_channels, grid_row, 0, 1, 2);
     
@@ -402,18 +395,6 @@ void Orgelwerk::showChannelDetails()
     
     // Show the scroll area
     this->scroll_channels->show();
-}
-
-void Orgelwerk::showCCMap()
-{
-    QScreen *screen = QGuiApplication::primaryScreen();
-    QSize screen_size = screen->availableVirtualSize();
-    
-    
-    
-    this->control_change->show();
-    
-    //this->interface_audio->setControlChangeEvent(this->tab_id, 2, 70, 127);
 }
 
 void Orgelwerk::channelsDialogRejected()

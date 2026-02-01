@@ -44,7 +44,6 @@ SOURCES += \
     menubar.cpp \
     midi_channel_selector.cpp \
     midi_channels_summary.cpp \
-    midi_control_change_selector.cpp \
     midi_key_selector.cpp \
     midi_key_shift_global.cpp \
     midi_key_shift_widget.cpp \
@@ -78,7 +77,6 @@ HEADERS += \
     menubar.h \
     midi_channel_selector.h \
     midi_channels_summary.h \
-    midi_control_change_selector.h \
     midi_key_selector.h \
     midi_key_shift_global.h \
     midi_key_shift_widget.h \

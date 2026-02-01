@@ -22,7 +22,6 @@
 #include <QScreen>
 
 #include "midi_channel_selector.h"
-#include "midi_control_change_selector.h"
 #include "midi_key_selector.h"
 #include "midi_pitchwheel.h"
 #include "midi_channels_summary.h"
@@ -57,7 +56,6 @@ public:
     void keySoft(bool pressed);
     
     MIDIChannelSelector *channels;
-    MIDIControlChangeSelector *control_change;
     MIDIKeySelector *keys;
     MIDIPitchWheel *pitch;
     MIDIMasterVolume *volume;
@@ -69,7 +67,6 @@ public:
     QPushButton *button_channels_dialog = new QPushButton;
     QPushButton *button_resend_midi = new QPushButton;
     QCheckBox *check_resend_midi_auto = new QCheckBox("auto");
-    QPushButton *button_cc_map = new QPushButton;
     
     QList<QMap<QString,QVariant>> listOfChannels(bool only_activated);
     QMap<QString, QVariant> getParams();
@@ -130,7 +127,6 @@ private slots:
     void keyMIDIUp(int midicode);
     void pitchWheelMoved(int pitch);
     void showChannelDetails();
-    void showCCMap();
     void channelsDialogRejected();
     void volumeSliderMoved(int value);
     

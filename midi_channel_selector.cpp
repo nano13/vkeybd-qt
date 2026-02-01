@@ -319,6 +319,9 @@ QList<QMap<QString,QVariant>> MIDIChannelSelector::listOfChannels(bool only_acti
                     
                     QString cc_i_value = "cc_" + istr + "_value";
                     map[cc_i_value] = entry.value->value();
+                    
+                    QString cc_i_delay = "cc_" + istr + "_delay";
+                    map[cc_i_delay] = entry.delay->value();
                 }
             }
             
@@ -362,7 +365,7 @@ void MIDIChannelSelector::restoreParams(QMap<QString,QVariant> data)
                 
                 if (!cc_map.contains("id"))
                 {
-                    // here we handle the first value of three
+                    // here we handle the first value of four
                     
                     cc_map["id"] = id;
                     cc_map[name] = value;
@@ -370,12 +373,12 @@ void MIDIChannelSelector::restoreParams(QMap<QString,QVariant> data)
                 }
                 else if (cc_map["id"] == id)
                 {
-                    // here we handle second and third value
+                    // here we handle second third and forth value
                     
                     cc_map[name] = value;
                     
-                    // check if we have all three, than load and reset cc_map
-                    if (cc_map.contains("id") && cc_map.contains("key") && cc_map.contains("value"))
+                    // check if we have all four, than load and reset cc_map
+                    if (cc_map.contains("id") && cc_map.contains("key") && cc_map.contains("value") && cc_map.contains("delay"))
                     {
                         addNewCCEntry(i, cc_map);
                         
@@ -466,6 +469,8 @@ void MIDIChannelSelector::addNewCCEntryRow(QGridLayout *grid, int channel, int r
     spin_delay->setRange(0, 5000);
     spin_delay->setToolTip("Some MIDI Devices need a few milliseconds to process control messages. Here you can set up a timer to compensate.");
     spin_delay->setObjectName("velocity");
+    if (cc_map.contains("delay"))
+        spin_delay->setValue(cc_map["delay"].toInt());
     
     grid->addWidget(button_delete, row, 1);
     grid->addWidget(check_active,  row, 2);
@@ -763,7 +768,6 @@ void MIDIChannelSelector::resendMIDIControls()
             this->interface_audio->setControlChangeEvent(port, channel, key, value);
         });
     }
-    
 }
 
 

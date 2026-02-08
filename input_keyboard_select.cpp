@@ -155,28 +155,8 @@ void InputKeyboardSelect::rawKeyboardSelected(int index)
     }
 }
 
-void InputKeyboardSelect::detectDisplayInput()
-{
-    if (qgetenv("XDG_SESSION_TYPE") == "x11")
-    {
-        this->display_input_type = DisplayInput::X11;
-    }
-    /*
-    else if (qgetenv("XDG_SESSION_TYPE") == "wayland" && qgetenv("WAYLAND_DISPLAY").startsWith("wayland"))
-    {
-        this->display_input_type = DisplayInput::Wayland;
-    }
-    */
-    else
-    {
-        this->display_input_type = DisplayInput::Unsupported;
-    }
-}
-
 void InputKeyboardSelect::keyboardRescan()
 {
-    detectDisplayInput();
-    
     if (this->button_keyboard_lock->isDown())
         this->button_keyboard_lock->setDown(false);
     
@@ -198,13 +178,6 @@ void InputKeyboardSelect::keyboardRescan()
     this->combo_keyboard_selector->clear();
     this->combo_keyboard_selector->addItems(keyboards);
     this->combo_keyboard_selector->blockSignals(false);
-    
-    if (this->display_input_type != DisplayInput::Unsupported)
-    {
-        QVariant v(0);
-        //this->combo_keyboard_selector->setItemData(KeyboardSelection::Native, v, Qt::UserRole - 1);
-        //this->combo_keyboard_selector->model()->setData(KeyboardSelection::Native, v, Qt::UserRole - 1);
-    }
 }
 
 bool InputKeyboardSelect::isKeyboardLocked()

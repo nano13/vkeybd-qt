@@ -141,11 +141,15 @@ void Orgelwerk::showChannelsSummary(int grid_row)
     
     this->check_resend_midi_auto->setToolTip("Automatically resend MIDI settings if tab activated");
     
+    QPushButton *button_keymap_tab = new QPushButton("Keymap");
+    
+    
     layout_channels->setVerticalSpacing(0);
-    layout_channels->addWidget(this->midi_channels_summary, 0, 0, 1, 3);
+    layout_channels->addWidget(this->midi_channels_summary, 0, 0, 1, 4);
     layout_channels->addWidget(button_channels_dialog, 1, 0);
     layout_channels->addWidget(button_resend_midi, 1, 1);
     layout_channels->addWidget(this->check_resend_midi_auto, 1, 2);
+    layout_channels->addWidget(button_keymap_tab, 1, 3);
     
     this->grid->addWidget(group_channels, grid_row, 0, 1, 2);
     

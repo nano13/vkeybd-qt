@@ -144,15 +144,6 @@ enum KeyboardMode
     lock
 };
 
-enum DisplayInput
-{
-    Unsupported,
-    X11,
-    Wayland,
-    Windows,
-    
-};
-
 struct KeyStroke
 {
     uint8_t octave;

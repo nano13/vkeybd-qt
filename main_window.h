@@ -36,8 +36,6 @@
 
 #include "enums_structs.h"
 
-#include "help_about_widget.h"
-
 class MainWindow : public QMainWindow
 {
     Q_OBJECT

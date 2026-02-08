@@ -47,9 +47,6 @@ private:
     void autoSelectPressedKeyboard(QString name);
     void rawKeyboardSelected(int index);
     
-    int display_input_type;
-    void detectDisplayInput();
-    
 private slots:
     void keyboardNotAvailable();
     void keyRawPressed(int keycode);

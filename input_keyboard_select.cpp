@@ -1,9 +1,55 @@
 #include "input_keyboard_select.h"
+#include "qabstractitemview.h"
+#include "qpainter.h"
+#include "qstyleditemdelegate.h"
+
+class KeyboardSelectorTwoLineDelegate : public QStyledItemDelegate {
+public:
+    using QStyledItemDelegate::QStyledItemDelegate;
+
+    void paint(QPainter *p, const QStyleOptionViewItem &opt, const QModelIndex &idx) const override {
+        p->save();
+        QStringList lines = idx.data().toString().split('\n');
+        QRect r = opt.rect;
+        int lineHeight = r.height() / lines.size(); // approximate
+
+        for (int i = 0; i < lines.size(); ++i) {
+            QRect lineRect(r.left()+4, r.top() + i*lineHeight, r.width()-8, lineHeight);
+            p->drawText(lineRect, Qt::AlignLeft | Qt::AlignVCenter, lines[i]);
+        }
+        p->restore();
+    }
+
+    QSize sizeHint(const QStyleOptionViewItem &opt, const QModelIndex &idx) const override {
+        QStringList lines = idx.data().toString().split('\n');
+        QSize s = QStyledItemDelegate::sizeHint(opt, idx);
+        s.setHeight(s.height() * lines.size()); // scale by number of lines
+        return s;
+    }
+};
+
+
+
+
+
 
 InputKeyboardSelect::InputKeyboardSelect(ComboKeyboardSelect *combo_keyboard_selector, QPushButton *button_keyboard_lock, QPushButton *button_keyboard_rescan, QObject *parent)
     : QObject{parent}
 {
     this->combo_keyboard_selector = combo_keyboard_selector;
+    // Ensure the popup items are tall enough for two lines
+    this->combo_keyboard_selector->setItemDelegate(new KeyboardSelectorTwoLineDelegate(combo_keyboard_selector));
+    this->combo_keyboard_selector->setStyleSheet(
+        "QComboBox QAbstractItemView::item {"
+        "    min-height: 40px;"  // increase to fit two lines comfortably
+        "    padding-top: 4px;"
+        "    padding-bottom: 4px;"
+        "    padding-left: 6px;"
+        "    padding-right: 6px;"
+        "}"
+        );
+    this->combo_keyboard_selector->view()->setAlternatingRowColors(true);
+
     this->button_keyboard_lock = button_keyboard_lock;
     this->button_keyboard_rescan = button_keyboard_rescan;
     

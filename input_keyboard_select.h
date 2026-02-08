@@ -6,6 +6,7 @@
 #include <QPushButton>
 #include <QMap>
 #include <QModelIndex>
+#include <QAbstractItemView>
 
 #include <QDebug>
 

@@ -11,6 +11,7 @@
 InputKeyboardRawWorker::InputKeyboardRawWorker(int fd, QObject *parent)
     : QObject(parent), fd(fd)
 {
+
 }
 
 InputKeyboardRawWorker::~InputKeyboardRawWorker()
@@ -156,7 +157,7 @@ QString InputKeyboardRawMeta::getPathForName(QString name)
 
 QString InputKeyboardRawMeta::getKeyboardName(QMap<QString, QString> keyboard)
 {
-    return keyboard["Name"] + "@" + (keyboard["Uniq"].isEmpty() ? keyboard["dev"] : keyboard["Uniq"]);
+    return keyboard["Name"] + "\n@" + (keyboard["Uniq"].isEmpty() ? keyboard["dev"] : keyboard["Uniq"]);
 }
 
 

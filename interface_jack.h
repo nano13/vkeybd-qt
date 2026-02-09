@@ -40,22 +40,22 @@ public:
     
     void createNewPort(QString label) override;
     
-    void keyPressEvent(int port, int channel, int midicode, int velocity) override;
-    void keyReleaseEvent(int port, int channel, int midicode, int velocity) override;
+    void keyPressEvent(int port, int channel, uint8_t midicode, uint8_t velocity) override;
+    void keyReleaseEvent(int port, int channel, uint8_t midicode, uint8_t velocity) override;
     void keyPanicEvent(int port, int channel) override;
     void keyStopAllEvent(int port, int channel) override;
     void keyPitchbendEvent(int port, int channel, int pitch) override;
     void keySustainEvent(int port, int channel, bool pressed) override;
     void keySostenutoEvent(int port, int channel, bool pressed) override;
     void keySoftEvent(int port, int channel, bool pressed) override;
-    void setProgramChangeEvent(int port, int channel, int program, int bank) override;
-    void setControlChangeEvent(int port, int channel, int cc, int value) override;
-    void setVolumeChangeEvent(int port, int channel, int volume) override;
-    void setPanChangeEvent(int port, int channel, int value) override;
-    void setPortamentoChanged(int port, int channel, int value) override;
-    void setAttackChanged(int port, int channel, int value) override;
-    void setReleaseChanged(int port, int channel, int value) override;
-    void setTremoloChanged(int port, int channel, int value) override;
+    void setProgramChangeEvent(int port, int channel, uint8_t program, int bank) override;
+    void setControlChangeEvent(int port, int channel, uint8_t cc, uint8_t value) override;
+    void setVolumeChangeEvent(int port, int channel, uint8_t volume) override;
+    void setPanChangeEvent(int port, int channel, uint8_t value) override;
+    void setPortamentoChanged(int port, int channel, uint8_t value) override;
+    void setAttackChanged(int port, int channel, uint8_t value) override;
+    void setReleaseChanged(int port, int channel, uint8_t value) override;
+    void setTremoloChanged(int port, int channel, uint8_t value) override;
     
 private:
     jack_client_t *client;
@@ -67,6 +67,9 @@ private:
     void processRingBuffer(jack_nframes_t nframes);
     
     static int jackCallback(jack_nframes_t nframes, void *arg);
+    
+    static constexpr uint8_t MIDI_ON  = 127;
+    static constexpr uint8_t MIDI_OFF = 0;
 };
 
 #endif // INTERFACEJACK_H

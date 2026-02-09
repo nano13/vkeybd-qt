@@ -51,7 +51,7 @@ InterfaceAlsa::~InterfaceAlsa()
     snd_seq_close(this->seq);
 }
 
-void InterfaceAlsa::keyPressEvent(int port, int channel, int midicode, int velocity)
+void InterfaceAlsa::keyPressEvent(int port, int channel, uint8_t midicode, uint8_t velocity)
 {
     snd_seq_ev_set_source(&this->ev, port);
     snd_seq_ev_set_noteon(&this->ev, channel, midicode, velocity);
@@ -59,7 +59,7 @@ void InterfaceAlsa::keyPressEvent(int port, int channel, int midicode, int veloc
     sendEvent(true);
 }
 
-void InterfaceAlsa::keyReleaseEvent(int port, int channel, int midicode, int velocity)
+void InterfaceAlsa::keyReleaseEvent(int port, int channel, uint8_t midicode, uint8_t velocity)
 {
     snd_seq_ev_set_source(&this->ev, port);
     snd_seq_ev_set_noteoff(&this->ev, channel, midicode, velocity);
@@ -127,18 +127,18 @@ void InterfaceAlsa::keySoftEvent(int port, int channel, bool pressed)
     sendEvent(true);
 }
 
-void InterfaceAlsa::setProgramChangeEvent(int port, int channel, int program, int bank)
+void InterfaceAlsa::setProgramChangeEvent(int port, int channel, uint8_t program, int bank)
 {
     int msb = (bank >> 7) & 0x7F;  // Bank / 128
     int lsb = bank & 0x7F;         // Bank % 128
     
     snd_seq_ev_set_source(&this->ev, port);
     
-    // MSB senden
+    // MSB send
     snd_seq_ev_set_controller(&this->ev, channel, MIDI_CTL_MSB_BANK, msb);
     sendEvent(false);
     
-    // LSB senden
+    // LSB send
     snd_seq_ev_set_controller(&this->ev, channel, MIDI_CTL_LSB_BANK, lsb);
     sendEvent(false);
     
@@ -147,26 +147,32 @@ void InterfaceAlsa::setProgramChangeEvent(int port, int channel, int program, in
     sendEvent(true);
 }
 
-void InterfaceAlsa::setControlChangeEvent(int port, int channel, int cc, int value)
+void InterfaceAlsa::setControlChangeEvent(int port, int channel, uint8_t cc, uint8_t value)
 {
+    cc    &= 0x7F;
+    value &= 0x7F;
     
+    snd_seq_ev_set_source(&this->ev, port);
+    snd_seq_ev_set_controller(&this->ev, channel, cc, value);
+    sendEvent(true);
 }
 
-void InterfaceAlsa::setVolumeChangeEvent(int port, int channel, int volume)
+
+void InterfaceAlsa::setVolumeChangeEvent(int port, int channel, uint8_t volume)
 {
     snd_seq_ev_set_source(&this->ev, port);
     snd_seq_ev_set_controller(&this->ev, channel, MIDI_CTL_MSB_MAIN_VOLUME, volume); // CC 7
     sendEvent(true);
 }
 
-void InterfaceAlsa::setPanChangeEvent(int port, int channel, int value)
+void InterfaceAlsa::setPanChangeEvent(int port, int channel, uint8_t value)
 {
     snd_seq_ev_set_source(&this->ev, port);
     snd_seq_ev_set_controller(&this->ev, channel, MIDI_CTL_MSB_PAN, value);
     sendEvent(true);
 }
 
-void InterfaceAlsa::setPortamentoChanged(int port, int channel, int value)
+void InterfaceAlsa::setPortamentoChanged(int port, int channel, uint8_t value)
 {
     snd_seq_ev_set_source(&this->ev, port);
     
@@ -185,7 +191,7 @@ void InterfaceAlsa::setPortamentoChanged(int port, int channel, int value)
     sendEvent(true);
 }
 
-void InterfaceAlsa::setAttackChanged(int port, int channel, int value)
+void InterfaceAlsa::setAttackChanged(int port, int channel, uint8_t value)
 {
     snd_seq_ev_set_source(&this->ev, port);
     snd_seq_ev_set_controller(&this->ev, channel, MIDI_CTL_SC4_ATTACK_TIME, value);
@@ -193,7 +199,7 @@ void InterfaceAlsa::setAttackChanged(int port, int channel, int value)
     sendEvent(true);
 }
 
-void InterfaceAlsa::setReleaseChanged(int port, int channel, int value)
+void InterfaceAlsa::setReleaseChanged(int port, int channel, uint8_t value)
 {
     snd_seq_ev_set_source(&this->ev, port);
     snd_seq_ev_set_controller(&this->ev, channel, MIDI_CTL_SC3_RELEASE_TIME, value);
@@ -201,7 +207,7 @@ void InterfaceAlsa::setReleaseChanged(int port, int channel, int value)
     sendEvent(true);
 }
 
-void InterfaceAlsa::setTremoloChanged(int port, int channel, int value)
+void InterfaceAlsa::setTremoloChanged(int port, int channel, uint8_t value)
 {
     snd_seq_ev_set_source(&this->ev, port);
     snd_seq_ev_set_controller(&this->ev, channel, MIDI_CTL_E2_TREMOLO_DEPTH, value);

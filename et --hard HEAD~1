@@ -1,0 +1,2149 @@
+[33mcommit fd075cb70573ab317e37f8141dc4a44652c772cd[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmaster[m[33m)[m
+Author: tambi-soft <nano13@gmx.net>
+Date:   Thu Feb 12 21:36:38 2026 +0100
+
+    Revert "interface audio: changed ints to uint8_t"
+    
+    This reverts commit 15704e6b4fd2e5d3c17d12789809b70dcfa6b853.
+
+[33mcommit acbd2a7298d9eb48e3b0b58bd6cf92cfc411d877[m[33m ([m[1;31morigin/master[m[33m, [m[1;31morigin/HEAD[m[33m)[m
+Merge: 0872e56 15704e6
+Author: tambi-soft <nano13@gmx.net>
+Date:   Thu Feb 12 21:22:48 2026 +0100
+
+    Merge branch 'master' of github.com:nano13/vkeybd-qt
+
+[33mcommit 0872e56cf5c78317c4f26c9fa7fc280c79574c67[m
+Author: tambi-soft <nano13@gmx.net>
+Date:   Thu Feb 12 21:21:55 2026 +0100
+
+    jack_volume & font in dropdown
+
+[33mcommit 15704e6b4fd2e5d3c17d12789809b70dcfa6b853[m
+Author: tambi-soft <nano13@gmx.net>
+Date:   Mon Feb 9 16:58:15 2026 +0100
+
+    interface audio: changed ints to uint8_t
+
+[33mcommit 87b299a30d4e213565bb427194d4b3250f9a1bd3[m
+Author: tambi-soft <nano13@gmx.net>
+Date:   Mon Feb 9 04:17:58 2026 +0100
+
+    adding tools
+
+[33mcommit 7e149ec138ad0265ae1790527d48baceceaa8039[m
+Author: tambi-soft <nano13@gmx.net>
+Date:   Mon Feb 9 00:56:15 2026 +0100
+
+    init tools
+
+[33mcommit 4d0e8ac7e24241dc81d6c7f670b26fcafc989be1[m
+Merge: 4fabff2 0fca6f7
+Author: tambi-soft <nano13@gmx.net>
+Date:   Sun Feb 8 22:53:09 2026 +0100
+
+    Merge branch 'master' of github.com:nano13/vkeybd-qt
+
+[33mcommit 4fabff29991cf0fe87c0981da1f1b8515502c3fd[m
+Author: tambi-soft <nano13@gmx.net>
+Date:   Sun Feb 8 22:52:55 2026 +0100
+
+    removed x11 and other stuff
+
+[33mcommit 0fca6f7919cbdaab91daa0446fb1ac7580f734d0[m
+Author: nano13 <nano13@gmx.net>
+Date:   Sun Feb 8 22:27:43 2026 +0100
+
+    trying to implement input select multiline
+
+[33mcommit 944b6f1cdacda0565afa6a9e2e71bab675c9563e[m
+Author: tambi-soft <nano13@gmx.net>
+Date:   Sun Feb 1 20:17:56 2026 +0100
+
+    removed experimental cc matrix gui
+
+[33mcommit d5f182dd2accb9dbabba197c643af2f4a41ccb9c[m
+Author: tambi-soft <nano13@gmx.net>
+Date:   Sun Feb 1 01:48:13 2026 +0100
+
+    cc: save & restore delay
+
+[33mcommit 025de5a0852a844d38346b38fcece3b7ed96002e[m
+Author: tambi-soft <nano13@gmx.net>
+Date:   Sat Jan 31 15:42:51 2026 +0100
+
+    sending cc messages: cumulative oneshot delay implemented
+
+[33mcommit 1e539d6d57b74ac3cd7268776bd9f561bf10b973[m
+Author: tambi-soft <nano13@gmx.net>
+Date:   Sat Jan 31 05:43:13 2026 +0100
+
+    cc events mostly bug free
+
+[33mcommit 70ede254ae9f7b5c62bf072458ab19d33d569163[m
+Author: tambi-soft <nano13@gmx.net>
+Date:   Sat Jan 31 04:03:55 2026 +0100
+
+    channel selector cc bug with channel 0: instrument bank option
+    [disabled]
+
+[33mcommit 50b15b85a4da211a08977382500e71c6d6c7010b[m
+Author: tambi-soft <nano13@gmx.net>
+Date:   Sat Jan 31 02:58:28 2026 +0100
+
+    auto send cc events almost working
+
+[33mcommit e158ceb99301308f79c99e83d9943c90cd5d46bb[m
+Author: tambi-soft <nano13@gmx.net>
+Date:   Sat Jan 31 01:07:52 2026 +0100
+
+    loading and saving cc section done
+
+[33mcommit b1882abc5784d565a1fa5411552d6e1cbf34831a[m
+Author: tambi-soft <nano13@gmx.net>
+Date:   Fri Jan 30 15:25:12 2026 +0100
+
+    channel selector cc tooltips
+
+[33mcommit 56b3137178f011c5b2759af2fd2c7e781597ce8a[m
+Author: tambi-soft <nano13@gmx.net>
+Date:   Fri Jan 30 07:16:35 2026 +0100
+
+    channel selector: cc check active
+
+[33mcommit 9d93016a93e277d5caad2a334d781a106a23bc12[m
+Author: tambi-soft <nano13@gmx.net>
+Date:   Fri Jan 30 05:54:57 2026 +0100
+
+    channel selector cc: prepare for load
+
+[33mcommit 6be2c922559d79d73935df548725057827bd5d1f[m
+Author: tambi-soft <nano13@gmx.net>
+Date:   Fri Jan 30 05:04:31 2026 +0100
+
+    channel selector cc saving
+
+[33mcommit 182aa7b533b34b8a805854d52a9e05b3810a8130[m
+Author: tambi-soft <nano13@gmx.net>
+Date:   Fri Jan 30 04:28:50 2026 +0100
+
+    channel selector: keep cc stuff in data structure
+
+[33mcommit ae96e44578fdad153c129c683fc70eb475135c87[m
+Author: tambi-soft <nano13@gmx.net>
+Date:   Fri Jan 30 03:30:54 2026 +0100
+
+    channel selector cc messages
+
+[33mcommit b989b0e64a986efe9ac7de78f93ac3b0467c4454[m
+Author: tambi-soft <nano13@gmx.net>
+Date:   Fri Jan 30 03:13:42 2026 +0100
+
+    channel selector: adding option for cc messages
+
+[33mcommit bc652002ba824f460253c44dd53747749839453b[m
+Author: tambi-soft <nano13@gmx.net>
+Date:   Fri Jan 30 00:43:14 2026 +0100
+
+    fixed size of channel details on wayland
+
+[33mcommit 97a470001f8a1cc039ebcffa3f2d599dd1f3d967[m
+Author: tambi-soft <nano13@gmx.net>
+Date:   Fri Jan 30 00:36:14 2026 +0100
+
+    size tweaks
+
+[33mcommit 5be541f53fab023e5503926b678ab7c5042c4800[m
+Author: tambi-soft <nano13@gmx.net>
+Date:   Fri Jan 30 00:31:46 2026 +0100
+
+    widget size tweaks
+
+[33mcommit 4e0e554e2c8ff9ab4f830b75271022607383f20a[m
+Author: tambi-soft <nano13@gmx.net>
+Date:   Fri Jan 30 00:11:52 2026 +0100
+
+    release lock if keyboard unplugged
+
+[33mcommit 542763e63a15578c5dd40c3e780b0efde6e9be93[m
+Author: tambi-soft <nano13@gmx.net>
+Date:   Thu Jan 29 22:17:52 2026 +0100
+
+    input raw: crashfix on disconnected keyboard
+
+[33mcommit 7d4e8adf81a54a74a60586bd266e304bee0fc02c[m
+Author: tambi-soft <nano13@gmx.net>
+Date:   Wed Jan 28 02:28:35 2026 +0100
+
+    control change gui exp
+
+[33mcommit dbb855a808b2a9b6a98b897f4837bfeaa0ed3091[m
+Author: tambi-soft <nano13@gmx.net>
+Date:   Wed Jan 28 02:01:47 2026 +0100
+
+    cc messages gui exp
+
+[33mcommit 2c09b59a7ae51a5a7981a5a6d3f5ea80a498823f[m
+Author: tambi-soft <nano13@gmx.net>
+Date:   Wed Jan 28 01:53:13 2026 +0100
+
+    experimenting with cc gui
+
+[33mcommit 6fe15c4649b27ed0ec665501a0a8318cff4b0efe[m
+Author: tambi-soft <nano13@gmx.net>
+Date:   Wed Jan 28 00:31:26 2026 +0100
+
+    jack: midi event enum
+
+[33mcommit d192470676d4740db7e64daced0577c499cc78f9[m
+Author: tambi-soft <nano13@gmx.net>
+Date:   Wed Jan 28 00:19:02 2026 +0100
+
+    jack: fixed pitchbend
+
+[33mcommit f7b0ec187b522d41ef47d285f651192f994f0324[m
+Author: tambi-soft <nano13@gmx.net>
+Date:   Wed Jan 28 00:06:28 2026 +0100
+
+    adding cc event functions
+
+[33mcommit 376554871ecf58d2c4b035bf9b9649de44a03d23[m
+Author: tambi-soft <nano13@gmx.net>
+Date:   Tue Jan 27 19:59:36 2026 +0100
+
+    input raw: fixed thread issues
+
+[33mcommit 9df62dd1ad73dba969ec5cb97d325d939c41265b[m
+Author: tambi-soft <nano13@gmx.net>
+Date:   Tue Jan 27 19:10:52 2026 +0100
+
+    removed keyrelease too much
+
+[33mcommit 87655411e467b1143cbf6ed5b2a6c00915766c7e[m
+Author: tambi-soft <nano13@gmx.net>
+Date:   Tue Jan 27 16:51:10 2026 +0100
+
+    changed interface_jack to use jack ringbuffer
+
+[33mcommit 84daee6cbb0a5c9bbd474eccd65c563956910f9d[m
+Author: tambi-soft <nano13@gmx.net>
+Date:   Tue Jan 27 16:23:52 2026 +0100
+
+    removed dead code
+
+[33mcommit 89764070b98b905bfec242cbefc9852db452ef00[m
+Author: tambi-soft <nano13@gmx.net>
+Date:   Tue Jan 27 15:58:45 2026 +0100
+
+    removed tremolo thread
+
+[33mcommit 66e845237ff4966546e9e67ccd24ebc0c1726dba[m
+Author: tambi-soft <nano13@gmx.net>
+Date:   Tue Jan 27 15:34:18 2026 +0100
+
+    config.cpp: set jack as default audio backend
+
+[33mcommit bbb96222a4a9fec680ff559f8fa07cc751bd2877[m
+Author: tambi-soft <nano13@gmx.net>
+Date:   Tue Jan 27 15:33:25 2026 +0100
+
+    pass id to interface_alsa & inherited
+
+[33mcommit 326754d0d8581e1e4b0cb49816afddf49eefceec[m
+Author: tambi-soft <nano13@gmx.net>
+Date:   Tue Jan 27 13:19:50 2026 +0100
+
+    chatgpt fix for msb/lsb handling jack
+
+[33mcommit f5b7218f246ffa9e4e72ed1be2bfb0e525b05df9[m
+Author: tambi-soft <nano13@gmx.net>
+Date:   Tue Jan 27 13:12:03 2026 +0100
+
+    chatgpt-fixed msb / lsb handling
+
+[33mcommit a6bf3577318e8fef4ad10d20a5a063acef72e74d[m
+Author: tambi-soft <nano13@gmx.net>
+Date:   Tue Jan 27 12:11:58 2026 +0100
+
+    interface_jack generated by chatgpt from interface_audio and
+    interface_alsa
+
+[33mcommit cd25b833e6fba7cbb4d2985ddde5907ab5c1b125[m
+Author: tambi-soft <nano13@gmx.net>
+Date:   Tue Apr 8 14:58:51 2025 +0200
+
+    show uniq instead of dev on blutooth keyboards
+
+[33mcommit 90862135dee735797e9faccffc31ea0fb988077f[m
+Merge: 70f2ec5 357be8f
+Author: tambi-soft <nano13@gmx.net>
+Date:   Tue Apr 8 03:21:07 2025 +0200
+
+    Merge branch 'master' of github.com:nano13/vkeybd-qt
+
+[33mcommit 70f2ec582fa58e708a706a96ed23c80d1ff3ff5c[m
+Author: tambi-soft <nano13@gmx.net>
+Date:   Tue Apr 8 03:20:42 2025 +0200
+
+    more reliable keyboard detection
+
+[33mcommit 357be8f6ce33128f2384bb9db42f2ac31d4810e0[m
+Merge: 7920ece afc2c05
+Author: tambi-soft <nano13@gmx.net>
+Date:   Tue Jan 14 00:15:12 2025 +0100
+
+    Merge branch 'm:wqaster' of github.com:nano13/vkeybd-qt
+
+[33mcommit 7920eceee30e0e4e6bd9bbaf2d1f206e50f3adec[m
+Author: tambi-soft <nano13@gmx.net>
+Date:   Tue Jan 14 00:14:06 2025 +0100
+
+    splash2 default
+
+[33mcommit afc2c05c9355979354504b7c20e810db44f0ce72[m
+Author: tambi-soft <nano13@gmx.net>
+Date:   Tue Jan 14 00:13:40 2025 +0100
+
+    new splash
+
+[33mcommit 2c933002fab491c92ea9f28785aa4bca60d295b1[m
+Author: tambi-soft <nano13@gmx.net>
+Date:   Mon Jan 13 14:57:48 2025 +0100
+
+    better splash image
+
+[33mcommit a29faf9506799a936c6b887f781712d2f3e092e9[m
+Author: tambi-soft <nano13@gmx.net>
+Date:   Thu Jan 9 19:02:58 2025 +0100
+
+    struggling with splash
+
+[33mcommit 85fb30a5992f76b8d55ab98f9e6884f657ab4aaa[m
+Author: tambi-soft <nano13@gmx.net>
+Date:   Thu Jan 9 18:39:22 2025 +0100
+
+    trying to add a splash screen
+
+[33mcommit 589a308759952e4ffc5dc264bb3244ad6d3c0185[m
+Author: tambi-soft <nano13@gmx.net>
+Date:   Thu Jan 9 17:33:53 2025 +0100
+
+    removed some qDebugs
+
+[33mcommit 06e4dad0bddc0f7a8875ff2f499d7c9a92952632[m
+Author: tambi-soft <nano13@gmx.net>
+Date:   Thu Jan 9 17:25:49 2025 +0100
+
+    adding autoload config on startup option
+
+[33mcommit ffebae9c2fc5f0098bbbf090ed8c952abeb9bcd1[m
+Merge: 9ed74a6 12633b1
+Author: tambi-soft <nano13@gmx.net>
+Date:   Tue Jan 7 16:22:17 2025 +0100
+
+    Merge branch 'master' of github.com:nano13/vkeybd-qt
+
+[33mcommit 9ed74a6f2a4140057e350b64bd5b0d2368c6ccaa[m
+Author: tambi-soft <nano13@gmx.net>
+Date:   Fri Jan 3 13:21:21 2025 +0100
+
+    updated help about widget
+
+[33mcommit e5b1876d4f11784cba8e32304281dfbd514c841c[m
+Author: tambi-soft <nano13@gmx.net>
+Date:   Fri Jan 3 12:46:33 2025 +0100
+
+    migrating to qt6
+
+[33mcommit 2776d1c019d40978c92401b6cd008b2379e1879d[m
+Author: tambi-soft <nano13@gmx.net>
+Date:   Thu Jan 2 16:15:23 2025 +0100
+
+    migrated to qt6
+
+[33mcommit fbb21561d4a1ec23e99ee98c61a832437ec72019[m
+Author: tambi-soft <nano13@gmx.net>
+Date:   Thu Jan 2 16:14:51 2025 +0100
+
+    migrated to qt6
+
+[33mcommit 12633b1131a233bc6e0beea50c677b004d5c32b2[m
+Author: nano13 <nano13@gmx.net>
+Date:   Thu Sep 28 20:34:48 2023 +0200
+
+    Update README.md
+
+[33mcommit 48118a9a5e16b69675f6bc857d7450be88b524f4[m
+Author: tambi-soft <nano13@gmx.net>
+Date:   Thu Sep 28 20:29:28 2023 +0200
+
+    screenshots
+
+[33mcommit 03a30db3a3ea6334fca08f566bfa09d5ec1674c3[m
+Author: tambi-soft <nano13@gmx.net>
+Date:   Thu Jun 1 07:15:55 2023 +0200
+
+    bugfix global keyshift
+
+[33mcommit 4d93bad0b4100475dc938cf4a14568b965e82f61[m
+Author: tambi-soft <nano13@gmx.net>
+Date:   Thu Jun 1 03:52:29 2023 +0200
+
+    implemented using keyboard print,scroll,pause keys as hotkeys for global
+    relative pitch shift
+
+[33mcommit a79db69281c3e4689d1032687a2a2e96be905f4c[m
+Author: tambi-soft <nano13@gmx.net>
+Date:   Thu Apr 27 16:16:47 2023 +0200
+
+    trying to be able to save and load midi-settings
+
+[33mcommit 8c601052f35da008cc2e9e5dde9baf30d7a7373a[m
+Author: tambi-soft <nano13@gmx.net>
+Date:   Thu Apr 27 11:50:02 2023 +0200
+
+    changed magick strings to enum
+
+[33mcommit 1adcaa5d7a2a7ff445254a27a7679af50059c7a8[m
+Author: tambi-soft <nano13@gmx.net>
+Date:   Wed Apr 26 21:28:50 2023 +0200
+
+    input_keyboard_raw: rewrite connects to more modern style
+
+[33mcommit c8111ec9aeef333c734755027da2f190f9bd1265[m
+Author: tambi-soft <nano13@gmx.net>
+Date:   Wed Apr 26 12:41:47 2023 +0200
+
+    midi_mastervolume: stopping thread when done
+
+[33mcommit 2e39949fbb206460c011bb1ba0de283d2748d923[m
+Author: tambi-soft <nano13@gmx.net>
+Date:   Wed Apr 26 12:30:15 2023 +0200
+
+    midi_pitchwheel: stopping timer when done
+
+[33mcommit 0ddb2cb864029969a32602720322a52c60031eed[m
+Author: tambi-soft <nano13@gmx.net>
+Date:   Sat Mar 25 14:04:30 2023 +0100
+
+    renamed "Save JACK Connections" to "Save MIDI Connections"
+
+[33mcommit ae0fa252ef8f22d6da5ff2a1ed2805578b96f7a7[m
+Author: tambi-soft <nano13@gmx.net>
+Date:   Mon Mar 6 18:02:28 2023 +0100
+
+    help_about: updated text
+
+[33mcommit d887bfd22aa7b337d5c1cdb9b7b20417e34e665d[m
+Author: tambi-soft <nano13@gmx.net>
+Date:   Mon Mar 6 17:48:01 2023 +0100
+
+    help_about: updated text and size
+
+[33mcommit 83beb9e815d986e2f78e085e42cf8ba0b8166245[m
+Author: tambi-soft <nano13@gmx.net>
+Date:   Sun Mar 5 04:53:14 2023 +0100
+
+    implemented help about
+
+[33mcommit b409f655b91aa267e7831f103f5bfdc31a3a25d1[m
+Author: tambi-soft <nano13@gmx.net>
+Date:   Sun Feb 26 16:41:29 2023 +0100
+
+    centering pc-keyboard
+
+[33mcommit 3de5b232473553e81ea57f97ef9019595dd6034f[m
+Author: tambi-soft <nano13@gmx.net>
+Date:   Sun Feb 26 03:05:05 2023 +0100
+
+    preparing menu entries for saving/loading JACK connections
+
+[33mcommit 8493d05a52f81cf7a536078dc0aed048ef836af8[m
+Author: tambi-soft <nano13@gmx.net>
+Date:   Fri Feb 10 11:17:19 2023 +0100
+
+    menubar: adding new entries for (quick)load/save jack connections
+
+[33mcommit 35f382a09115ff1b5ad7cd1177fdec3445ba4423[m
+Author: tambi-soft <nano13@gmx.net>
+Date:   Wed Feb 8 11:35:43 2023 +0100
+
+    crashfix if a save is meant for a larger keyboard setup than the current
+
+[33mcommit b1d0ae3b774c130e2a5bdb90ee371d31a7c70d81[m
+Author: tambi-soft <nano13@gmx.net>
+Date:   Wed Feb 8 11:35:22 2023 +0100
+
+    renaming signals to standard naming scheme
+
+[33mcommit 129d7dfce553bae378705a9229ed41da17598b0d[m
+Author: tambi-soft <nano13@gmx.net>
+Date:   Wed Feb 1 13:07:31 2023 +0100
+
+    activate leftmost tab if current tab is deselected
+
+[33mcommit 0e56df3284a3bffe177f004af0bf5c1e58834d97[m
+Author: tambi-soft <nano13@gmx.net>
+Date:   Wed Feb 1 09:57:39 2023 +0100
+
+    progress on activating multiple tabs at once
+
+[33mcommit b0ab2f997a2237f6553dbb00607bc4d933af63b2[m
+Author: tambi-soft <nano13@gmx.net>
+Date:   Wed Feb 1 08:23:25 2023 +0100
+
+    progress on main_tab_switcher: bugfixes with button logic
+
+[33mcommit 7cdd9b602409f58099bd696493c6522adced9e02[m
+Author: tambi-soft <nano13@gmx.net>
+Date:   Tue Jan 31 13:24:14 2023 +0100
+
+    main_tabs_switcher: right click button
+
+[33mcommit 5e0f1db95f30fe4c6498d2eb4567201937d9ea93[m
+Author: tambi-soft <nano13@gmx.net>
+Date:   Sun Jan 29 17:40:38 2023 +0100
+
+    introducing main_tab_switcher: having up to 24 layers per keyboard
+
+[33mcommit f1808eaf7c23046c0c70231e60310d33e97507e3[m
+Author: tambi-soft <nano13@gmx.net>
+Date:   Sun Jan 29 14:09:47 2023 +0100
+
+    adding functionality to load/save settings (additionally to
+    quickload/save)
+
+[33mcommit a75df5ace547c293edb0a7eb5ef4ae8cae615ac6[m
+Author: tambi-soft <nano13@gmx.net>
+Date:   Sat Jan 28 14:40:41 2023 +0100
+
+    minor renamings for cleanup
+
+[33mcommit 9f4d292143a366bc534162f36e69403a80af34d7[m
+Author: tambi-soft <nano13@gmx.net>
+Date:   Sat Jan 28 01:20:36 2023 +0100
+
+    started to implement save/load functions
+
+[33mcommit 996fbd7eb13a271c23d258e5b3515d14455b81dd[m
+Author: nano13 <nano13@gmx.net>
+Date:   Fri Jan 27 06:55:26 2023 +0100
+
+    removing debugs and comments
+
+[33mcommit 3cdede00e041a4f60d260e949fd85f801492368a[m
+Author: tambi-soft <nano13@gmx.net>
+Date:   Fri Jan 27 00:00:36 2023 +0100
+
+    removed broken "play test note" button
+
+[33mcommit 9f20180fa72af4b76d8bf30ad517d2dbd928999f[m
+Author: tambi-soft <nano13@gmx.net>
+Date:   Tue Jan 24 23:57:47 2023 +0100
+
+    bugfixes on channel selector / channels summary
+
+[33mcommit 0debe5b3ba46c0fe90b6490ae5ee448230afc3c5[m
+Author: tambi-soft <nano13@gmx.net>
+Date:   Tue Jan 24 05:19:03 2023 +0100
+
+    put midi channel selector in scrollarea
+
+[33mcommit d22208aac86626e8d0c5156f7b17a1fb4f8d4c2f[m
+Author: tambi-soft <nano13@gmx.net>
+Date:   Sun Jan 22 00:38:36 2023 +0100
+
+    implemented velocity and pitch adjustment per channel
+
+[33mcommit bbefb25dee9d06410f2256e7e8e1eac83fccc95a[m
+Author: tambi-soft <nano13@gmx.net>
+Date:   Thu Oct 27 02:19:42 2022 +0200
+
+    fixed "resend All MIDI settings" by adding a delay
+
+[33mcommit 02d063c9825853e1640560233ed4e5e15139a39b[m
+Author: tambi-soft <nano13@gmx.net>
+Date:   Wed Oct 26 23:57:32 2022 +0200
+
+    option for resending midi channel settings if tab is activated
+
+[33mcommit 798e33c3267f242e10d19be29f801bf709ba3c31[m
+Author: tambi-soft <nano13@gmx.net>
+Date:   Mon Oct 24 19:16:21 2022 +0200
+
+    started to implement resending midi settings on activating tab
+
+[33mcommit 98695fdacfacad0ed4d9fa653f34a5b88b595260[m
+Author: tambi-soft <nano13@gmx.net>
+Date:   Mon Oct 24 16:55:51 2022 +0200
+
+    added checkbox "automatically resend MIDI settings if Tab activated"
+
+[33mcommit 4919ff24a8863c0f30fdf2cb14ef39c92219d7a4[m
+Author: tambi-soft <nano13@gmx.net>
+Date:   Sat Oct 22 02:40:45 2022 +0200
+
+    fixed icon for save and load
+
+[33mcommit 17c84260c4838a0e339ce079f626f6c19d28fd03[m
+Author: tambi-soft <nano13@gmx.net>
+Date:   Sat Oct 22 02:32:55 2022 +0200
+
+    various changes
+
+[33mcommit 7c2963da058c7f975d90cf43dd9ad2a9276ec294[m
+Author: tambi-soft <nano13@gmx.net>
+Date:   Tue Sep 6 02:53:14 2022 +0200
+
+    wayland compatibility
+
+[33mcommit 7a90327e32797fabba5c172e8e229de33375d856[m
+Author: tambi-soft <nano13@gmx.net>
+Date:   Fri Aug 19 05:02:42 2022 +0200
+
+    jack output working now with ports (some bugs included)
+
+[33mcommit cc02853a4fd34208f2afd4975fee7f4b6a28ef0c[m
+Author: tambi-soft <nano13@gmx.net>
+Date:   Mon Aug 15 23:09:38 2022 +0200
+
+    disabled feature of having additional midi outputs for a tab for easier
+    jack-compatibility
+
+[33mcommit 595011400780a970c5e05139c51a8edeac1555f0[m
+Author: tambi-soft <nano13@gmx.net>
+Date:   Fri Aug 12 04:41:02 2022 +0200
+
+    stop creating a new audio interface for each tabs but use ports
+
+[33mcommit 96d4bd3d980221d92a2a4f9b8812061ec4005376[m
+Author: tambi-soft <nano13@gmx.net>
+Date:   Thu Aug 11 22:31:32 2022 +0200
+
+    progress on jack output
+
+[33mcommit 9b3b3339e513b665a83755feb12502281c702bdb[m
+Author: tambi-soft <nano13@gmx.net>
+Date:   Mon Aug 8 17:11:51 2022 +0200
+
+    channel selector: store and restore velocity
+
+[33mcommit ad8dcafcf2a28f110927d7bd4e0fe4d7b7db4f6b[m
+Author: tambi-soft <nano13@gmx.net>
+Date:   Mon Aug 8 14:00:31 2022 +0200
+
+    midi_channel_selector: adding nuance&velocity combo
+
+[33mcommit 92e4e6eb2cba213d99312672833ffebb15fc83c9[m
+Author: tambi-soft <nano13@gmx.net>
+Date:   Mon Aug 8 13:30:28 2022 +0200
+
+    progress with jack implementation
+
+[33mcommit 1354c3e03f4399675d89a9c184a3b4c120fc9c80[m
+Author: tambi-soft <nano13@gmx.net>
+Date:   Mon Aug 8 04:34:34 2022 +0200
+
+    progress on jack interface
+
+[33mcommit c36682941f71ccefb2e70453ca444f707ebb1fc1[m
+Author: tambi-soft <nano13@gmx.net>
+Date:   Sun Aug 7 15:41:22 2022 +0200
+
+    interface audio: new function createNewPort initialized
+
+[33mcommit f6c4d9fb2dc6d5c2e5637498f4f4769503b45e98[m
+Author: tambi-soft <nano13@gmx.net>
+Date:   Sun Aug 7 13:44:30 2022 +0200
+
+    interface_jack: adding function stubs
+
+[33mcommit a7646ade8f5811d75882fc8d62c909d145ad30e4[m
+Author: nano13 <nano13@gmx.net>
+Date:   Mon Aug 1 13:38:50 2022 +0200
+
+    menu tools: resend all midi settings
+
+[33mcommit 0fdb8f4a1eaf7669adcc4ee3efa7c730a0d75422[m
+Author: tambi-soft <nano13@gmx.net>
+Date:   Wed Jul 27 15:29:00 2022 +0200
+
+    styling QMessageBox
+
+[33mcommit 617014796c82924ad9b3eb1436ed68c285ce0521[m
+Merge: 6e0a673 7126a1d
+Author: tambi-soft <nano13@gmx.net>
+Date:   Wed Jul 27 06:52:20 2022 +0200
+
+    Merge branch 'master' of github.com:tambi-soft/vkeybd-qt
+
+[33mcommit 6e0a67329565eb77d20e2a5892a11c1787b997a9[m
+Author: tambi-soft <nano13@gmx.net>
+Date:   Wed Jul 27 06:50:06 2022 +0200
+
+    adding global key shift
+
+[33mcommit 7126a1d45dde0480062206de7cac902c4eeffc3f[m
+Author: nano13 <nano13@gmx.net>
+Date:   Thu Jul 21 20:39:37 2022 +0200
+
+    message box before overwriting quicksave
+
+[33mcommit dfa81dbebc1581017a60d21e0875936b36d9addb[m
+Author: nano13 <nano13@gmx.net>
+Date:   Thu Jul 21 19:34:36 2022 +0200
+
+    removed qdebugs
+
+[33mcommit 014460bcfd872b5b36af3667b8b53a4f15e709d6[m
+Author: nano13 <nano13@gmx.net>
+Date:   Thu Jul 21 19:23:55 2022 +0200
+
+    different quicksave files for various numbers of keyboards
+
+[33mcommit 2bed90c56bef84f5f2b703164282656a709893a1[m
+Author: tambi-soft <nano13@gmx.net>
+Date:   Thu Jul 14 00:50:35 2022 +0200
+
+    removing debug message
+
+[33mcommit 6e7aac678cce72b02c770710e0293d8c217db338[m
+Author: tambi-soft <nano13@gmx.net>
+Date:   Thu Jul 14 00:40:01 2022 +0200
+
+    midi_mastervolume: implemented tether slider
+
+[33mcommit df60f0ffcbc29a6d471557f774bf59302bf05c12[m
+Author: tambi-soft <nano13@gmx.net>
+Date:   Wed Jul 13 23:02:41 2022 +0200
+
+    stylesheet "allen-heath": menu bar background darkened
+
+[33mcommit 89f3702059a123e55ea8bcf68cef93ba5b7a3769[m
+Author: tambi-soft <nano13@gmx.net>
+Date:   Wed Jul 13 20:22:36 2022 +0200
+
+    minor comments
+
+[33mcommit fa77370e065c5d03ae8b5ae3a82baa92fe955992[m
+Author: tambi-soft <nano13@gmx.net>
+Date:   Wed Jul 13 20:19:38 2022 +0200
+
+    fixed master volume fader
+
+[33mcommit 2cdf60b6ee1c34b189fa0b700103877b87330923[m
+Merge: 2a3c0e7 b6ca167
+Author: tambi-soft <nano13@gmx.net>
+Date:   Wed Jul 13 17:31:54 2022 +0200
+
+    Merge branch 'master' of github.com:tambi-soft/vkeybd-qt
+
+[33mcommit 2a3c0e7cba99669a087ff0e7b265f0c222d4ca0f[m
+Author: tambi-soft <nano13@gmx.net>
+Date:   Wed Jul 13 17:30:17 2022 +0200
+
+    trying to fix some issues with qt-threads and the keyboard-input system
+
+[33mcommit c2d96cd0bde2f1414218bfdcc27b7c0ef4dc9eaa[m
+Author: tambi-soft <nano13@gmx.net>
+Date:   Wed Jul 13 17:25:59 2022 +0200
+
+    expanding "play test note" button to full size
+
+[33mcommit b6ca167ef7f1b11e94bd3c9362d66bca93ac5d37[m
+Author: nano13 <nano13@gmx.net>
+Date:   Wed Jun 29 21:11:33 2022 +0200
+
+    removed deadcode
+
+[33mcommit 62f21bb7ea489902d3879ed4125e83b0c93336ce[m
+Author: tambi-soft <nano13@gmx.net>
+Date:   Fri Jun 24 04:15:31 2022 +0200
+
+    progress on correctly stopping raw input thread
+
+[33mcommit a3068e8609b165682c344285c8cdad1a85535965[m
+Author: tambi-soft <nano13@gmx.net>
+Date:   Fri Jun 24 03:16:15 2022 +0200
+
+    comments
+
+[33mcommit d6d0bc979d5fd0615502b6e5d53f1912f1bb09b8[m
+Author: tambi-soft <nano13@gmx.net>
+Date:   Mon Jun 6 00:26:07 2022 +0200
+
+    refactoring raw keyboard input: moving out some functions to separate class
+
+[33mcommit 9cae28ea0b889a7ef2f358079d0c13d63dcf9fb8[m
+Author: tambi-soft <nano13@gmx.net>
+Date:   Sun Jun 5 23:55:03 2022 +0200
+
+    progress on making keyboard raw threads working correctly
+
+[33mcommit d6edbdf89eee1ee894c207adf5a8ba8e904a4325[m
+Author: tambi-soft <nano13@gmx.net>
+Date:   Fri Jun 3 17:53:57 2022 +0200
+
+    implemented keyboard auto choosing
+
+[33mcommit ccf99f62427dc487d20d7e29a876c601c5d7c893[m
+Merge: 0d42b2b f5c7087
+Author: nano13 <nano13@gmx.net>
+Date:   Fri Jun 3 13:32:00 2022 +0200
+
+    Merge branch 'master' of github.com:tambi-soft/vkeybd-qt
+
+[33mcommit 0d42b2b693784284c96f1ee90a52c2ef3193ed52[m
+Author: nano13 <nano13@gmx.net>
+Date:   Fri Jun 3 13:29:26 2022 +0200
+
+    starting work on keyboard detection
+
+[33mcommit f5c70875117e1a6a3681a6487f3ff9b1cc11201f[m
+Merge: f192584 e192d4b
+Author: tambi-soft <nano13@gmx.net>
+Date:   Fri Jun 3 12:11:16 2022 +0200
+
+    Merge branch 'master' of github.com:tambi-soft/vkeybd-qt
+
+[33mcommit f192584c51064db1d89c2f9ba1d03b5c83ffbe04[m
+Author: tambi-soft <nano13@gmx.net>
+Date:   Fri Jun 3 12:09:56 2022 +0200
+
+    cleanup and crashfix with raw keyboard input thread
+
+[33mcommit e192d4b3b674ee3b5a8cc14dd38c62c843d13f26[m
+Author: nano13 <nano13@gmx.net>
+Date:   Thu Jun 2 20:49:59 2022 +0200
+
+    fixing autorepeat detection after refactoring
+
+[33mcommit 662c2ed81e216c944aaa6e4a649df0435b4560de[m
+Author: tambi-soft <nano13@gmx.net>
+Date:   Thu Jun 2 17:47:38 2022 +0200
+
+    deactivating menu key;
+
+[33mcommit 79468ad2f2ffac93895116450ec4f81d7660a6d6[m
+Author: tambi-soft <nano13@gmx.net>
+Date:   Thu Jun 2 17:18:27 2022 +0200
+
+    finished keyboard select & lock logic
+
+[33mcommit 317fb495b47e2ba1005bdafcb144f2ab085c4029[m
+Author: tambi-soft <nano13@gmx.net>
+Date:   Thu Jun 2 16:39:22 2022 +0200
+
+    progress on reworking keyboard selection logic; preparing to implement
+    keyboard lock button
+
+[33mcommit 2899e43131ea426f5e5d8ebca5e120e18ce8eb3f[m
+Author: tambi-soft <nano13@gmx.net>
+Date:   Thu Jun 2 15:58:38 2022 +0200
+
+    reworking keyboard selector
+
+[33mcommit a5dbb20552713b44867da917c53e5a74e3d58699[m
+Author: tambi-soft <nano13@gmx.net>
+Date:   Thu Jun 2 00:16:00 2022 +0200
+
+    keyboard pc: renamed label "ctrl" to "<<" and ">>"
+
+[33mcommit eabe9c26110cbc342e59676e9c13fb07499beef0[m
+Author: tambi-soft <nano13@gmx.net>
+Date:   Thu Jun 2 00:01:30 2022 +0200
+
+    positioning keys in equal and correctly rounded distances
+
+[33mcommit cdc2d423967be2305a222c2d9c4093f11f9903b6[m
+Author: nano13 <nano13@gmx.net>
+Date:   Tue May 31 17:36:46 2022 +0200
+
+    showing event-name for raw keyboards
+
+[33mcommit d6aee03e934f383a49cba1aa02ea0cfadaa74b7f[m
+Author: nano13 <nano13@gmx.net>
+Date:   Mon May 30 16:10:01 2022 +0200
+
+    pitchwheel: fine and permanent movement with End/Home Keys
+
+[33mcommit c577be16d165135d0ddcf2d713fee4a5faa4fa1d[m
+Author: nano13 <nano13@gmx.net>
+Date:   Sat May 28 21:49:59 2022 +0200
+
+    refactoring gui show/hide logick to use enums; work in progress to
+    restructure GUI for Pitch & Volume
+
+[33mcommit fe18c0f7a2c9a39bb08301608ec20f7816e18674[m
+Author: nano13 <nano13@gmx.net>
+Date:   Sat May 28 12:20:57 2022 +0100
+
+    completely removed pitchwheel vibrato function
+
+[33mcommit 3c0e24314602037c869476e0a028f6e91cdf0ab6[m
+Author: nano13 <nano13@gmx.net>
+Date:   Wed May 25 09:30:03 2022 +0100
+
+    refactored code to be prepared to implement/fix key shift behaviour
+
+[33mcommit 1aa688255ea0b725c0d8ccf0f4d305ba04192662[m
+Author: nano13 <nano13@gmx.net>
+Date:   Wed May 25 09:08:10 2022 +0100
+
+    moved tremolo thread start/stop to own functions
+
+[33mcommit 703624c81b3459267250a139f9b1700c9e39ac68[m
+Author: nano13 <nano13@gmx.net>
+Date:   Wed May 25 00:40:16 2022 +0100
+
+    change key "soft" to send midi-soft-signal (before it manipulated the
+    volume)
+
+[33mcommit 5342ec358a3c7147b40319fb4c6a3c00665e5897[m
+Author: nano13 <nano13@gmx.net>
+Date:   Sun May 22 15:28:07 2022 +0100
+
+    never mind: dropping vibrato pitchwheel function
+
+[33mcommit 6a62b144568d8c882330492d6f9f2b36e25fe4d4[m
+Author: nano13 <nano13@gmx.net>
+Date:   Sun May 22 13:28:25 2022 +0100
+
+    pitchwheel: fixed vibrato function
+
+[33mcommit 2c7988df6964f540bd50459d36cbbeba7522a0b5[m
+Author: nano13 <nano13@gmx.net>
+Date:   Sun May 22 01:28:15 2022 +0100
+
+    pitchwheel: forbid over/undershooting valid range
+
+[33mcommit 40888534c079e0d043fb2a3d2b8a885823d97ad3[m
+Author: nano13 <nano13@gmx.net>
+Date:   Sun May 22 01:16:34 2022 +0100
+
+    fixing pitch wheel
+
+[33mcommit 9db9a3c7f8c04f2aab2829aa4126fedcdabf988d[m
+Author: nano13 <nano13@gmx.net>
+Date:   Sat May 21 23:54:18 2022 +0100
+
+    crashfix: cleanup forgotten deadcode
+
+[33mcommit 7d324e9ca3f74cca5ce1f0d20454a14afb1434c6[m
+Author: nano13 <nano13@gmx.net>
+Date:   Sat May 21 19:36:17 2022 +0100
+
+    smooth keyshift transition finished
+
+[33mcommit d27bea135b0e394ca9bb1e0faf69c12997573e35[m
+Author: nano13 <nano13@gmx.net>
+Date:   Sat May 21 15:29:17 2022 +0100
+
+    preparing for smooth keyshift transition
+
+[33mcommit 264ca4e7ddf7baa5124c493f9fd0f8c46435b0d2[m
+Author: nano13 <nano13@gmx.net>
+Date:   Sat May 21 12:56:19 2022 +0100
+
+    filtering out keyRelease events if no keyPress before
+
+[33mcommit 2bf71edf17047de41a4234135663fb15204a2883[m
+Author: nano13 <nano13@gmx.net>
+Date:   Wed May 18 22:08:26 2022 +0100
+
+    reading command line parameters alternatively from config
+
+[33mcommit 52a488b82991f21b8cc2bdeada872f6a3c0528c7[m
+Author: nano13 <nano13@gmx.net>
+Date:   Tue May 17 23:46:46 2022 +0100
+
+    keyboard config example json file
+
+[33mcommit d8902983b7d881efe16535fad74d947f6b17cf6f[m
+Author: nano13 <nano13@gmx.net>
+Date:   Tue May 17 22:46:02 2022 +0100
+
+    keyboard_pc: implemented mousecklicks
+
+[33mcommit 034deb1a921878416f22446b2790625ed9b52f62[m
+Author: nano13 <nano13@gmx.net>
+Date:   Tue May 17 21:40:08 2022 +0100
+
+    restructuring bottom row of keyboard_pc; animate ctrl_l & ctrl_r presses
+
+[33mcommit bbfbd134c618dec3f159895165ade2517a84dac6[m
+Author: nano13 <nano13@gmx.net>
+Date:   Tue May 17 19:28:44 2022 +0100
+
+    cleanups; ctrl_l & ctrl_r for octave up & down
+
+[33mcommit c445a6b8c4edf47342125a84654763d5fc963f33[m
+Author: nano13 <nano13@gmx.net>
+Date:   Sun May 15 18:59:08 2022 +0100
+
+    cleaning up key handling to have same functions for all three input
+    methods
+
+[33mcommit e259c6651e7a24362b9fd4ff97b5ace2b36d2ead[m
+Author: nano13 <nano13@gmx.net>
+Date:   Sat May 14 21:59:43 2022 +0100
+
+    removed unneeded "native" button map
+
+[33mcommit 4e8fb11630b797838a43a4fc2616a1f92222f631[m
+Author: nano13 <nano13@gmx.net>
+Date:   Sat May 14 21:37:14 2022 +0100
+
+    progress on refactorings
+
+[33mcommit 99813f7011522b15a782f8f25b9c92cca639ba7d[m
+Author: nano13 <nano13@gmx.net>
+Date:   Sat May 14 16:09:29 2022 +0100
+
+    refactored string output_system to enum
+
+[33mcommit 2cf8e34ed89ab4f084ff958d955c153159e9f5af[m
+Author: nano13 <nano13@gmx.net>
+Date:   Sat May 14 12:08:43 2022 +0100
+
+    refactoring qt-default event handling to own class
+
+[33mcommit 4b02e0fc15352ea9a20234b31eec7ea41b9b2f2d[m
+Author: nano13 <nano13@gmx.net>
+Date:   Fri May 13 03:51:26 2022 +0100
+
+    preparing pulling out qt default event handling to own class
+
+[33mcommit 15dcec1252e9c23a0880c81b9413b70a2a192e4a[m
+Author: nano13 <nano13@gmx.net>
+Date:   Fri May 13 03:50:58 2022 +0100
+
+    nativeEvent: cleaning ups
+
+[33mcommit 7d4dddfa22239b648609f34711f9a2f6fc4c9abf[m
+Author: nano13 <nano13@gmx.net>
+Date:   Fri May 13 03:26:18 2022 +0100
+
+    nativeEvent: filtering out autorepeats
+
+[33mcommit 499b007a2404e621e829b67a759495c34aaebdae[m
+Author: nano13 <nano13@gmx.net>
+Date:   Sun May 8 23:00:33 2022 +0100
+
+    progress on native event
+
+[33mcommit f87a7e4563083744178269afb6860570f86f0b39[m
+Author: nano13 <nano13@gmx.net>
+Date:   Sun May 8 19:37:48 2022 +0100
+
+    progress on nativeEvent
+
+[33mcommit 87d2af70f0eb43b3eeee486958575497dd937dc1[m
+Author: nano13 <nano13@gmx.net>
+Date:   Sun May 8 14:53:18 2022 +0100
+
+    trying to get nativeeventfilter running
+
+[33mcommit ec1da0cfa7b5080c038cd75d375cc453adf6cb5f[m
+Author: nano13 <nano13@gmx.net>
+Date:   Sun May 8 02:52:03 2022 +0100
+
+    removing unused class
+
+[33mcommit 9ffa1d0bb2b813bf1c833ddde2f46bb21eb08505[m
+Author: nano13 <nano13@gmx.net>
+Date:   Sun May 8 02:41:32 2022 +0100
+
+    cleaning ups
+
+[33mcommit df5f6c7a88e1797e84dfca95ca2e52340f99547f[m
+Author: nano13 <nano13@gmx.net>
+Date:   Sat May 7 23:01:50 2022 +0100
+
+    deleted obsolete files
+
+[33mcommit c02f00b076e17cce0269a6637cc0ee0ce84eaab3[m
+Author: nano13 <nano13@gmx.net>
+Date:   Sat May 7 19:22:13 2022 +0100
+
+    cleaning ups
+
+[33mcommit b48940c9476fdd9e8c934f48c217f252b8629124[m
+Author: nano13 <nano13@gmx.net>
+Date:   Tue May 3 23:23:34 2022 +0100
+
+    raw input: distinguish between modes "listen" and "lock"
+
+[33mcommit 147f906d9f83c1bb5712a62a8fbed9b67459f9cd[m
+Author: nano13 <nano13@gmx.net>
+Date:   Mon May 2 23:29:50 2022 +0100
+
+    changing default number of keyboards back to 1
+
+[33mcommit 989ab98388787027f4228ff651ca23b8ea0f48f5[m
+Author: nano13 <nano13@gmx.net>
+Date:   Mon May 2 23:27:02 2022 +0100
+
+    adding support for multiple keyboards / raw keyboard support
+
+[33mcommit 809d6da1abbef27506fc201a33928c4dd8d4912a[m
+Author: nano13 <nano13@gmx.net>
+Date:   Sun May 1 18:58:48 2022 +0100
+
+    progress on direct keyboard input (/dev/input/)
+
+[33mcommit 93f9337df49870bf7619d1953f0f52bb59e7ab45[m
+Author: nano13 <nano13@gmx.net>
+Date:   Fri Apr 29 00:22:34 2022 +0100
+
+    run for raw keyboard input
+
+[33mcommit 58ce4875db4c2cba8c7b0800e2be7b84dc8b3a81[m
+Author: nano13 <nano13@gmx.net>
+Date:   Wed Apr 27 23:15:24 2022 +0100
+
+    fixing view for network mode
+
+[33mcommit 2d7e869576b8b64406cef6e1a4aa770faabd5ad7[m
+Author: nano13 <nano13@gmx.net>
+Date:   Mon Apr 25 13:16:23 2022 +0100
+
+    style: adjust background for menu bar
+
+[33mcommit 1a70ef7635a9b7cf6d82f0394aea513978f97d2e[m
+Author: nano13 <nano13@gmx.net>
+Date:   Mon Apr 25 13:09:32 2022 +0100
+
+    implemented showing/hiding gui elements
+
+[33mcommit ed9200c6bd1769b1c0b3b592a17f2b1741db9ce3[m
+Author: nano13 <nano13@gmx.net>
+Date:   Sun Apr 24 00:31:41 2022 +0100
+
+    progress with view-menu
+
+[33mcommit 66c4226d69747c438c5eb74b0f9f1340d275ed34[m
+Author: nano13 <nano13@gmx.net>
+Date:   Sun Apr 24 00:05:05 2022 +0100
+
+    preparing "view" menu in menubar
+
+[33mcommit 3fc340905c6871493f84c0037aa1704cb94e6f8d[m
+Author: nano13 <nano13@gmx.net>
+Date:   Sat Apr 23 23:24:38 2022 +0100
+
+    removed channels screenshot and real widget (channels summary has proven
+    to be the best idea so far)
+
+[33mcommit 8c0f016c68b167424685a482febcde2f23dd747f[m
+Author: nano13 <nano13@gmx.net>
+Date:   Sat Apr 23 14:45:13 2022 +0100
+
+    crashfix if savefile has more main_tabs than the active process
+
+[33mcommit fdda000650e7284ba8076b68dc136671c6e472ec[m
+Author: nano13 <nano13@gmx.net>
+Date:   Sat Apr 23 14:42:58 2022 +0100
+
+    removing deleted files db_adapter
+
+[33mcommit be6d029c8cad0b85bfd55783973b677345f49cf2[m
+Author: nano13 <nano13@gmx.net>
+Date:   Sat Apr 23 14:40:21 2022 +0100
+
+    saving and restoring quicksaves finished
+
+[33mcommit d7490a356f2fb36609cd06a2253bf7d999a3a619[m
+Author: nano13 <nano13@gmx.net>
+Date:   Sat Apr 23 13:46:05 2022 +0100
+
+    removed unused class db_adapter
+
+[33mcommit 1943fe2e1ef8f42c2af1f49c4b576729380b28ad[m
+Author: nano13 <nano13@gmx.net>
+Date:   Sat Apr 23 13:43:00 2022 +0100
+
+    progress on saving and restoring quicksaves
+
+[33mcommit f1a4f45ecdd69671c644dedddd7c6b534c37db54[m
+Author: nano13 <nano13@gmx.net>
+Date:   Fri Apr 22 21:57:24 2022 +0100
+
+    renamed default.ini to quicksave.ini
+
+[33mcommit 74437a7a1d0d66aad89a9c91e29e48097c17c78c[m
+Author: nano13 <nano13@gmx.net>
+Date:   Fri Apr 22 21:52:26 2022 +0100
+
+    cleaning up
+
+[33mcommit 683c640c7c4c8a8cf056e6e1fe9f66a2f6941f70[m
+Author: nano13 <nano13@gmx.net>
+Date:   Fri Apr 22 21:38:33 2022 +0100
+
+    cleanups; preparing to save parameters of orgelwerk and main_tabs
+
+[33mcommit fbec38ca0597191a4f9b1b8ec4c61248d13fe8de[m
+Author: nano13 <nano13@gmx.net>
+Date:   Fri Apr 22 20:29:52 2022 +0100
+
+    minor cleanups
+
+[33mcommit 46f7c6d5aabd9af72473154ac83f6d065a8b1441[m
+Author: nano13 <nano13@gmx.net>
+Date:   Fri Apr 22 20:17:46 2022 +0100
+
+    implemented restoring savegame
+
+[33mcommit 6a41b1399bbbf7a5c21fa45bb8566cc4328a85fc[m
+Author: nano13 <nano13@gmx.net>
+Date:   Tue Apr 19 23:28:55 2022 +0100
+
+    audio interface name shows keyboard id
+
+[33mcommit 63f1cb5c2184565217bf7c1338ec50befeb3657d[m
+Author: nano13 <nano13@gmx.net>
+Date:   Tue Apr 19 20:38:10 2022 +0100
+
+    fixed grab button if multiple view used
+
+[33mcommit 1a7acbbd123a8478c362317af7a7d724825d6d34[m
+Author: nano13 <nano13@gmx.net>
+Date:   Tue Apr 19 19:14:54 2022 +0100
+
+    trying to fix random crashes with tremolo (without success);
+    css_allen_heath
+
+[33mcommit 09607b0a39546e14aa3b8078a94c1dcfb8ec92b5[m
+Author: nano13 <nano13@gmx.net>
+Date:   Mon Apr 18 00:59:50 2022 +0100
+
+    clarifying error message
+
+[33mcommit b608efc8c56294c056c39e934e748fa0e5f610f5[m
+Author: nano13 <nano13@gmx.net>
+Date:   Mon Apr 18 00:56:25 2022 +0100
+
+    adding parser value checking and error messages
+
+[33mcommit 12e47e56ecbbb2426b2d64efe48e14256642a794[m
+Author: nano13 <nano13@gmx.net>
+Date:   Sun Apr 17 23:16:02 2022 +0100
+
+    dont show menubar in network mode
+
+[33mcommit 9d4046b858b114ad3dc5fbaba18ec9b10117066a[m
+Author: nano13 <nano13@gmx.net>
+Date:   Sun Apr 17 21:38:36 2022 +0100
+
+    making soundsystem selectable by command line option
+
+[33mcommit a1226965eff60444c7a96ca09b59d6159a94c7d1[m
+Author: nano13 <nano13@gmx.net>
+Date:   Mon Apr 11 22:29:14 2022 +0100
+
+    bugfix with tremolo; cleaned up qDebug messages
+
+[33mcommit cdc57de7cc4bc810bc8cf1c6a88a3fe8b7084e8c[m
+Author: nano13 <nano13@gmx.net>
+Date:   Sun Apr 10 22:52:08 2022 +0100
+
+    adding randomness to tremolo
+
+[33mcommit 0842e5a9a3c1779e8adfbaccf225f56795718ee2[m
+Author: nano13 <nano13@gmx.net>
+Date:   Sun Apr 10 15:51:16 2022 +0100
+
+    adding tremolo functionality
+
+[33mcommit 86b7e9178d3ffb3285c1d8ad24a010933784fe35[m
+Author: nano13 <nano13@gmx.net>
+Date:   Sun Apr 10 13:16:52 2022 +0100
+
+    adding help messages
+
+[33mcommit 668feecef2723d4b3197c9465adb77cc05e73f43[m
+Author: nano13 <nano13@gmx.net>
+Date:   Wed Apr 6 10:36:37 2022 +0100
+
+    fixing misspelled variable
+
+[33mcommit 2305739ec4e2aa886bd846eeba3da503ec87ded7[m
+Author: nano13 <nano13@gmx.net>
+Date:   Wed Apr 6 10:31:08 2022 +0100
+
+    adding shorthand option "-s" for "--satellite"
+
+[33mcommit 6c1926d250c22149d0dab6ac2c782169a75ac09e[m
+Author: nano13 <nano13@gmx.net>
+Date:   Wed Apr 6 10:30:00 2022 +0100
+
+    fixed spelling for command line option "satellite"
+
+[33mcommit a99e066b9ff2ff61333687a9620763e216489f43[m
+Author: nano13 <nano13@gmx.net>
+Date:   Wed Apr 6 10:27:47 2022 +0100
+
+    command line parameter "number-of-keyboards" implemented
+
+[33mcommit a1411f67d1fe4993e21e26b2dedccec054eeeab2[m
+Author: nano13 <nano13@gmx.net>
+Date:   Wed Apr 6 10:23:36 2022 +0100
+
+    fiddling around with command line options with values
+
+[33mcommit c058978183bf455f4b32d5832221950f3d37482b[m
+Author: nano13 <nano13@gmx.net>
+Date:   Wed Apr 6 10:15:16 2022 +0100
+
+    fiddling around with command line options
+
+[33mcommit 798c5aca1e5407b18e6ceeed177b79e4469d60c8[m
+Author: nano13 <nano13@gmx.net>
+Date:   Wed Apr 6 10:08:45 2022 +0100
+
+    debugging command line options
+
+[33mcommit af85da9758fe10a5d6543729d6962122eac42e1d[m
+Author: nano13 <nano13@gmx.net>
+Date:   Wed Apr 6 09:37:25 2022 +0100
+
+    adding command line option "number-of-keyboards"
+
+[33mcommit 58baf7186778595581277667b45201c1751c7218[m
+Author: nano13 <nano13@gmx.net>
+Date:   Wed Apr 6 09:14:51 2022 +0100
+
+    introducing command line options
+
+[33mcommit 3f1c7099df320fbab5fce683c4420d46d270b0ea[m
+Author: nano13 <nano13@gmx.net>
+Date:   Wed Apr 6 00:04:28 2022 +0100
+
+    udp: make listen ip changeable
+
+[33mcommit 5cc115e29b8e63b4b41501ce28b10fa149d82b70[m
+Author: nano13 <nano13@gmx.net>
+Date:   Tue Apr 5 23:07:57 2022 +0100
+
+    implementing udp
+
+[33mcommit 1c4d83e73b3fc547408e7797afa27fee27f5c9e2[m
+Author: nano13 <nano13@gmx.net>
+Date:   Mon Apr 4 06:31:49 2022 +0100
+
+    allowing to add multiple orgelwerks to the gui
+
+[33mcommit 96d1f25b308653e3cd8b8b3a35c16ad076bc35a3[m
+Author: nano13 <nano13@gmx.net>
+Date:   Sun Mar 27 15:48:32 2022 +0100
+
+    progress on styling
+
+[33mcommit 5b842c76b945b3616d6851f5b9b49ad0c37c6119[m
+Author: nano13 <nano13@gmx.net>
+Date:   Sun Mar 27 14:00:29 2022 +0100
+
+    progress on styling: removed unessessarry dialog
+
+[33mcommit 4ffa8a4041bd9507f16f97e0573a062e18c19a96[m
+Author: nano13 <nano13@gmx.net>
+Date:   Sun Mar 27 10:56:49 2022 +0100
+
+    progress on stylesheet
+
+[33mcommit 5926096a33d7b9c4ff1ab77ece113073516cf401[m
+Author: nano13 <nano13@gmx.net>
+Date:   Sun Mar 27 09:55:00 2022 +0100
+
+    progress with css
+
+[33mcommit 589d9b1ddde7cfbceebceb789264ca4dbc983cbd[m
+Author: nano13 <nano13@gmx.net>
+Date:   Sun Mar 27 01:16:23 2022 +0100
+
+    moved styles to css file
+
+[33mcommit 01f1d95f1438a46fbb1066f2da89e353143822db[m
+Author: nano13 <nano13@gmx.net>
+Date:   Thu Mar 24 08:19:40 2022 +0100
+
+    introducing global css
+
+[33mcommit 41922b23f59a9c5970154ef6455464663fde4782[m
+Author: tambi-soft <nano13@gmx.net>
+Date:   Mon Mar 21 01:00:44 2022 +0100
+
+    experimenting with replacing main_tabs
+
+[33mcommit 5ab8873adaf10647829b612c8ae9dab92aef05e2[m
+Author: tambi-soft <nano13@gmx.net>
+Date:   Fri Feb 25 09:16:48 2022 +0100
+
+    master volume: implemented pageup & pagedown
+
+[33mcommit e20f32394497d4d975d91f63f3de1647b9e6b215[m
+Author: tambi-soft <nano13@gmx.net>
+Date:   Thu Feb 24 10:08:58 2022 +0100
+
+    midi_mastervolume: worker for slider working now
+
+[33mcommit 066461ff02ac3114aa9a8d15e0aa891a67bd472e[m
+Author: tambi-soft <nano13@gmx.net>
+Date:   Wed Feb 23 19:07:35 2022 +0100
+
+    progress on moving volume slider with arrow keys
+
+[33mcommit c92173989152a27c61847a8261bccb6f567b7773[m
+Author: tambi-soft <nano13@gmx.net>
+Date:   Wed Feb 23 15:09:21 2022 +0100
+
+    preparing for moving master volume with arrow keys
+
+[33mcommit 37c5f2b7d0cf924af7ade5a53860802ce53d61a9[m
+Author: tambi-soft <nano13@gmx.net>
+Date:   Tue Feb 22 19:15:45 2022 +0100
+
+    smooth change between tabs & bugfix alsa output
+
+[33mcommit e65f785d73bd50d1697f24fa03ec9cfbcbd42732[m
+Author: nano13 <nano13@gmx.net>
+Date:   Mon Feb 21 14:56:50 2022 +0100
+
+    channel selector: output combos: memorize last position on change
+
+[33mcommit 7ec4a1e27a19cc51a51c48cc90d819fd00890b81[m
+Author: nano13 <nano13@gmx.net>
+Date:   Mon Feb 21 07:48:45 2022 +0100
+
+    keyboard_notes: allKeysUp
+
+[33mcommit 1274c0e95b2d2f44009567666aeb070076b1ef01[m
+Author: tambi-soft <nano13@gmx.net>
+Date:   Sun Feb 20 22:36:00 2022 +0100
+
+    keyboard_notes: added subcontra, contra, C6, C7
+
+[33mcommit f3a9a20d37ce79dd03337c787f70a38c60ece29e[m
+Author: tambi-soft <nano13@gmx.net>
+Date:   Wed Feb 16 14:55:19 2022 +0100
+
+    implementing multiple midi interfaces per tab
+
+[33mcommit cb2c39eca2bd9e1fb7552e7f31cb323adbacfa72[m
+Author: nano13 <nano13@gmx.net>
+Date:   Sat Jan 1 20:04:14 2022 +0100
+
+    fixed channel_selector: interaction between "instrument group",
+    "instrument", msb and lsb
+
+[33mcommit 3cb5ab4393fbad69c382dd23ab8915e805c4e7b9[m
+Author: nano13 <nano13@gmx.net>
+Date:   Sat Jan 1 09:08:40 2022 +0100
+
+    progress on open settings
+
+[33mcommit 5c674457449b66ab42c5022c7c097db009441829[m
+Author: nano13 <nano13@gmx.net>
+Date:   Sat Dec 25 23:06:58 2021 +0100
+
+    renamed getListOfActivatedChannels to listOfChannels
+
+[33mcommit 5e0957c8ff12a6da108115ba1ab6953c389fdc66[m
+Author: nano13 <nano13@gmx.net>
+Date:   Sat Dec 25 22:47:58 2021 +0100
+
+    repositioned master key shift
+
+[33mcommit 4034728232cec493b2e5add198eced277a0ae2ba[m
+Author: nano13 <nano13@gmx.net>
+Date:   Sat Dec 25 17:57:17 2021 +0100
+
+    master key shift implemented
+
+[33mcommit 424db301baa9e498a2d199b2140ffc9fc3354133[m
+Author: nano13 <nano13@gmx.net>
+Date:   Sat Dec 25 17:34:57 2021 +0100
+
+    midi key shift widget to own file
+
+[33mcommit e49e5e246a4c040c5feb45e35e8f0fa22d651a82[m
+Author: nano13 <nano13@gmx.net>
+Date:   Wed Dec 22 22:01:39 2021 +0100
+
+    preparing rename ListOfActiveChannels to ListOfChannels
+
+[33mcommit 3a6c23561fee712556aedfb655cbeb6d10a4367a[m
+Author: nano13 <nano13@gmx.net>
+Date:   Wed Dec 22 21:57:15 2021 +0100
+
+    implemented saving channel settings to ini file
+
+[33mcommit 5c2c24ad1212c4294016e89be23b2860482ba2c8[m
+Author: nano13 <nano13@gmx.net>
+Date:   Wed Dec 22 16:02:11 2021 +0100
+
+    introducing class "config"
+
+[33mcommit 8ecbca8d515d53b61dfeff2d407c00599c519146[m
+Merge: ced6d8d 5b46bbf
+Author: tambi-soft <nano13@gmx.net>
+Date:   Wed Dec 22 16:03:27 2021 +0100
+
+    Merge branch 'master' of github.com:tambi-soft/vkeybd-qt
+
+[33mcommit ced6d8d058a8413f09c3a2e75403a5a09fbc8b7d[m
+Author: tambi-soft <nano13@gmx.net>
+Date:   Wed Dec 22 16:02:56 2021 +0100
+
+    channel selector: bugfix with KeyRelease
+
+[33mcommit 5b46bbf4d4ca3afb0e7f6a00dadda2e35e178b5d[m
+Author: nano13 <nano13@gmx.net>
+Date:   Tue Dec 21 23:34:27 2021 +0100
+
+    clef bass: resize
+
+[33mcommit 98358ad31c118a1f32d6b10e35dc09fb9aaa7396[m
+Author: tambi-soft <nano13@gmx.net>
+Date:   Sun Dec 19 23:45:52 2021 +0100
+
+    do not call "Resend MIDI settings" on tab-change
+
+[33mcommit 84b7a039a53c5ccfca7467c0f585c6a14f843360[m
+Author: tambi-soft <nano13@gmx.net>
+Date:   Sun Dec 19 23:40:34 2021 +0100
+
+    keyboard bindings for resend/edit midi settings
+
+[33mcommit 6c1a547b5ab4913687c770e3c9124d42437cbd32[m
+Author: tambi-soft <nano13@gmx.net>
+Date:   Sun Dec 19 23:25:13 2021 +0100
+
+    channel selector: handling key release event
+
+[33mcommit ec5378f826acb6f9b7434d43fa8e3a1d8a0493b1[m
+Author: tambi-soft <nano13@gmx.net>
+Date:   Sun Dec 19 23:19:03 2021 +0100
+
+    channel selector: toggle channels with number keys
+
+[33mcommit 45e1a4a29f0236d07a6357f612bc7199ae79abcc[m
+Author: tambi-soft <nano13@gmx.net>
+Date:   Sun Dec 19 22:43:19 2021 +0100
+
+    implemented "Resend MIDI settings" button; added instrument name to
+    summary
+
+[33mcommit 8d3d135d1ffac30359ca0a7258b77e50c46d1191[m
+Author: tambi-soft <nano13@gmx.net>
+Date:   Sun Dec 19 20:37:39 2021 +0100
+
+    keyboard_notes: panic hides everything
+
+[33mcommit b0b31a9d84de61704d4878dad0e87f67e5b77eb4[m
+Author: tambi-soft <nano13@gmx.net>
+Date:   Fri Dec 3 23:47:29 2021 +0100
+
+    keyboard notes: draw auxiliary lines
+
+[33mcommit 622854a26f2b1cf743450890714562575449edc8[m
+Author: nano13 <nano13@gmx.net>
+Date:   Fri Dec 3 11:49:20 2021 +0100
+
+    hidden piano keyboard
+
+[33mcommit b3a13fad2fa69b5fb35d146f16d4149f14887d21[m
+Author: nano13 <nano13@gmx.net>
+Date:   Fri Dec 3 11:44:26 2021 +0100
+
+    keyboard_notes: adjust minimal size
+
+[33mcommit 0ea84712f4d78542ed679441e17980dac3d820aa[m
+Author: nano13 <nano13@gmx.net>
+Date:   Thu Dec 2 22:10:24 2021 +0100
+
+    keyboard notes: flat and sharp implemented
+
+[33mcommit 3847435ef515ee2a013f40dcb127d42b3c0612bc[m
+Author: tambi-soft <nano13@gmx.net>
+Date:   Thu Dec 2 20:25:40 2021 +0100
+
+    minor changes on keyboard_notes
+
+[33mcommit 6d40b040c3413aab25a540944b88fbe4a00d1b2b[m
+Author: nano13 <nano13@gmx.net>
+Date:   Thu Dec 2 12:56:25 2021 +0100
+
+    keyboard notes: full tone visualization implemented
+
+[33mcommit 8309693de15679631c06326429f76d1d718adcd7[m
+Author: tambi-soft <nano13@gmx.net>
+Date:   Thu Dec 2 01:36:07 2021 +0100
+
+    progess on notes view
+
+[33mcommit 8b1d85e41fd55f8aa91f06f5ca2fa24213d4405b[m
+Author: tambi-soft <nano13@gmx.net>
+Date:   Wed Dec 1 15:07:07 2021 +0100
+
+    introducing keyboard_notes widget
+
+[33mcommit e276cc70c592607fd6dcb0632027907d83642071[m
+Author: tambi-soft <nano13@gmx.net>
+Date:   Wed Dec 1 12:52:40 2021 +0100
+
+    piano and pc keyboard to own functions
+
+[33mcommit 0338244918d7014c3a58cb41398de6254776f938[m
+Author: nano13 <nano13@gmx.net>
+Date:   Wed Dec 1 11:58:58 2021 +0100
+
+    moved midi channel summary to own class
+
+[33mcommit 666aa3c0ae82d92881b9bae53fdb90be41885f83[m
+Author: tambi-soft <nano13@gmx.net>
+Date:   Tue Nov 30 23:45:54 2021 +0100
+
+    init midi channels summary as own class
+
+[33mcommit 93037a6d607a1c7c0317fc411a207e38bbd4ae8a[m
+Author: tambi-soft <nano13@gmx.net>
+Date:   Tue Nov 30 16:26:31 2021 +0100
+
+    channel selector: added "play test note" button
+
+[33mcommit e4a4ba338cbffcc20e55c6b2ac841d094b7d8acb[m
+Author: tambi-soft <nano13@gmx.net>
+Date:   Tue Nov 30 14:25:17 2021 +0100
+
+    automatically send panic on tab change
+
+[33mcommit 0b1ed3025115ce3248834fbcd231849cd3a13c6a[m
+Author: tambi-soft <nano13@gmx.net>
+Date:   Tue Nov 30 14:16:50 2021 +0100
+
+    midi channel selector: dont handle esc (so it closes the dialog by
+    default)
+
+[33mcommit dd91d6c3af360333931891fa75e1c0f8ef5ab6b0[m
+Author: tambi-soft <nano13@gmx.net>
+Date:   Tue Nov 30 10:29:31 2021 +0100
+
+    channel selector: adjust focusing
+
+[33mcommit 027b1965f78c7f287a2c4cd9f72e6835f7117a70[m
+Author: tambi-soft <nano13@gmx.net>
+Date:   Tue Nov 30 09:18:26 2021 +0100
+
+    channel selector & orgelwerk: pass filtered events
+
+[33mcommit f82d5d221ac4c25b632979a4c6e855a21c4ea436[m
+Author: tambi-soft <nano13@gmx.net>
+Date:   Mon Nov 29 23:49:27 2021 +0100
+
+    master volume: show value in label
+
+[33mcommit aab708538943bb5af6af411d4506d1154ad9f6dc[m
+Author: tambi-soft <nano13@gmx.net>
+Date:   Mon Nov 29 23:39:18 2021 +0100
+
+    init: show channels summarry
+
+[33mcommit 624af95f93beeb47d28d01a4da8252e80ca8be02[m
+Author: tambi-soft <nano13@gmx.net>
+Date:   Mon Nov 29 21:49:53 2021 +0100
+
+    GUI prepared for mulitple keyboard support
+
+[33mcommit 86f4656f48733a1bf361494d1ed59c5fb1ddcc87[m
+Author: tambi-soft <nano13@gmx.net>
+Date:   Mon Nov 29 20:47:33 2021 +0100
+
+    implemented audio DCA; prepared channels: MSB & LSB
+
+[33mcommit a12fe4cf33f68ca3cba9802cb10c9185061bf789[m
+Author: nano13 <nano13@gmx.net>
+Date:   Sun Nov 28 10:14:55 2021 +0100
+
+    channel settings as real widget and screenshot implemented
+
+[33mcommit 3c595d191750273940278fe01fd42cf822c3a737[m
+Author: nano13 <nano13@gmx.net>
+Date:   Fri Nov 26 10:56:18 2021 +0100
+
+    showChanenlsReal / showChannelsImage implemented
+
+[33mcommit 9c448cc0daddf9d764842117c6651a8bce292a6a[m
+Author: nano13 <nano13@gmx.net>
+Date:   Thu Nov 25 16:09:51 2021 +0100
+
+    channel mixer as image preview
+
+[33mcommit 77850ad950e7620c0c27e5d3ce3a94edb51d3fc9[m
+Author: nano13 <nano13@gmx.net>
+Date:   Thu Nov 25 13:51:49 2021 +0100
+
+    adding master volume slider
+
+[33mcommit 59c763b668a9a213b0c4e017b166b2961e3c383c[m
+Author: nano13 <nano13@gmx.net>
+Date:   Thu Nov 18 12:32:49 2021 +0100
+
+    typo
+
+[33mcommit e1334593cd610709bf3bfb38d2caf535fd4efa8c[m
+Author: nano13 <nano13@gmx.net>
+Date:   Wed Nov 17 12:25:49 2021 +0100
+
+    removed unneded signalling
+
+[33mcommit 8b438430d5919925a27501f1b1ade2bf40c11649[m[33m ([m[1;31mdell/master[m[33m)[m
+Author: nano13 <nano13@gmx.net>
+Date:   Tue Nov 16 23:17:58 2021 +0100
+
+    soft button value adjusted
+
+[33mcommit eedee151d929225c9096dcb155fcd7d1e35fffed[m
+Author: nano13 <nano13@gmx.net>
+Date:   Tue Nov 16 22:27:05 2021 +0100
+
+    pc-keyboard: font size to 6
+
+[33mcommit 54386affffc9b6ed405fcd45972d9a914ae448d2[m
+Author: nano13 <nano13@gmx.net>
+Date:   Tue Nov 16 22:10:48 2021 +0100
+
+    pedals "sostenuto" and "soft" implemented
+
+[33mcommit 1ddcd8c7ba2c08b79682491a5c4bc3a242dfa2e2[m
+Author: nano13 <nano13@gmx.net>
+Date:   Tue Nov 16 21:31:05 2021 +0100
+
+    delete key for "stop all sounds"
+
+[33mcommit c2e32ea5556317666a37dbde341a28ed181411f4[m
+Author: nano13 <nano13@gmx.net>
+Date:   Tue Nov 16 21:23:18 2021 +0100
+
+    sustain key implemented
+
+[33mcommit 230b814d3a5f6b195079bdf5fdebd0ad00b8952a[m
+Merge: f521b96 d598830
+Author: nano13 <nano13@gmx.net>
+Date:   Tue Nov 16 20:09:51 2021 +0100
+
+    Merge branch 'master' of ssh://cf19.priv:/home/samuel/programmierung/vkeybd-qt
+
+[33mcommit f521b96dbb73038010c5373ed158ed5e6efaf9cf[m
+Author: nano13 <nano13@gmx.net>
+Date:   Tue Nov 16 18:04:47 2021 +0100
+
+    install event filter again
+
+[33mcommit d5988309ee096a10668f235b06addaa07524b66e[m
+Author: nano13 <nano13@gmx.net>
+Date:   Tue Nov 16 15:24:42 2021 +0100
+
+    styling pitchslider
+
+[33mcommit 748550502385885aacc6b07969c5db3c02cda786[m
+Author: nano13 <nano13@gmx.net>
+Date:   Tue Nov 16 15:12:29 2021 +0100
+
+    install event filter again (bugfix)
+
+[33mcommit 8dcd72bd98aac0a4675fab9138d4ee86e87883c3[m
+Author: nano13 <nano13@gmx.net>
+Date:   Tue Nov 16 10:11:58 2021 +0100
+
+    fixed shift button for neo2; init jack output
+
+[33mcommit b25b2575d48d1ff97d91e60a7b1e27ef983bfa66[m
+Author: nano13 <nano13@gmx.net>
+Date:   Sat Nov 13 16:28:32 2021 +0100
+
+    pan implemented
+
+[33mcommit a90e996996a652aedb4e3bc690a04661963f2209[m
+Author: nano13 <nano13@gmx.net>
+Date:   Sat Nov 13 15:46:56 2021 +0100
+
+    implemented portamento
+
+[33mcommit 820788b2f692477a72fcc705f21ffe19af3a111c[m
+Author: nano13 <nano13@gmx.net>
+Date:   Wed Nov 10 11:13:45 2021 +0100
+
+    attack & release; init new menu entries
+
+[33mcommit b3161fef7ba7a968d7b405b244bbd0e33310e5cf[m
+Merge: 6d3b804 a9c94fa
+Author: nano13 <nano13@gmx.net>
+Date:   Wed Nov 10 09:30:15 2021 +0100
+
+    Merge branch 'master' of github.com:tambi-soft/vkeybd-qt
+
+[33mcommit a9c94fac3832f64413c365c830161da7ae3b0261[m
+Author: tambi-soft <37853508+tambi-soft@users.noreply.github.com>
+Date:   Wed Nov 10 09:25:00 2021 +0100
+
+    Initial commit
+
+[33mcommit 6d3b804127f921961522fff8663ccaee9e9eb5f8[m
+Author: nano13 <nano13@gmx.net>
+Date:   Mon Nov 8 06:21:31 2021 +0100
+
+    grab keyboard: change labels and use mouseclick to ungrab.
+
+[33mcommit 5378f171db040d043f5ff7340c91f66095085ac4[m
+Author: nano13 <nano13@gmx.net>
+Date:   Sat Nov 6 12:11:27 2021 +0100
+
+    grabbing mouse aswell to avoid messing around with the os
+
+[33mcommit d7f240d7e4a38d4da37d0f685e064c094a4995dd[m
+Author: nano13 <nano13@gmx.net>
+Date:   Sat Nov 6 11:54:45 2021 +0100
+
+    removed dead code
+
+[33mcommit 87b8fbcf62835c6762c107cfaeb5c8b471c27396[m
+Author: nano13 <nano13@gmx.net>
+Date:   Sat Nov 6 11:50:04 2021 +0100
+
+    grab keyboard button moved to main_window; hotkey ctr+shift
+
+[33mcommit 6fcde7eaaeb5c649d0604f23f83787a54427bd17[m
+Author: nano13 <nano13@gmx.net>
+Date:   Sat Nov 6 10:31:34 2021 +0100
+
+    grab button implemented
+
+[33mcommit 2c3c61b12cd3802d548534dbe1dcc06f9ac1b940[m
+Author: nano13 <nano13@gmx.net>
+Date:   Sat Nov 6 01:38:17 2021 +0100
+
+    implemented midi v1 instrument switching
+
+[33mcommit 800336747c435a8c0e16b358924c271338701779[m
+Author: nano13 <nano13@gmx.net>
+Date:   Fri Nov 5 17:32:16 2021 +0100
+
+    pitchwheel vibrato; midi instrument list
+
+[33mcommit 2120ffa3bbbfcf32d6412f3b51a82c9304c80206[m
+Author: nano13 <nano13@gmx.net>
+Date:   Thu Nov 4 00:36:37 2021 +0100
+
+    pitchwheel: work in progress on vibrato
+
+[33mcommit 846923a0e981fdac5c6f83845ceb8c4561658401[m
+Merge: 8a1b63d c4374be
+Author: nano13 <nano13@gmx.net>
+Date:   Thu Nov 4 00:36:26 2021 +0100
+
+    Merge branch 'master' of github.com:nano13/vkeybd-qt
+
+[33mcommit c4374bebf7339e12838950fae9fdc7fda24cec24[m
+Author: nano13 <nano13@gmx.net>
+Date:   Thu Nov 4 00:32:03 2021 +0100
+
+    Update README.md
+
+[33mcommit 8a1b63d45c0d4d211e5f84f5ae20d4836813198a[m
+Merge: 4de2c79 2f0f14c
+Author: nano13 <nano13@gmx.net>
+Date:   Thu Nov 4 00:31:57 2021 +0100
+
+    Merge branch 'master' of github.com:nano13/vkeybd-qt
+
+[33mcommit 2f0f14c636fc8ef32ef6d0b0cb59894e92563d10[m
+Author: nano13 <nano13@gmx.net>
+Date:   Wed Nov 3 20:44:15 2021 +0100
+
+    Initial commit
+
+[33mcommit 4de2c7982e4239963e7774ddb74cba92b1a9f8f3[m[33m ([m[1;31mpowerplant/master[m[33m)[m
+Author: tambi-soft <nano13@gmx.net>
+Date:   Mon Nov 1 01:43:04 2021 +0100
+
+    pitchwheel: rename worker class
+
+[33mcommit 3e003a899fdf0bcb0cc90b87a189b2ce04749e9f[m
+Author: tambi-soft <nano13@gmx.net>
+Date:   Mon Nov 1 01:12:12 2021 +0100
+
+    pitch wheel smoothen
+
+[33mcommit 8112bf6327085e6419fa65a344767cb9189319da[m
+Author: tambi-soft <nano13@gmx.net>
+Date:   Mon Nov 1 00:40:37 2021 +0100
+
+    reimplement pitch-wheel: moving smoothly with arrow keys
+
+[33mcommit 7f774cc24aaa8c0a739ad81550b20a357edaa0f4[m
+Author: tambi-soft <nano13@gmx.net>
+Date:   Sun Oct 31 23:51:58 2021 +0100
+
+    reimplemented pitchbend
+
+[33mcommit 62d1af22d42a44d2e67823f7c9bf699eea7dba75[m
+Author: tambi-soft <nano13@gmx.net>
+Date:   Sun Oct 31 15:41:47 2021 +0100
+
+    implemented midi channel selector with key_shift, key_min, key_max
+
+[33mcommit 1a40ff4728c8161c86bf93f9e7cdb4d0e66c649b[m
+Author: nano13 <nano13@gmx.net>
+Date:   Sun Oct 31 13:17:35 2021 +0100
+
+    implemented midi notes in keys
+
+[33mcommit 559ac8a1984d7c9475b0ea54d7caf24dbc9ba2a1[m
+Author: tambi-soft <nano13@gmx.net>
+Date:   Sun Oct 31 12:41:17 2021 +0100
+
+    implemented midi panic
+
+[33mcommit 94fa4c18a814d17f7e68fe33009c3d3ed215b367[m
+Author: nano13 <nano13@gmx.net>
+Date:   Sun Oct 31 11:11:00 2021 +0100
+
+    indentation interface_alsa
+
+[33mcommit 03a435312bb9ed0687aad3a824ef0f5ea77523f7[m
+Author: tambi-soft <nano13@gmx.net>
+Date:   Sun Oct 31 02:31:36 2021 +0100
+
+    interface_audio: keypress/release takes midi-codes
+
+[33mcommit 5122419ec3ed98baa74459bdec27b6f7b946fcfe[m
+Author: tambi-soft <nano13@gmx.net>
+Date:   Sun Oct 31 02:11:22 2021 +0100
+
+    pitch wheel arrow keys
+
+[33mcommit f0ee0f3e998ebeda1e9711daf60b62577156047c[m
+Author: tambi-soft <nano13@gmx.net>
+Date:   Sun Oct 31 02:06:30 2021 +0100
+
+    operate pitch wheel with arrow keys
+
+[33mcommit bf14a4c80174e62f33870850cf3c39212e8700ce[m
+Author: tambi-soft <nano13@gmx.net>
+Date:   Sun Oct 31 01:06:24 2021 +0100
+
+    comments
+
+[33mcommit 6830a67227b20efbec7d67857c9ce9f5624aac1b[m
+Author: tambi-soft <nano13@gmx.net>
+Date:   Sun Oct 31 00:59:50 2021 +0100
+
+    fixed endless loop with panic-button
+
+[33mcommit 122bf6371f7edcb28e5c610931aba08679de55d5[m
+Author: tambi-soft <nano13@gmx.net>
+Date:   Sun Oct 31 00:39:01 2021 +0100
+
+    midi-codes for pc-keyboard and piano-keyboard
+
+[33mcommit c2b743436492f2d35ee67395d11ebb4c416db4d2[m
+Author: nano13 <nano13@gmx.net>
+Date:   Mon Oct 25 00:20:08 2021 +0100
+
+    pc-keyboard animated
+
+[33mcommit e1b3cfac978b024914e91de91127ff7eea67b550[m
+Author: tambi-soft <nano13@gmx.net>
+Date:   Sun Oct 24 21:37:29 2021 +0100
+
+    init eventFilter and panic! button
+
+[33mcommit cddfbe16899e609eb1703c4576a07693c349ea41[m
+Author: tambi-soft <nano13@gmx.net>
+Date:   Sun Oct 24 20:55:30 2021 +0100
+
+    added slider for midi-volume
+
+[33mcommit 03039721fe20a12e5d61da988b65540fd298b44e[m
+Author: tambi-soft <nano13@gmx.net>
+Date:   Sun Oct 24 20:39:24 2021 +0100
+
+    tabs: bind f-keys
+
+[33mcommit 60e6420eb651d6ae58fd1b1f781f82df96903deb[m
+Author: nano13 <nano13@gmx.net>
+Date:   Sun Oct 24 15:51:22 2021 +0100
+
+    added menubar
+
+[33mcommit c5aeeaf3142579cd109c5c3035d9b5bc79546d21[m
+Author: nano13 <nano13@gmx.net>
+Date:   Sun Oct 24 15:26:28 2021 +0100
+
+    added tab widget
+
+[33mcommit a36accc1599539e9f0e5f2e8ecbc8b6421f64665[m
+Author: nano13 <nano13@gmx.net>
+Date:   Sun Oct 24 13:07:03 2021 +0100
+
+    implemented key shift
+
+[33mcommit f7a83170b2e5cb2f7a7b7fb0146a9ba4d22788f1[m
+Author: nano13 <nano13@gmx.net>
+Date:   Sat Oct 23 20:39:10 2021 +0100
+
+    progress on raw input
+
+[33mcommit 06493bb098cb4098e27f6a300c6d6e813de1a95e[m
+Author: nano13 <nano13@gmx.net>
+Date:   Tue Oct 19 23:22:07 2021 +0100
+
+    pitch wheel thread: proper destructor
+
+[33mcommit a926f04e5241eead497d314c16f98991e8139ca6[m
+Author: tambi-soft <nano13@gmx.net>
+Date:   Tue Oct 19 21:12:54 2021 +0100
+
+    progress on midi instrument bank
+
+[33mcommit 6cda24d19e6113ff057617d341256c2cbc5eae5c[m
+Author: tambi-soft <nano13@gmx.net>
+Date:   Tue Oct 19 19:43:19 2021 +0100
+
+    tether finished
+
+[33mcommit e151e1e03679b55e2faa4740d1e3157e8e3b223d[m
+Author: tambi-soft <nano13@gmx.net>
+Date:   Tue Oct 19 19:16:13 2021 +0100
+
+    pitchwheel: cleaned up thread and timer
+
+[33mcommit 1e5fb091ca933a4b6e6f207a34433bd8dc1a2917[m
+Author: tambi-soft <nano13@gmx.net>
+Date:   Tue Oct 19 19:05:14 2021 +0100
+
+    pithwheel with tether implemented
+
+[33mcommit c11d471afa44ad18694df2eea87a16bc22d190ad[m
+Author: nano13 <nano13@gmx.net>
+Date:   Tue Oct 19 12:39:17 2021 +0100
+
+    added pitchwheel
+
+[33mcommit 8262c57d82efc64744912d0700330404d5ee75f5[m
+Merge: 8113237 4fbfd41
+Author: nano13 <nano13@gmx.net>
+Date:   Tue Oct 19 01:31:18 2021 +0100
+
+    Merge branch 'master' of ssh://powerplant.priv:/home/samuel/programmierung/vkeybd-qt
+
+[33mcommit 4fbfd41b9b9b5571b2e401bf1ebcd016a67898a9[m
+Author: tambi-soft <nano13@gmx.net>
+Date:   Tue Oct 19 01:28:50 2021 +0100
+
+    progress on pc keyboard
+
+[33mcommit 8113237dbf11b2dec96726d33e63156664bb8607[m
+Merge: b6ca10f 2ecb8e6
+Author: nano13 <nano13@gmx.net>
+Date:   Thu Oct 14 00:57:31 2021 +0100
+
+    Merge branch 'master' of ssh://powerplant.priv:/home/samuel/programmierung/vkeybd-qt
+
+[33mcommit 2ecb8e6c863b8faeec88051a12d2eb100356380c[m
+Author: tambi-soft <nano13@gmx.net>
+Date:   Thu Oct 14 00:56:18 2021 +0100
+
+    orgelwerk
+
+[33mcommit b6ca10fafd453d39dbbe54fe380f58baf81fbba0[m
+Author: nano13 <nano13@gmx.net>
+Date:   Thu Sep 23 09:03:36 2021 +0100
+
+    fiddling around with jack and alsa output
+
+[33mcommit 6974154816da8bb2382f0d40968959f64f897021[m
+Author: tambi-soft <nano13@gmx.net>
+Date:   Thu Sep 23 08:49:46 2021 +0100
+
+    adding lib asound
+
+[33mcommit f2ad3d1b2aaf94dae0c1704a9ebfe8a5ac371a93[m
+Author: tambi-soft <nano13@gmx.net>
+Date:   Mon Sep 13 10:44:52 2021 +0100
+
+    debug and release pathes
+
+[33mcommit 068fb2c306e2a814820dd80cc95d8461d49eb067[m
+Author: tambi-soft <nano13@gmx.net>
+Date:   Mon Sep 13 10:06:33 2021 +0100
+
+    interface_audio working now
+
+[33mcommit e3e7c21da98a2ad5e7f6f5164435a1157c809d52[m
+Author: tambi-soft <nano13@gmx.net>
+Date:   Mon Sep 13 09:55:45 2021 +0100
+
+    trying to implement audio interface
+
+[33mcommit 24b44ca02890dca1c1da0a1fc5afdb5a43500539[m
+Author: tambi-soft <nano13@gmx.net>
+Date:   Mon Sep 13 09:55:23 2021 +0100
+
+    trying to implement audio interface
+
+[33mcommit a7c857ba12f658d9e0da007c6b3eb3e93ab5c4b8[m
+Author: nano13 <nano13@gmx.net>
+Date:   Mon Sep 13 09:02:50 2021 +0100
+
+    init alsa_adapter
+
+[33mcommit c571117ff465cab3ee909bb8da8c015b16bdbd03[m
+Author: tambi-soft <nano13@gmx.net>
+Date:   Fri Sep 10 10:18:46 2021 +0100
+
+    piano: filtering out repeat events
+
+[33mcommit 7e141f7d9ba9f6377eb3de3be28970c1bdfaeba1[m
+Author: nano13 <nano13@gmx.net>
+Date:   Fri Sep 10 09:34:38 2021 +0100
+
+    progress on keyboard mapping and restructuring
+
+[33mcommit 2032eb44b86787006d53cc733298e639df263ed9[m
+Author: tambi-soft <nano13@gmx.net>
+Date:   Thu Sep 9 22:58:03 2021 +0100
+
+    first test for jack connection
+
+[33mcommit 6326f0be7a23b377578e10cf8d50de4f5cf0ef23[m
+Author: tambi-soft <nano13@gmx.net>
+Date:   Thu Sep 9 21:25:15 2021 +0100
+
+    piano button view finished
+
+[33mcommit dfc7478a939dc5592aff4425f577629c6d75c01d[m
+Author: nano13 <nano13@gmx.net>
+Date:   Thu Sep 9 20:04:11 2021 +0100
+
+    progress on piano keyboard
+
+[33mcommit 22cf9fef3f1210576ae010f767e4504a0f863f5c[m
+Author: tambi-soft <nano13@gmx.net>
+Date:   Thu Sep 9 20:03:02 2021 +0100
+
+    gitignore
+
+[33mcommit 2f1233277ca6cdd318e629ec976fd2ae75b6ebf6[m
+Author: tambi-soft <nano13@gmx.net>
+Date:   Thu Sep 9 19:40:07 2021 +0100
+
+    drawing piano keyboard
+
+[33mcommit 0decc300bae2199c7ee858658424521cf86dc328[m
+Author: tambi-soft <nano13@gmx.net>
+Date:   Thu Sep 9 16:42:00 2021 +0100
+
+    initial commit

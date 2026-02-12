@@ -253,8 +253,8 @@ void InputKeyboardRawController::keyboardRelease()
     t->quit();
     t->wait();
     
-    w->deleteLater();
-    t->deleteLater();
+    //w->deleteLater();
+    //t->deleteLater();
 }
 
 

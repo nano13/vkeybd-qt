@@ -6,28 +6,53 @@
 class KeyboardSelectorTwoLineDelegate : public QStyledItemDelegate {
 public:
     using QStyledItemDelegate::QStyledItemDelegate;
-
-    void paint(QPainter *p, const QStyleOptionViewItem &opt, const QModelIndex &idx) const override {
+    
+    void paint(QPainter *p,
+               const QStyleOptionViewItem &opt,
+               const QModelIndex &idx) const override
+    {
         p->save();
+        
         QStringList lines = idx.data().toString().split('\n');
-        QRect r = opt.rect;
-        int lineHeight = r.height() / lines.size(); // approximate
-
-        for (int i = 0; i < lines.size(); ++i) {
-            QRect lineRect(r.left()+4, r.top() + i*lineHeight, r.width()-8, lineHeight);
-            p->drawText(lineRect, Qt::AlignLeft | Qt::AlignVCenter, lines[i]);
+        QFontMetrics fm(opt.font);
+        
+        int lineHeight = fm.height();
+        int spacing = 2;          // pixels between lines
+        int xPad = 6;
+        int y = opt.rect.top() + 4;
+        
+        for (const QString &line : lines) {
+            QRect r(opt.rect.left() + xPad,
+                    y,
+                    opt.rect.width() - 2 * xPad,
+                    lineHeight);
+            
+            p->drawText(r, Qt::AlignLeft | Qt::AlignVCenter, line);
+            y += lineHeight + spacing;
         }
+        
         p->restore();
     }
-
-    QSize sizeHint(const QStyleOptionViewItem &opt, const QModelIndex &idx) const override {
+    
+    QSize sizeHint(const QStyleOptionViewItem &opt,
+                   const QModelIndex &idx) const override
+    {
         QStringList lines = idx.data().toString().split('\n');
+        QFontMetrics fm(opt.font);
+        
+        int lineHeight = fm.height();
+        int spacing = 2;
+        int vPad = 8;
+        
+        int h = lines.size() * lineHeight
+                + (lines.size() - 1) * spacing
+                + vPad;
+        
         QSize s = QStyledItemDelegate::sizeHint(opt, idx);
-        s.setHeight(s.height() * lines.size()); // scale by number of lines
+        s.setHeight(h);
         return s;
     }
 };
-
 
 
 
@@ -37,8 +62,10 @@ InputKeyboardSelect::InputKeyboardSelect(ComboKeyboardSelect *combo_keyboard_sel
     : QObject{parent}
 {
     this->combo_keyboard_selector = combo_keyboard_selector;
+    this->combo_keyboard_selector->setMinimumHeight(45);
     // Ensure the popup items are tall enough for two lines
     this->combo_keyboard_selector->setItemDelegate(new KeyboardSelectorTwoLineDelegate(combo_keyboard_selector));
+    /*
     this->combo_keyboard_selector->setStyleSheet(
         "QComboBox QAbstractItemView::item {"
         "    min-height: 40px;"  // increase to fit two lines comfortably
@@ -48,6 +75,7 @@ InputKeyboardSelect::InputKeyboardSelect(ComboKeyboardSelect *combo_keyboard_sel
         "    padding-right: 6px;"
         "}"
         );
+    */
     this->combo_keyboard_selector->view()->setAlternatingRowColors(true);
 
     this->button_keyboard_lock = button_keyboard_lock;

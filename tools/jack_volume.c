@@ -3,6 +3,8 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <unistd.h>
+#include <math.h>
+#include <string.h>
 
 jack_port_t *inputL, *inputR;
 jack_port_t *outputL, *outputR;
@@ -13,14 +15,14 @@ float target_volume = 1.0f;   // volume from MIDI
 float current_volume = 1.0f;  // actual applied volume
 const float smoothing = 0.001f; // smaller = smoother
 
-// Process callback
+// Process callback with soft clipping and smooth volume
 int process(jack_nframes_t nframes, void *arg) {
     jack_default_audio_sample_t *in_l = jack_port_get_buffer(inputL, nframes);
     jack_default_audio_sample_t *in_r = jack_port_get_buffer(inputR, nframes);
     jack_default_audio_sample_t *out_l = jack_port_get_buffer(outputL, nframes);
     jack_default_audio_sample_t *out_r = jack_port_get_buffer(outputR, nframes);
 
-    // MIDI
+    // MIDI handling
     void *midi_buf = jack_port_get_buffer(midi_in, nframes);
     jack_midi_event_t ev;
     int n_events = jack_midi_get_event_count(midi_buf);
@@ -31,20 +33,28 @@ int process(jack_nframes_t nframes, void *arg) {
             uint8_t cc = ev.buffer[1];
             uint8_t value = ev.buffer[2];
             if (status == 0xB0 && cc == 7) { // CC7 = volume
-                target_volume = value / 127.0f;
+                float max_gain = 3.0f; // up to 3x boost
+                target_volume = (value / 127.0f) * max_gain;
             }
         }
     }
 
-    // Apply volume with exponential smoothing per sample
+    // Apply volume with smoothing + soft clipping
     for (jack_nframes_t i = 0; i < nframes; i++) {
         current_volume += (target_volume - current_volume) * smoothing;
-        out_l[i] = in_l[i] * current_volume;
-        out_r[i] = in_r[i] * current_volume;
+
+        // amplify
+        float l = in_l[i] * current_volume;
+        float r = in_r[i] * current_volume;
+
+        // soft clip using tanh (gentle saturation)
+        out_l[i] = tanhf(l);
+        out_r[i] = tanhf(r);
     }
 
     return 0;
 }
+
 
 // JACK shutdown callback
 void shutdown(void *arg) {
@@ -52,7 +62,17 @@ void shutdown(void *arg) {
 }
 
 int main(int argc, char *argv[]) {
-    const char *client_name = "jack_volume_control";
+    const char *default_name = "jack_volume_control";
+    const char *client_name = default_name;
+
+    // Parse command-line arguments for -l
+    for (int i = 1; i < argc; i++) {
+        if (strcmp(argv[i], "-l") == 0 && i + 1 < argc) {
+            client_name = argv[i + 1];
+            i++; // skip next argument since we used it
+        }
+    }
+
     jack_options_t options = JackNullOption;
     jack_status_t status;
 
@@ -80,7 +100,7 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
-    printf("JACK client active. Listening for CC7 (volume) MIDI messages...\n");
+    printf("JACK client '%s' active. Listening for CC7 (volume) MIDI messages...\n", client_name);
 
     // Auto-connect system capture to input and output to system playback
     const char **ports;

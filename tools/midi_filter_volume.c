@@ -74,13 +74,23 @@ int process(jack_nframes_t nframes, void *arg) {
 }
 
 int main(int argc, char *argv[]) {
-    const char *client_name = "midi_volume_filter";
+    const char *default_name = "midi_volume_filter";
+    const char *client_name = default_name;
+
+    // Parse command-line arguments for -l <label>
+    for (int i = 1; i < argc; i++) {
+        if (strcmp(argv[i], "-l") == 0 && i + 1 < argc) {
+            client_name = argv[i + 1];
+            i++; // skip next argument since it's the label
+        }
+    }
+
     jack_options_t options = JackNullOption;
     jack_status_t status;
 
     client = jack_client_open(client_name, options, &status, NULL);
     if (!client) {
-        fprintf(stderr, "Failed to open JACK client\n");
+        fprintf(stderr, "Failed to open JACK client '%s'\n", client_name);
         return 1;
     }
 
@@ -92,7 +102,7 @@ int main(int argc, char *argv[]) {
     midi_out_filtered = jack_port_register(client, "output-filtered", JACK_DEFAULT_MIDI_TYPE, JackPortIsOutput, 0);
     midi_out_volume = jack_port_register(client, "output-volume", JACK_DEFAULT_MIDI_TYPE, JackPortIsOutput, 0);
 
-    // Ringbuffer for external thread access
+    // Ringbuffer
     midi_rb = jack_ringbuffer_create(4096);
     if (!midi_rb) {
         fprintf(stderr, "Failed to create ringbuffer\n");
@@ -102,11 +112,11 @@ int main(int argc, char *argv[]) {
     jack_set_process_callback(client, process, 0);
 
     if (jack_activate(client)) {
-        fprintf(stderr, "Cannot activate client\n");
+        fprintf(stderr, "Cannot activate JACK client\n");
         return 1;
     }
 
-    printf("MIDI forwarding active.\n");
+    printf("JACK client '%s' active.\n", client_name);
     printf("Filtered output: all except volume CC\n");
     printf("Volume output: CC7/CC11 only\n");
 
@@ -116,4 +126,5 @@ int main(int argc, char *argv[]) {
     jack_ringbuffer_free(midi_rb);
     return 0;
 }
+
 

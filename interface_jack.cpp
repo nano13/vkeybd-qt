@@ -129,19 +129,19 @@ void InterfaceJack::processRingBuffer(jack_nframes_t nframes)
 }
 
 // Event handlers remain unchanged
-void InterfaceJack::keyPressEvent(int port, int channel, int midicode, int velocity)
+void InterfaceJack::keyPressEvent(int port, int channel, uint8_t midicode, uint8_t velocity)
 {
     pushEvent({port, channel, MidiEvent::NOTE_ON, midicode, velocity});
 }
 
-void InterfaceJack::keyReleaseEvent(int port, int channel, int midicode, int velocity)
+void InterfaceJack::keyReleaseEvent(int port, int channel, uint8_t midicode, uint8_t velocity)
 {
     pushEvent({port, channel, MidiEvent::NOTE_OFF, midicode, velocity});
 }
 
 void InterfaceJack::keyPanicEvent(int port, int channel)
 {
-    for (int i = 0; i < 128; ++i)
+    for (uint8_t i = 0; i < 128; ++i)
         pushEvent({port, channel, MidiEvent::NOTE_OFF, i, 127});
 }
 
@@ -168,36 +168,36 @@ void InterfaceJack::keyPitchbendEvent(int port, int channel, int pitch)
 
 void InterfaceJack::keySustainEvent(int port, int channel, bool pressed)
 {
-    pushEvent({port, channel, MidiEvent::CC, 64, pressed ? 127 : 0});
+    pushEvent({port, channel, MidiEvent::CC, 64, pressed ? MIDI_ON : MIDI_OFF});
 }
 
 void InterfaceJack::keySostenutoEvent(int port, int channel, bool pressed)
 {
-    pushEvent({port, channel, MidiEvent::CC, 66, pressed ? 127 : 0});
+    pushEvent({port, channel, MidiEvent::CC, 66, pressed ? MIDI_ON : MIDI_OFF});
 }
 
 void InterfaceJack::keySoftEvent(int port, int channel, bool pressed)
 {
-    pushEvent({port, channel, MidiEvent::CC, 67, pressed ? 127 : 0});
+    pushEvent({port, channel, MidiEvent::CC, 67, pressed ? MIDI_ON : MIDI_OFF});
 }
 
-void InterfaceJack::setProgramChangeEvent(int port, int channel, int program, int bank)
+void InterfaceJack::setProgramChangeEvent(int port, int channel, uint8_t program, int bank)
 {
     if (bank < 0) bank = 0;
     
     // Bank MSB (CC0)
-    int bankMSB = (bank >> 7) & 0x7F;
+    uint8_t bankMSB = (bank >> 7) & 0x7F;
     pushEvent({port, channel, MidiEvent::CC, 0, bankMSB});
     
     // Bank LSB (CC32)
-    int bankLSB = bank & 0x7F;
+    uint8_t bankLSB = bank & 0x7F;
     pushEvent({port, channel, MidiEvent::CC, 32, bankLSB});
     
     // Program Change
-    pushEvent({port, channel, MidiEvent::PROGRAM, program & 0x7F, 0});
+    pushEvent({port, channel, MidiEvent::PROGRAM, program, 0});
 }
 
-void InterfaceJack::setControlChangeEvent(int port, int channel, int cc, int value)
+void InterfaceJack::setControlChangeEvent(int port, int channel, uint8_t cc, uint8_t value)
 {
     // Clamp to valid MIDI range just to be safe
     cc &= 0x7F;
@@ -207,32 +207,32 @@ void InterfaceJack::setControlChangeEvent(int port, int channel, int cc, int val
     pushEvent({port, channel, MidiEvent::CC, cc, value});
 }
 
-void InterfaceJack::setVolumeChangeEvent(int port, int channel, int volume)
+void InterfaceJack::setVolumeChangeEvent(int port, int channel, uint8_t volume)
 {
     pushEvent({port, channel, MidiEvent::CC, 7, volume});
 }
 
-void InterfaceJack::setPanChangeEvent(int port, int channel, int value)
+void InterfaceJack::setPanChangeEvent(int port, int channel, uint8_t value)
 {
     pushEvent({port, channel, MidiEvent::CC, 10, value});
 }
 
-void InterfaceJack::setPortamentoChanged(int port, int channel, int value)
+void InterfaceJack::setPortamentoChanged(int port, int channel, uint8_t value)
 {
     pushEvent({port, channel, MidiEvent::CC, 5, value});
 }
 
-void InterfaceJack::setAttackChanged(int port, int channel, int value)
+void InterfaceJack::setAttackChanged(int port, int channel, uint8_t value)
 {
     pushEvent({port, channel, MidiEvent::CC, 73, value});
 }
 
-void InterfaceJack::setReleaseChanged(int port, int channel, int value)
+void InterfaceJack::setReleaseChanged(int port, int channel, uint8_t value)
 {
     pushEvent({port, channel, MidiEvent::CC, 72, value});
 }
 
-void InterfaceJack::setTremoloChanged(int port, int channel, int value)
+void InterfaceJack::setTremoloChanged(int port, int channel, uint8_t value)
 {
     pushEvent({port, channel, MidiEvent::CC, 1, value});
 }

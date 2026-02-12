@@ -21,7 +21,7 @@ QString InterfaceAudio::label()
     return "";
 }
 
-void InterfaceAudio::keyPressEvent(int port, int channel, int midicode, int velocity)
+void InterfaceAudio::keyPressEvent(int port, int channel, uint8_t midicode, uint8_t velocity)
 {
     Q_UNUSED(port);
     Q_UNUSED(channel);
@@ -29,7 +29,7 @@ void InterfaceAudio::keyPressEvent(int port, int channel, int midicode, int velo
     Q_UNUSED(velocity);
 }
 
-void InterfaceAudio::keyReleaseEvent(int port, int channel, int midicode, int velocity)
+void InterfaceAudio::keyReleaseEvent(int port, int channel, uint8_t midicode, uint8_t velocity)
 {
     Q_UNUSED(port);
     Q_UNUSED(channel);
@@ -77,7 +77,7 @@ void InterfaceAudio::keySoftEvent(int port, int channel, bool pressed)
     Q_UNUSED(pressed);
 }
 
-void InterfaceAudio::setProgramChangeEvent(int port, int channel, int program, int bank)
+void InterfaceAudio::setProgramChangeEvent(int port, int channel, uint8_t program, int bank)
 {
     Q_UNUSED(port);
     Q_UNUSED(channel);
@@ -85,7 +85,7 @@ void InterfaceAudio::setProgramChangeEvent(int port, int channel, int program, i
     Q_UNUSED(bank);
 }
 
-void InterfaceAudio::setControlChangeEvent(int port, int channel, int cc, int value)
+void InterfaceAudio::setControlChangeEvent(int port, int channel, uint8_t cc, uint8_t value)
 {
     Q_UNUSED(port);
     Q_UNUSED(channel);
@@ -93,42 +93,42 @@ void InterfaceAudio::setControlChangeEvent(int port, int channel, int cc, int va
     Q_UNUSED(value);
 }
 
-void InterfaceAudio::setVolumeChangeEvent(int port, int channel, int volume)
+void InterfaceAudio::setVolumeChangeEvent(int port, int channel, uint8_t volume)
 {
     Q_UNUSED(port);
     Q_UNUSED(channel);
     Q_UNUSED(volume);
 }
 
-void InterfaceAudio::setPanChangeEvent(int port, int channel, int value)
+void InterfaceAudio::setPanChangeEvent(int port, int channel, uint8_t value)
 {
     Q_UNUSED(port);
     Q_UNUSED(channel);
     Q_UNUSED(value);
 }
 
-void InterfaceAudio::setPortamentoChanged(int port, int channel, int value)
+void InterfaceAudio::setPortamentoChanged(int port, int channel, uint8_t value)
 {
     Q_UNUSED(port);
     Q_UNUSED(channel);
     Q_UNUSED(value);
 }
 
-void InterfaceAudio::setAttackChanged(int port, int channel, int value)
+void InterfaceAudio::setAttackChanged(int port, int channel, uint8_t value)
 {
     Q_UNUSED(port);
     Q_UNUSED(channel);
     Q_UNUSED(value);
 }
 
-void InterfaceAudio::setReleaseChanged(int port, int channel, int value)
+void InterfaceAudio::setReleaseChanged(int port, int channel, uint8_t value)
 {
     Q_UNUSED(port);
     Q_UNUSED(channel);
     Q_UNUSED(value);
 }
 
-void InterfaceAudio::setTremoloChanged(int port, int channel, int value)
+void InterfaceAudio::setTremoloChanged(int port, int channel, uint8_t value)
 {
     Q_UNUSED(port);
     Q_UNUSED(channel);

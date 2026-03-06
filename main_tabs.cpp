@@ -38,7 +38,7 @@ MainTabs::MainTabs(QList<QString> labels, int id, Config *config, OutputSystem o
     this->socket = new QUdpSocket(this);
     
     if (output != OutputSystem::Network)
-    {
+    {  
         connect(line_udp_ip, &QLineEdit::textChanged, this, &MainTabs::rebindSocketIP);
         connect(spin_port, QOverload<int>::of(&QSpinBox::valueChanged), this, &MainTabs::rebindSocket);
         
@@ -56,6 +56,7 @@ MainTabs::MainTabs(QList<QString> labels, int id, Config *config, OutputSystem o
     
     //installEventFilter(this);
     
+    // we implement our own tab bar with "main_tabs_switcher"
     tabBar()->hide();
 }
 
@@ -318,6 +319,10 @@ void MainTabs::rawKeyPressed(int keycode)
                 MIDISignal(MIDISignalTypes::SustainReleased);
                 this->setCurrentIndex(i+12);
             }
+            else if (this->is_escape_pressed)
+            {
+                this->setCurrentIndex(i+24);
+            }
             else
                 this->setCurrentIndex(i);
         }
@@ -325,7 +330,15 @@ void MainTabs::rawKeyPressed(int keycode)
     
     if (keycode == KeysRaw::Escape)
     {
+        this->is_escape_pressed = true;
+        
         MIDISignal(MIDISignalTypes::Panick);
+        
+        for (int i=0; i < this->list_of_tabs.length(); i++)
+        {
+            Orgelwerk* o = this->list_of_tabs.at(i);
+            o->stopAllPressed();
+        }
     }
     else if (keycode == KeysRaw::Delete)
     {
@@ -427,7 +440,11 @@ void MainTabs::rawKeyReleased(int keycode)
     
     sendUDPMessage(udp_message);
     
-    if (keycode == KeysRaw::Space)
+    if (keycode == KeysRaw::Escape)
+    {
+        this->is_escape_pressed = false;
+    }
+    else if (keycode == KeysRaw::Space)
     {
         this->is_space_pressed = false;
         

@@ -77,6 +77,7 @@ private:
     
     void multiplexMIDIEventToTabs(int tab_id, int midicode, MIDIMode mode);
     
+    bool is_escape_pressed = false;
     bool is_space_pressed = false;
 
 protected:

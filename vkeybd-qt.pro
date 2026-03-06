@@ -38,6 +38,7 @@ SOURCES += \
     keyboard_pc.cpp \
     keyboard_piano.cpp \
     main.cpp \
+    main_subtabs_switcher.cpp \
     main_tabs.cpp \
     main_tabs_switcher.cpp \
     main_window.cpp \
@@ -71,6 +72,7 @@ HEADERS += \
     keyboard_notes.h \
     keyboard_pc.h \
     keyboard_piano.h \
+    main_subtabs_switcher.h \
     main_tabs.h \
     main_tabs_switcher.h \
     main_window.h \

@@ -15,8 +15,6 @@ void QRightClickButton::mousePressEvent(QMouseEvent *e)
         QPushButton::mousePressEvent(e);
 }
 
-
-
 MainTabsSwitcher::MainTabsSwitcher(int keyboard_id, Config *config, QWidget *parent)
     : QWidget{parent}
 {

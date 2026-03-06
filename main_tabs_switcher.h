@@ -41,6 +41,9 @@ public slots:
 
 #include "config.h"
 
+#include "interface_notify.h"
+#include "interface_notify_dbus.h"
+
 class MainTabsSwitcher : public QWidget
 {
     Q_OBJECT
@@ -65,6 +68,8 @@ private:
     void rightClicked(QRightClickButton *button, int tab_id);
     
     void activateLeftmostTab();
+    
+    InterfaceNotifyDBus *notify_dbus;  
     
 signals:
     void signalTabSwitched(int keyboard_id, int tab_id);

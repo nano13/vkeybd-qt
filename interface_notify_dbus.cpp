@@ -60,10 +60,10 @@ int InterfaceNotifyDBus::sendNotification(const NotificationData &data)
 void InterfaceNotifyDBus::sendKeyShiftNotification(int keyshift)
 {
     NotificationData data;
-    data.id = keyshift_last_id;     // try to update existing one
+    data.id = this->keyshift_last_id;     // try to update existing one
     data.title = "KeyShift";
     data.body = QString::number(keyshift);
-    data.timeout = 5000;
+    data.timeout = -1;
     
     QDBusMessage msg = QDBusMessage::createMethodCall(
         "org.freedesktop.Notifications",
@@ -87,13 +87,45 @@ void InterfaceNotifyDBus::sendKeyShiftNotification(int keyshift)
     if (reply.type() == QDBusMessage::ReplyMessage &&
         reply.arguments().size() == 1)
     {
-        keyshift_last_id = reply.arguments().at(0).toUInt();
+        this->keyshift_last_id = reply.arguments().at(0).toUInt();
     }
 }
 
+void InterfaceNotifyDBus::sendTabChangeNotification(const QString &text)
+{
+    QDBusMessage msg = QDBusMessage::createMethodCall(
+        "org.freedesktop.Notifications",
+        "/org/freedesktop/Notifications",
+        "org.freedesktop.Notifications",
+        "Notify"
+        );
+    
+    msg << "vkeybd-qt"
+        << this->tabchange_last_id
+        << ""                  // icon
+        << "Register Change"        // title
+        << text                // body
+        << QStringList()
+        << QVariantMap()
+        << int(-1);          // timeout
+    
+    QDBusMessage reply = QDBusConnection::sessionBus().call(msg);
+    
+    if (reply.type() == QDBusMessage::ReplyMessage &&
+        reply.arguments().size() == 1)
+    {
+        this->tabchange_last_id = reply.arguments().at(0).toUInt();
+    }
+}
+
+
 void InterfaceNotifyDBus::onNotificationClosed(uint id, uint reason)
 {
-    if (id == keyshift_last_id)
-        keyshift_last_id = 0;
+    if (id == this->keyshift_last_id)
+        this->keyshift_last_id = 0;
+    
+    if (id == this->tabchange_last_id)
+        this->tabchange_last_id = 0;
 }
+
 

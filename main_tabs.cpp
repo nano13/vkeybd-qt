@@ -27,9 +27,6 @@ MainTabs::MainTabs(QList<QString> labels, int id, Config *config, OutputSystem o
     connect(input_keyboard_select, &InputKeyboardSelect::keyRawPressedSignal, this, &MainTabs::rawKeyPressed);
     connect(input_keyboard_select, &InputKeyboardSelect::keyRawReleasedSignal, this, &MainTabs::rawKeyReleased);
     
-    //this->button_lock = button_lock;
-    //connect(this->button_lock, &QPushButton::clicked, this, &MainTabs::toggleKeyboardLock);
-    
     this->line_udp_ip = line_udp_ip;
     this->spin_port = spin_port;
     
@@ -54,20 +51,13 @@ MainTabs::MainTabs(QList<QString> labels, int id, Config *config, OutputSystem o
         hide();
     }
     
-    //installEventFilter(this);
-    
     // we implement our own tab bar with "main_tabs_switcher"
     tabBar()->hide();
 }
 
 void MainTabs::initializeTabs(OutputSystem output)
 {
-    //this->list_function_keys = {Qt::Key_F1, Qt::Key_F2, Qt::Key_F3, Qt::Key_F4, -1, Qt::Key_F5, Qt::Key_F6, Qt::Key_F7, Qt::Key_F8, -1, Qt::Key_F9, Qt::Key_F10, Qt::Key_F11, Qt::Key_F12};
-    //this->list_function_keys_raw = {KeysRaw::F1, KeysRaw::F2, KeysRaw::F3, KeysRaw::F4, -1, KeysRaw::F5, KeysRaw::F6, KeysRaw::F7, KeysRaw::F8, -1, KeysRaw::F9, KeysRaw::F10, KeysRaw::F11, KeysRaw::F12};
     this->list_function_keys_raw = {KeysRaw::F1, KeysRaw::F2, KeysRaw::F3, KeysRaw::F4, KeysRaw::F5, KeysRaw::F6, KeysRaw::F7, KeysRaw::F8, KeysRaw::F9, KeysRaw::F10, KeysRaw::F11, KeysRaw::F12};
-    //this->list_function_keys_native = {67, 68, 69, 70, -1, 71, 72, 73, 74, -1, 75, 76, 95, 96};
-    //this->list_labels = {"F1", "F2", "F3", "F4", "spacer", "F5", "F6", "F7", "F8", "spacer", "F9", "F10", "F11", "F12"};
-    //this->list_labels = {"F1", "F2", "F3", "F4", "F5", "F6", "F7", "F8", "F9", "F10", "F11", "F12"};
     
     int number_of_tabs = this->list_labels.length();
     //number_of_tabs = 4;
@@ -185,22 +175,6 @@ void MainTabs::showHideGUIElements(GUIElements elements, bool show)
     resize(10, 10);
 }
 
-/*
-bool MainTabs::callEventFilter(QObject *obj, QEvent *ev)
-{
-    return eventFilter(obj, ev);
-}
-bool MainTabs::eventFilter(QObject *obj, QEvent *ev)
-{
-    if (! this->input_kbd_qt_default)
-    {
-        return false;
-    }
-    
-    //return this->keyboard_qt->callEventFilter(obj, ev);
-}
-*/
-
 void MainTabs::sendUDPMessage(QString message)
 {
     QByteArray udp_message;
@@ -252,33 +226,6 @@ void MainTabs::rebindSocket(int value)
     socket->bind(QHostAddress(this->line_udp_ip->text()), value);
 }
 
-/*
-void MainTabs::keyboardSelectionChanged(QString text)
-{
-    if (this->keyboard_locked)
-    {
-        toggleKeyboardLock();
-    }
-    
-    // unlock the keyboard if selection changed and it was locked (probably this is not possible anymore anyways since the lock-button deactivates this->combo_keyboard_input, but it is better to leave this code in here, just in case ...)
-    this->keyboard_raw->keyboardRelease();
-    
-    if (this->combo_keyboard_input->currentText() == this->combo_keyboard_input_labels[0])
-    {
-        emit useInputKbdQtNativeSignal();
-    }
-    else if (this->combo_keyboard_input->currentText() == this->combo_keyboard_input_labels[1])
-    {
-        emit useInputKbdQtDefaultSignal();
-    }
-    else
-    {
-        QString devpath = this->keyboard_raw->getPathForName(text);
-        
-        this->keyboard_raw->keyboardListen(devpath);
-    }
-}
-*/
 void MainTabs::deviceNotAvailable(QString message)
 {
     qDebug() << "main_tabs: deviceNotAvailable";
@@ -601,90 +548,3 @@ void MainTabs::loadMIDIConnections()
     this->interface_audio->loadMIDISettings();
 }
 
-/*
-void MainTabs::toggleKeyboardLock()
-{
-    //this->keyboard_raw->keyboardRelease();
-    
-    if (this->keyboard_locked)
-    {
-        this->keyboard_locked = false;
-        this->button_lock->setDown(false);
-        this->button_lock->setText("Lock");
-        
-        this->combo_keyboard_input->setEnabled(true);
-        
-        //if (this->combo_keyboard_input->currentText() == this->combo_keyboard_input_labels[1])
-        if (this->combo_keyboard_input->currentIndex() == KeyboardEvent::None)
-        {
-            qDebug() << "NONE: AAAAAAAAAA";
-        }
-        //else if (this->combo_keyboard_input->currentText() == this->combo_keyboard_input_labels[0])
-        else if (this->combo_keyboard_input->currentIndex() == KeyboardEvent::Default)
-        {
-            this->input_kbd_qt_native = false;
-            qDebug() << "releasing Qt native";
-            releaseKeyboard();
-        }
-        else if (this->combo_keyboard_input->currentIndex() == KeyboardEvent::Native)
-        {
-            this->input_kbd_qt_default = false;
-            qDebug() << "releasing Qt default";
-            releaseKeyboard();
-            //releaseMouse();
-        }
-        else if (this->combo_keyboard_input->currentIndex() == KeyboardEvent::Detect)
-        {
-            
-        }
-        else
-        {
-            this->input_kbd_linux_raw = false;
-            qDebug() << "releasing raw";
-            this->keyboard_raw->keyboardRelease();
-        }
-    }
-    else
-    {
-        this->keyboard_locked = true;
-        this->button_lock->setDown(true);
-        this->button_lock->setText("Unlock");
-        
-        this->combo_keyboard_input->setEnabled(false);
-        
-        if (this->combo_keyboard_input->currentIndex() == KeyboardEvent::None)
-        {
-            qDebug() << "NONE: BBBBBBBBBB";
-        }
-        else if (this->combo_keyboard_input->currentIndex() == KeyboardEvent::Default)
-        //if (this->combo_keyboard_input->currentText() == this->combo_keyboard_input_labels[1])
-        {
-            this->input_kbd_qt_default = true;
-            qDebug() << "grabbing Qt default";
-            grabKeyboard();
-            // to avoid to mess around with the os like blocking taskbar-items, we need to grab the mouse aswell
-            //grabMouse();
-        }
-        else if (this->combo_keyboard_input->currentIndex() == KeyboardEvent::Native)
-        //else if (this->combo_keyboard_input->currentText() == this->combo_keyboard_input_labels[0])
-        {
-            this->input_kbd_qt_native = true;
-            qDebug() << "grabbing Qt native";
-            grabKeyboard();
-        }
-        else if (this->combo_keyboard_input->currentIndex() == KeyboardEvent::Detect)
-        {
-            
-        }
-        else
-        {
-            this->input_kbd_linux_raw = true;
-            //qDebug() << "locking: release";
-            //this->keyboard_raw->keyboardRelease();
-            qDebug() << "gabbing: raw";
-            QString devpath = this->keyboard_raw->getPathForName(this->combo_keyboard_input->currentText());
-            this->keyboard_raw->keyboardLock(devpath);
-        }
-    }
-}
-*/

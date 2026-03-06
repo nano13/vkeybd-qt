@@ -17,11 +17,14 @@ void QRightClickButton::mousePressEvent(QMouseEvent *e)
 
 
 
-MainTabsSwitcher::MainTabsSwitcher(int keyboard_id, Config *config, QWidget *parent)
+MainTabsSwitcher::MainTabsSwitcher(int keyboard_id, Config *config, InterfaceNotify *notify, QWidget *parent)
     : QWidget{parent}
 {
     this->keyboard_id = keyboard_id;
     this->config = config;
+    this->notify_dbus = notify;
+    qDebug() << this->notify_dbus;
+    qDebug() << "aaaaaaaaaaaaaaaaaaaaaaaaaaadddddddddddddddddd";
     
     this->grid = new QGridLayout;
     setLayout(this->grid);
@@ -59,8 +62,6 @@ MainTabsSwitcher::MainTabsSwitcher(int keyboard_id, Config *config, QWidget *par
             connect(button, &QRightClickButton::rightClicked, this, [this, button, tab_id]{ rightClicked(button, tab_id); });
         }
     }
-    
-    this->notify_dbus = new InterfaceNotifyDBus(this);
     
     // to activate first tab on startup
     this->list_of_buttons.first()->setChecked(true);

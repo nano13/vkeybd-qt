@@ -1,9 +1,7 @@
 #include "interface_notify_dbus.h"
-#include <QDBusMessage>
-#include <QDBusConnection>
 
-InterfaceNotifyDBus::InterfaceNotifyDBus(QObject *parent)
-    : QObject(parent)
+InterfaceNotifyDBus::InterfaceNotifyDBus(InterfaceNotify *parent)
+    : InterfaceNotify(parent)
 {
     QDBusConnection::sessionBus().connect(
         "org.freedesktop.Notifications",
@@ -36,7 +34,7 @@ void InterfaceNotifyDBus::sendNotification(const QString &message)
     QDBusConnection::sessionBus().call(msg, QDBus::NoBlock);
 }
 
-int InterfaceNotifyDBus::sendNotification(const NotificationData &data)
+int InterfaceNotifyDBus::sendNotification(const NotifyData &data)
 {
     QDBusMessage msg = QDBusMessage::createMethodCall(
         "org.freedesktop.Notifications",
@@ -59,7 +57,7 @@ int InterfaceNotifyDBus::sendNotification(const NotificationData &data)
 
 void InterfaceNotifyDBus::sendKeyShiftNotification(int keyshift)
 {
-    NotificationData data;
+    NotifyData data;
     data.id = this->keyshift_last_id;     // try to update existing one
     data.title = "KeyShift";
     data.body = QString::number(keyshift);

@@ -34,6 +34,7 @@ SOURCES += \
     interface_alsa.cpp \
     interface_audio.cpp \
     interface_jack.cpp \
+    interface_notify.cpp \
     interface_notify_dbus.cpp \
     jack_save_load.cpp \
     keyboard_notes.cpp \

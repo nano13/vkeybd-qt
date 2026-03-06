@@ -3,17 +3,22 @@
 
 #include <QObject>
 #include <QString>
+#include <QDBusMessage>
+#include <QDBusConnection>
+
+#include "interface_notify.h"
+
 #include "enums_structs.h"
 
-class InterfaceNotifyDBus : public QObject
+class InterfaceNotifyDBus : public InterfaceNotify
 {
     Q_OBJECT
     
 public:
-    explicit InterfaceNotifyDBus(QObject *parent = nullptr);
+    explicit InterfaceNotifyDBus(InterfaceNotify *parent = nullptr);
     
     static void sendNotification(const QString &message);
-    int sendNotification(const NotificationData &data);
+    int sendNotification(const NotifyData &data);
     
     void sendKeyShiftNotification(int keyshift);
     void sendTabChangeNotification(const QString &text);

@@ -21,6 +21,7 @@ Config::Config(QObject *parent) : QObject(parent)
         this->config->setValue("default/number-of-layers", 2);
         this->config->setValue("default/output", "jack");
         this->config->setValue("default/keyboard-config", "keyboard-default.json");
+        this->config->setValue("default/notify", "dbus");
     }
 }
 
@@ -100,6 +101,16 @@ int Config::getNumberOfLayers()
 void Config::setNumberOfLayers(int number)
 {
     this->config->setValue("default/number-of-layers", number);
+}
+
+NotifyBackend Config::getNotifyBackend()
+{
+    QString backend = this->config->value("default/notify").toString();
+    
+    if (backend == "dbus")
+        return NotifyBackend::dbus;
+    else // also backend == none
+        return NotifyBackend::none;
 }
 
 QString Config::getKeyboardConfig()

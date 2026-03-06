@@ -172,7 +172,13 @@ struct CCEntry
 
 
 
-struct NotificationData
+enum NotifyBackend
+{
+    none,
+    dbus
+};
+
+struct NotifyData
 {
     uint32_t id = 0;                        // which logical notification (value must be 0 for new or returned from earlier dbus message
     QString title = "Notification";                 // summary/title

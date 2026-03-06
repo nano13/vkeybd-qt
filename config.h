@@ -34,6 +34,8 @@ public:
     int getNumberOfLayers();
     void setNumberOfLayers(int number);
     
+    NotifyBackend getNotifyBackend();
+    
     QString getOutputSystem();
     void setOutputSystem(QString output);
     

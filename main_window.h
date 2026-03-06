@@ -74,7 +74,7 @@ private:
     
     MIDIKeyShiftGlobal *global_key_shift_widget = new MIDIKeyShiftGlobal;
     
-    InterfaceNotifyDBus *notify_dbus;    
+    InterfaceNotify *notify_dbus;    
 
 protected:
     bool eventFilter(QObject *obj, QEvent *ev) override;

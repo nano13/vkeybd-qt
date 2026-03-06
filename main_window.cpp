@@ -3,6 +3,14 @@
 MainWindow::MainWindow(OutputSystem output, int number_of_keyboards, QWidget *parent)
     : QMainWindow(parent)
 {
+    this->config = new Config;
+    
+    NotifyBackend notify = this->config->getNotifyBackend();
+    if (notify == NotifyBackend::dbus)
+        this->notify_dbus = new InterfaceNotifyDBus();
+    else
+        this->notify_dbus = new InterfaceNotify();
+    
     this->number_of_keyboards = number_of_keyboards;
     
     QWidget *main_container_widget = new QWidget;
@@ -49,8 +57,6 @@ MainWindow::MainWindow(OutputSystem output, int number_of_keyboards, QWidget *pa
     connect(this->global_key_shift_widget, &MIDIKeyShiftGlobal::signalKeyShiftChanged, this, &MainWindow::globalKeyShiftValueChanged);
     
     this->loadParamsAuto();
-    
-    this->notify_dbus = new InterfaceNotifyDBus(this);
 }
 
 MainWindow::~MainWindow()
@@ -66,7 +72,7 @@ QWidget* MainWindow::newKeyboardInstance(int id, OutputSystem output)
     //widget->setLayout(layout);
     widget->setLayout(grid);
     
-    this->config = new Config;
+    //this->config = new Config;
     connect(this->config, &Config::restoreParams, this, &MainWindow::restoreParams);
     connect(this->config, &Config::restoreGeneral, this, &MainWindow::restoreGeneral);
     
@@ -102,7 +108,7 @@ QWidget* MainWindow::newKeyboardInstance(int id, OutputSystem output)
     //spin_port->hide();
     this->list_of_spin_ports.append(spin_port);
     
-    this->switcher = new MainTabsSwitcher(id, this->config, this);
+    this->switcher = new MainTabsSwitcher(id, this->config, this->notify_dbus, this);
     connect(this->switcher, &MainTabsSwitcher::signalTabSwitched, this, &MainWindow::changeCurrentTab);
     connect(this->switcher, &MainTabsSwitcher::signalTabCheckChanged, this, &MainWindow::tabsCheckChanged);
     this->list_of_maintab_switchers.append(this->switcher);
@@ -372,6 +378,7 @@ void MainWindow::globalKeyShiftValueChanged(int value, bool is_relative)
     int keyshift = this->list_of_maintabs.at(0)->globalKeyShiftGet();
     
     //InterfaceNotifyDBus::sendNotification("KeyShift " + QString::number(keyshift));
+    
     
     this->notify_dbus->sendKeyShiftNotification(keyshift);
 }

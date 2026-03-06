@@ -48,7 +48,7 @@ class MainTabsSwitcher : public QWidget
 {
     Q_OBJECT
 public:
-    explicit MainTabsSwitcher(int keyboard_id = 0, Config *config = nullptr, QWidget *parent = nullptr);
+    explicit MainTabsSwitcher(int keyboard_id = 0, Config *config = nullptr, InterfaceNotify *notify = nullptr, QWidget *parent = nullptr);
     
     // called if tab was changed by hotkey to keep this widget synchronised
     void pressButton(int button_id);
@@ -69,7 +69,7 @@ private:
     
     void activateLeftmostTab();
     
-    InterfaceNotifyDBus *notify_dbus;  
+    InterfaceNotify *notify_dbus;  
     
 signals:
     void signalTabSwitched(int keyboard_id, int tab_id);

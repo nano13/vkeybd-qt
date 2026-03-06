@@ -21,7 +21,12 @@ Config::Config(QObject *parent) : QObject(parent)
         this->config->setValue("default/number-of-layers", 2);
         this->config->setValue("default/output", "jack");
         this->config->setValue("default/keyboard-config", "keyboard-default.json");
-        this->config->setValue("default/notify", "dbus");
+        
+        QString platform = QGuiApplication::platformName();
+        if (platform == "xcb" || platform == "wayland")
+            this->config->setValue("default/notify", "dbus");
+        else
+            this->config->setValue("default/notify", "none");
     }
 }
 

@@ -6,6 +6,7 @@
 #include <QFile>
 #include <QStandardPaths>
 #include <QSettings>
+#include <QGuiApplication>
 
 #include <QDebug>
 

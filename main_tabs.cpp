@@ -238,6 +238,10 @@ void MainTabs::globalKeyShiftChanged(int value, bool is_relative)
         this->list_of_tabs.at(i)->globalPitchShiftChanged(value, is_relative);
     }
 }
+int MainTabs::globalKeyShiftGet()
+{
+    return this->list_of_tabs.at(0)->globalPitchShiftGet();
+}
 
 void MainTabs::globalResendMIDISettings()
 {
@@ -364,14 +368,20 @@ void MainTabs::rawKeyPressed(int keycode)
     else if (keycode == KeysRaw::Print)
     {
         emit signalKeyShiftChanged(-1, true);
+        
+        // Notification in MainWindow::globalKeyShiftValueChanged
     }
     else if (keycode == KeysRaw::Scroll)
     {
         emit signalKeyShiftChanged(0, true);
+        
+        // Notification in MainWindow::globalKeyShiftValueChanged
     }
     else if (keycode == KeysRaw::Pause)
     {
         emit signalKeyShiftChanged(1, true);
+        
+        // Notification in MainWindow::globalKeyShiftValueChanged
     }
     else
     {

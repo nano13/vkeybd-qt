@@ -77,6 +77,7 @@ public:
     void octaveDown();
     void octaveUp();
     void globalPitchShiftChanged(int value, bool is_relative=false);
+    int globalPitchShiftGet();
     
     // to be called if we have multiple tabs activated (using right mouse button on tab buttons)
     void injectExternalMIDIEvent(int midicode, MIDIMode mode);

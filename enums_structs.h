@@ -170,4 +170,19 @@ struct CCEntry
     QSpinBox* delay;      // delay before shooting the CC message
 };
 
+
+
+struct NotificationData
+{
+    uint32_t id = 0;                        // which logical notification (value must be 0 for new or returned from earlier dbus message
+    QString title = "Notification";                 // summary/title
+    QString body;                                   // main message
+    QString icon = "";                              // icon name or path
+    QStringList actions = {};                       // optional action buttons
+    QVariantMap hints = {};                         // urgency, category, etc.
+    int timeout = 5000;                               // -1 = server default
+};
+
+
+
 #endif // ENUMS_STRUCTS_H

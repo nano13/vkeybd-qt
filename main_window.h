@@ -36,6 +36,9 @@
 
 #include "enums_structs.h"
 
+#include "interface_notify.h"
+#include "interface_notify_dbus.h"
+
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
@@ -70,6 +73,8 @@ private:
     InputKeyboardQt *inputQt = new InputKeyboardQt;
     
     MIDIKeyShiftGlobal *global_key_shift_widget = new MIDIKeyShiftGlobal;
+    
+    InterfaceNotifyDBus *notify_dbus;    
 
 protected:
     bool eventFilter(QObject *obj, QEvent *ev) override;

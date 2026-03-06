@@ -20,6 +20,9 @@
 #include "input_keyboard_select.h"
 //#include "combo_keyboard_select.h"
 
+#include "interface_notify.h"
+#include "interface_notify_dbus.h"
+
 #include "enums_structs.h"
 
 class MainTabs : public QTabWidget
@@ -41,6 +44,7 @@ public:
     void loadMIDIConnections();
     
     void globalKeyShiftChanged(int value, bool is_relative);
+    int globalKeyShiftGet();
     void globalResendMIDISettings();
     
     void listOfCheckTabsChanged(QList<int> list_of_tab_ids);

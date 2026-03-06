@@ -520,6 +520,10 @@ void Orgelwerk::globalPitchShiftChanged(int value, bool is_relative)
         }
     }
 }
+int Orgelwerk::globalPitchShiftGet()
+{
+    return this->key_shift_master->value();
+}
 
 void Orgelwerk::showEvent(QShowEvent *event)
 {

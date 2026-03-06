@@ -49,6 +49,8 @@ MainWindow::MainWindow(OutputSystem output, int number_of_keyboards, QWidget *pa
     connect(this->global_key_shift_widget, &MIDIKeyShiftGlobal::signalKeyShiftChanged, this, &MainWindow::globalKeyShiftValueChanged);
     
     this->loadParamsAuto();
+    
+    this->notify_dbus = new InterfaceNotifyDBus(this);
 }
 
 MainWindow::~MainWindow()
@@ -366,6 +368,12 @@ void MainWindow::globalKeyShiftValueChanged(int value, bool is_relative)
     {
         this->list_of_maintabs.at(i)->globalKeyShiftChanged(value, is_relative);
     }
+    
+    int keyshift = this->list_of_maintabs.at(0)->globalKeyShiftGet();
+    
+    //InterfaceNotifyDBus::sendNotification("KeyShift " + QString::number(keyshift));
+    
+    this->notify_dbus->sendKeyShiftNotification(keyshift);
 }
 
 void MainWindow::globalResendMIDISettings()

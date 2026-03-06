@@ -2,7 +2,8 @@ QT  += core\
     gui\
     svg\
     svgwidgets\
-    network
+    network\
+    dbus
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -33,6 +34,7 @@ SOURCES += \
     interface_alsa.cpp \
     interface_audio.cpp \
     interface_jack.cpp \
+    interface_notify_dbus.cpp \
     jack_save_load.cpp \
     keyboard_notes.cpp \
     keyboard_pc.cpp \
@@ -68,6 +70,8 @@ HEADERS += \
     interface_alsa.h \
     interface_audio.h \
     interface_jack.h \
+    interface_notify.h \
+    interface_notify_dbus.h \
     jack_save_load.h \
     keyboard_notes.h \
     keyboard_pc.h \

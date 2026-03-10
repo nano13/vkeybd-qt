@@ -15,6 +15,7 @@
 
 #include "orgelwerk.h"
 #include "config.h"
+#include "main_tabs_switcher.h"
 #include "enums_structs.h"
 
 #include "input_keyboard_select.h"
@@ -29,7 +30,7 @@ class MainTabs : public QTabWidget
 {
     Q_OBJECT
 public:
-    explicit MainTabs(QList<QString> labels, int id, Config* config, OutputSystem output, InputKeyboardSelect *input_keyboard_select, QLineEdit *line_udp_ip, QSpinBox *spin_port, QWidget *parent = nullptr);
+    explicit MainTabs(QList<QString> labels, int id, Config* config, MainTabsSwitcher* switcher, OutputSystem output, InputKeyboardSelect *input_keyboard_select, QLineEdit *line_udp_ip, QSpinBox *spin_port, QWidget *parent = nullptr);
     
     //bool callEventFilter(QObject *obj, QEvent *ev);
     void saveParams(QSettings *settings);
@@ -64,6 +65,7 @@ private:
     
     int id;
     Config *config;
+    MainTabsSwitcher *main_tabs_switcher;
     //InputKeyboardSelect *input_keyboard_select;
     //QPushButton *button_lock;
     QLineEdit *line_udp_ip;

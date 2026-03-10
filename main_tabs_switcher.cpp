@@ -23,8 +23,6 @@ MainTabsSwitcher::MainTabsSwitcher(int keyboard_id, Config *config, InterfaceNot
     this->keyboard_id = keyboard_id;
     this->config = config;
     this->notify_dbus = notify;
-    qDebug() << this->notify_dbus;
-    qDebug() << "aaaaaaaaaaaaaaaaaaaaaaaaaaadddddddddddddddddd";
     
     this->grid = new QGridLayout;
     setLayout(this->grid);
@@ -33,8 +31,8 @@ MainTabsSwitcher::MainTabsSwitcher(int keyboard_id, Config *config, InterfaceNot
     this->grid->setVerticalSpacing(0);
     
     int tab_id = -1;
-    int number_of_layers = this->config->getNumberOfLayers();
-    for (int x=0; x < number_of_layers; x++)
+    this->layers_number = this->config->getNumberOfLayers();
+    for (int x=0; x < this->layers_number; x++)
     {
         for (int y=0; y < 12; y++)
         {
@@ -51,10 +49,7 @@ MainTabsSwitcher::MainTabsSwitcher(int keyboard_id, Config *config, InterfaceNot
             this->list_of_buttons.append(button);
             this->list_labels.append(label);
             
-            if (y >= 4 & y <= 7)
-                button->setObjectName("main_tab_switcher_button_b");
-            else
-                button->setObjectName("main_tab_switcher_button_a");
+            this->colorizeTabs(button, x, y);
             
             this->grid->addWidget(button, x, y);
             
@@ -145,10 +140,61 @@ QList<int> MainTabsSwitcher::getCheckedTabsList()
     return result;
 }
 
+void MainTabsSwitcher::setLayerActive(int layer)
+{
+    // layers_number counts from 1 because it comes from config.
+    // letting the human put in 0 for one layer of keyboards would be a bit strange ...
+    // however layer counts from 0
+    if (layer < this->layers_number)
+    {
+        this->layer_active = layer;
+        
+        // change colors of selected layer
+        int tab_id = -1;
+        for (int x=0; x < this->layers_number; x++)
+        {
+            for (int y=0; y < 12; y++)
+            {
+                tab_id++;
+                
+                QRightClickButton *button = this->list_of_buttons.at(tab_id);
+                
+                this->colorizeTabs(button, x, y);
+                
+                button->style()->unpolish(button);
+                button->style()->polish(button);
+                button->update();
+            }
+        }
+    }
+}
+int MainTabsSwitcher::getLayerActive()
+{
+    return this->layer_active;
+}
+
 void MainTabsSwitcher::activateLeftmostTab()
 {
     QList<int> checked_tabs = getCheckedTabsList();
     int tab_id = checked_tabs.first();
     
     emit signalTabSwitched(this->keyboard_id, tab_id);
+}
+
+void MainTabsSwitcher::colorizeTabs(QPushButton *button, int layers_counter, int tabs_counter)
+{
+    if (layers_counter == this->layer_active)
+    {
+        if (tabs_counter >= 4 & tabs_counter <= 7)
+            button->setObjectName("main_tab_switcher_button_a");
+        else
+            button->setObjectName("main_tab_switcher_button_b");
+    }
+    else
+    {
+        if (tabs_counter >= 4 & tabs_counter <= 7)
+            button->setObjectName("main_tab_switcher_button_b");
+        else
+            button->setObjectName("main_tab_switcher_button_a");
+    }
 }

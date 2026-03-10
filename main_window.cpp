@@ -115,7 +115,7 @@ QWidget* MainWindow::newKeyboardInstance(int id, OutputSystem output)
     
     QList<QString> labels = this->switcher->getLabelsList();
     
-    MainTabs *tabs = new MainTabs(labels, id, this->config, output, input_keyboard_select, line_udp_ip, spin_port, this);
+    MainTabs *tabs = new MainTabs(labels, id, this->config, this->switcher, output, input_keyboard_select, line_udp_ip, spin_port, this);
     //connect(tabs, &MainTabs::currentChanged, this, [this, id](MainTabs::currentChanged index){ currentTabChanged(index, id); });
     connect(tabs, &MainTabs::currentChanged, this, [this, tabs, id](int index){ currentTabChanged(id, index); });
     //connect(tabs, &MainTabs::useInputKbdQtNativeSignal, this, &MainWindow::useInputKbdQtNative);

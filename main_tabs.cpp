@@ -1,11 +1,12 @@
 #include "main_tabs.h"
 
-MainTabs::MainTabs(QList<QString> labels, int id, Config *config, OutputSystem output, InputKeyboardSelect *input_keyboard_select, QLineEdit *line_udp_ip, QSpinBox *spin_port, QWidget *parent)
+MainTabs::MainTabs(QList<QString> labels, int id, Config *config, MainTabsSwitcher *switcher, OutputSystem output, InputKeyboardSelect *input_keyboard_select, QLineEdit *line_udp_ip, QSpinBox *spin_port, QWidget *parent)
     : QTabWidget(parent)
 {
     this->list_labels = labels;
     this->id = id;
     this->config = config;
+    this->main_tabs_switcher = switcher;
     
     if (output == OutputSystem::Alsa)
     {
@@ -265,6 +266,19 @@ void MainTabs::rawKeyPressed(int keycode)
     {
         if (this->list_function_keys_raw.at(i) == keycode)
         {
+            if (this->is_escape_pressed)
+            {
+                this->main_tabs_switcher->setLayerActive(i);
+            }
+            else
+            {
+                MIDISignal(MIDISignalTypes::Panick);
+                
+                int layer = this->main_tabs_switcher->getLayerActive();
+                this->setCurrentIndex(i + layer*12);
+            }
+            
+            /*
             if (this->is_space_pressed)
             {
                 MIDISignal(MIDISignalTypes::SustainReleased);
@@ -276,6 +290,7 @@ void MainTabs::rawKeyPressed(int keycode)
             }
             else
                 this->setCurrentIndex(i);
+            */
         }
     }
     

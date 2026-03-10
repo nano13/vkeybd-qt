@@ -36,6 +36,7 @@ public slots:
 #include <QGridLayout>
 #include <QPushButton>
 #include <QList>
+#include <QStyle>
 
 #include <QDebug>
 
@@ -56,6 +57,9 @@ public:
     
     QList<int> getCheckedTabsList();
     
+    void setLayerActive(int layer);
+    int getLayerActive();
+    
 private:
     int keyboard_id;
     Config *config;
@@ -69,7 +73,12 @@ private:
     
     void activateLeftmostTab();
     
-    InterfaceNotify *notify_dbus;  
+    void colorizeTabs(QPushButton *button, int layers_counter, int tabs_counter);
+    
+    InterfaceNotify *notify_dbus;
+    
+    int layers_number = 1;
+    int layer_active = 0;
     
 signals:
     void signalTabSwitched(int keyboard_id, int tab_id);

@@ -361,24 +361,40 @@ void MainWindow::showActionChanged(GUIElements elements, bool is_checked)
 
 bool MainWindow::eventFilter(QObject *obj, QEvent *ev)
 {
+    // A key released outside the application can never reach our input filter.
+    // Release held notes and on-screen keys when the application loses focus.
+    if ((obj == qApp && ev->type() == QEvent::ApplicationDeactivate) ||
+        (obj == this && ev->type() == QEvent::WindowDeactivate))
+    {
+        this->inputQt->releaseAllKeys();
+        return false;
+    }
+
+    if (ev->type() != QEvent::KeyPress &&
+        ev->type() != QEvent::KeyRelease &&
+        ev->type() != QEvent::ShortcutOverride)
+        return false;
+
+    // The filter lives on QApplication so it sees releases consumed by focused
+    // buttons and controls. Never intercept keys in independent dialogs/windows.
+    QWidget *target = qobject_cast<QWidget*>(obj);
+    if (!target || target->window() != this)
+        return false;
+
     return this->inputQt->callEventFilter(obj, ev);
 }
 
 void MainWindow::keyboardSelectionChanged(int selection, bool locked)
 {
+    if (this->keyboard_selection == KeyboardSelection::Default)
+        this->inputQt->releaseAllKeys();
+
     this->keyboard_selection = selection;
-    
+
     if (selection == KeyboardSelection::Default)
     {
-        installEventFilter(this);
-        
-        if (locked)
-            grabKeyboard();
-        else
-            releaseKeyboard();
-    }
-    else if (selection == KeyboardSelection::Native)
-    {
+        qApp->installEventFilter(this);
+
         if (locked)
             grabKeyboard();
         else
@@ -386,7 +402,12 @@ void MainWindow::keyboardSelectionChanged(int selection, bool locked)
     }
     else
     {
-        removeEventFilter(this);
+        qApp->removeEventFilter(this);
+
+        if (selection == KeyboardSelection::Native && locked)
+            grabKeyboard();
+        else
+            releaseKeyboard();
     }
 }
 

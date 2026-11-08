@@ -20,5 +20,5 @@ build_dir="$root/build-$mode"
 cmake -S "$root" -B "$build_dir" -G Ninja \
     -DCMAKE_BUILD_TYPE="$build_type" \
     -DBUILD_TESTING=ON
-cmake --build "$build_dir" --target tst_core --parallel
+cmake --build "$build_dir" --target tst_core tst_keyboard_qt --parallel
 ctest --test-dir "$build_dir" --output-on-failure

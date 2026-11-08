@@ -72,7 +72,7 @@ private:
     
     //bool input_kbd_qt_native = true;
     //bool input_kbd_qt_default = false;
-    int keyboard_selection;
+    int keyboard_selection = KeyboardSelection::None;
     
     InputKeyboardQt *inputQt = new InputKeyboardQt(this);
     

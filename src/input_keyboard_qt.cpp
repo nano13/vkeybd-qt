@@ -9,60 +9,56 @@ InputKeyboardQt::InputKeyboardQt(QObject *parent)
 bool InputKeyboardQt::callEventFilter(QObject *obj, QEvent *ev)
 {
     Q_UNUSED(obj);
-    
-    // as this object does not have focus when this function is called, Qt does not count this as a KeyPress but a ShortcutOverride instead
-    if (ev->type() == QEvent::KeyPress || ev->type() == QEvent::ShortcutOverride)
+
+    if (ev->type() != QEvent::KeyPress &&
+        ev->type() != QEvent::KeyRelease &&
+        ev->type() != QEvent::ShortcutOverride)
+        return false;
+
+    QKeyEvent *event = static_cast<QKeyEvent*>(ev);
+    const quint32 scan_code = event->nativeScanCode();
+
+    // Synthetic Qt key events have no X11 scan code; subtracting eight would
+    // otherwise invent a negative Linux key code.
+    if (scan_code < 8)
+        return false;
+
+    const int key = static_cast<int>(scan_code - 8);
+
+    if (ev->type() == QEvent::ShortcutOverride)
     {
-        QKeyEvent *event = static_cast<QKeyEvent*>(ev);
-        bool is_auto_repeat = isAutoRepeat(ev, event);
-        if (!is_auto_repeat)
+        // Prevent focused child widgets and QAction shortcuts from stealing the
+        // subsequent KeyPress, but do not treat ShortcutOverride as a press.
+        event->accept();
+        return true;
+    }
+
+    if (ev->type() == QEvent::KeyPress)
+    {
+        // Both native and Qt-generated repeat presses are ignored while held.
+        if (!this->held_keys.contains(key))
         {
-            int key = event->nativeScanCode() -8;
+            this->held_keys.insert(key);
             emit keyPressSignal(key);
-            
-            return true;
         }
     }
-    else if (ev->type() == QEvent::KeyRelease)
+    else
     {
-        QKeyEvent *event = static_cast<QKeyEvent*>(ev);
-        bool is_auto_repeat = isAutoRepeat(ev, event);
-        if (!is_auto_repeat)
-        {
-            int key = event->nativeScanCode() -8;
+        // Ignore intermediary auto-repeat releases. The final physical release
+        // clears the held key even if its Qt key symbol changed in the meantime.
+        if (!event->isAutoRepeat() && this->held_keys.remove(key))
             emit keyReleaseSignal(key);
-            
-            return true;
-        }
     }
-    
-    return false;
+
+    return true;
 }
 
-bool InputKeyboardQt::isAutoRepeat(QEvent *event, QKeyEvent *key)
+void InputKeyboardQt::releaseAllKeys()
 {
-    bool autorepeat_detected = false;
-    if (event->type() == QEvent::KeyPress || event->type() == QEvent::ShortcutOverride)
-    {
-        if (this->list_of_keypresses.contains(key->key()))
-        {
-            autorepeat_detected = true;
-        }
-        else
-        {
-            this->list_of_keypresses.append(key->key());
-        }
-    }
-    else if (event->type() == QEvent::KeyRelease)
-    {
-        int index = this->list_of_keypresses.indexOf(key->key());
-        if (index >= 0)
-        {
-            this->list_of_keypresses.removeAt(index);
-        }
-    }
-    
-    return autorepeat_detected;
+    const QList<int> keys = this->held_keys.values();
+    this->held_keys.clear();
+    for (int key : keys)
+        emit keyReleaseSignal(key);
 }
 
 int InputKeyboardQt::mapFromKeyboardLayoutToLinuxRaw(int key)

@@ -4,6 +4,7 @@
 #include <QObject>
 #include <QWidget>
 #include <QPushButton>
+#include <QResizeEvent>
 #include <QList>
 #include <QDebug>
 
@@ -32,9 +33,12 @@ private:
     QList<QList<QPushButton*>> list_of_buttons;
     
     void drawButtons();
-    float calculateOffset(float row_offset, int row, int col, QList<QList<int>> sizes);
+    void layoutButtons();
     
     void buttonPressed(int midicode);
+
+protected:
+    void resizeEvent(QResizeEvent *event) override;
 
 signals:
     void MIDIPress(int midicode);

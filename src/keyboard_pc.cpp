@@ -2,9 +2,12 @@
 
 KeyboardPC::KeyboardPC(QWidget *parent) : QWidget(parent)
 {
+    setMinimumWidth(qRound(450 * this->button_scale));
+    setFixedHeight(qRound(5 * 30 * this->button_scale));
+    setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+
     drawButtons();
-    
-    setMinimumSize(200, 119);
+    layoutButtons();
 }
 
 void KeyboardPC::drawButtons()
@@ -18,31 +21,12 @@ void KeyboardPC::drawButtons()
     for (int row = 0; row < sizes.length(); row++)
     {
         QList<QPushButton*> list_of_buttons_row;
-        float offset = 0;
         for (int col = 0; col < sizes.at(row).length(); col++)
         {
-            offset = calculateOffset(
-                            offset,
-                            row,
-                            col,
-                            sizes
-                        );
-            
             QPushButton *button = new QPushButton(this);
             QString button_text = labels.at(row).at(col);
             button->setText(button_text.replace("|", "\n"));
-            
-            button->resize(
-                            sizes.at(row).at(col) * this->button_scale,
-                            30 * this->button_scale
-                        );
-            
-            float xpos = (col + offset) * 30;
-            button->move(
-                            qRound(xpos * this->button_scale),
-                            qRound(row * 30 * this->button_scale)
-                        );
-            
+
             int midicode = midicodes.at(row).at(col);
             if (midicode > -1)
             {
@@ -89,30 +73,36 @@ void KeyboardPC::drawButtons()
     //qDebug() << this->list_of_buttons;
 }
 
-float KeyboardPC::calculateOffset(float row_offset, int row, int col, QList<QList<int>> sizes)
+void KeyboardPC::resizeEvent(QResizeEvent *event)
 {
-    if (col > 0)
+    QWidget::resizeEvent(event);
+    layoutButtons();
+}
+
+void KeyboardPC::layoutButtons()
+{
+    const QList<QList<int>> sizes = getButtonSizes();
+    const int row_count = sizes.size();
+
+    for (int row = 0; row < row_count; row++)
     {
-        float size_a = sizes.at(row).at(col-1);
-        float size_b = sizes.at(row).at(col);
-        
-        float offset = 1;
-        if (size_a > size_b)
+        const QList<int> &row_sizes = sizes.at(row);
+        int row_width = 0;
+        for (int key_width : row_sizes)
+            row_width += key_width;
+
+        const int top = qRound(static_cast<qreal>(row) * height() / row_count);
+        const int bottom = qRound(static_cast<qreal>(row + 1) * height() / row_count);
+        int x = 0;
+
+        for (int col = 0; col < row_sizes.size(); col++)
         {
-            offset = size_a / 30;
+            const int left = qRound(static_cast<qreal>(x) * width() / row_width);
+            x += row_sizes.at(col);
+            const int right = qRound(static_cast<qreal>(x) * width() / row_width);
+            this->list_of_buttons.at(row).at(col)->setGeometry(left, top, right - left, bottom - top);
         }
-        else if (size_a < size_b)
-        {
-            offset = size_a / 30;
-        }
-        else if (size_a == size_b)
-        {
-            offset = size_b / 30;
-        }
-        row_offset = row_offset + offset - 1.0;
     }
-    //qDebug() << "row_offset: " << row_offset << " row: " << row << " col: " << col << " offset: " << row_offset;
-    return row_offset;
 }
 
 QList<QList<int>> KeyboardPC::getButtonSizes()

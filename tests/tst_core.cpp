@@ -527,6 +527,27 @@ private slots:
         QVERIFY(restored == preset);
     }
 
+    void duplicateCCEntriesDropped()
+    {
+        QMap<QString, QVariant> channel;
+        for (int id : {0, 1, 2})
+        {
+            QString prefix = QString("cc_%1_").arg(id, 3, 10, QLatin1Char('0'));
+            channel[prefix + "active"] = "true";
+            channel[prefix + "label"] = "reverb";
+            channel[prefix + "key"] = "91";
+            channel[prefix + "value"] = (id == 2) ? 50 : 40;   // the third one differs
+            channel[prefix + "delay"] = 0;
+        }
+        QMap<QString, QVariant> data;
+        data["0"] = channel;
+        
+        TabPreset preset = PresetSerializer::fromRestoreData(data);
+        QCOMPARE(preset.cc_entries.length(), 2);
+        QCOMPARE(preset.cc_entries.at(0).value, 40);
+        QCOMPARE(preset.cc_entries.at(1).value, 50);
+    }
+    
     void missingKeysKeepDefaults()
     {
         QMap<QString, QVariant> channel;

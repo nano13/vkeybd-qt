@@ -188,11 +188,17 @@ ChannelSettings PresetSerializer::channelFromMap(const QMap<QString, QVariant> &
             cc.delay_ms = value.toInt();
     }
 
+    // Exact duplicates are dropped: older versions restored the CC entries once per
+    // keyboard without clearing them, so save files accumulated identical copies.
+    QList<CCSetting> channel_entries;
     QList<int> ids = cc_by_id.keys();
     for (int id : ids)
     {
-        cc_out.append(cc_by_id.value(id));
+        const CCSetting cc = cc_by_id.value(id);
+        if (!channel_entries.contains(cc))
+            channel_entries.append(cc);
     }
+    cc_out.append(channel_entries);
 
     return result;
 }

@@ -45,13 +45,23 @@ void InterfaceJack::createNewPort(QString label)
 {
     if (!client) return;
     
+    const int index = this->output_port_count.load(std::memory_order_relaxed);
+    if (index >= MAX_PORTS) {
+        qWarning() << "Too many JACK ports, not registering" << label;
+        return;
+    }
+    
     jack_port_t* port = jack_port_register(client,
                                            label.toUtf8(),
                                            JACK_DEFAULT_MIDI_TYPE,
                                            JackPortIsOutput,
                                            0);
-    if (port)
-        outputPorts.push_back(port);
+    if (!port)
+        qWarning() << "Failed to register JACK port" << label;
+    
+    // the slot is taken even if registration failed, so slot index == tab id stays true
+    this->output_ports[index] = port;
+    this->output_port_count.store(index + 1, std::memory_order_release);
 }
 
 // Push event into JACK ring buffer (lock-free)
@@ -59,11 +69,12 @@ void InterfaceJack::pushEvent(const MidiEvent &event)
 {
     if (!ringBuffer) return;
     
-    // Write event to ring buffer
-    size_t written = jack_ringbuffer_write(ringBuffer, (const char*)&event, sizeof(MidiEvent));
-    if (written != sizeof(MidiEvent)) {
+    // Never write a partial event: the reader would be out of step from then on
+    if (jack_ringbuffer_write_space(ringBuffer) < sizeof(MidiEvent)) {
         qWarning() << "Ring buffer overflow, MIDI event lost!";
+        return;
     }
+    jack_ringbuffer_write(ringBuffer, (const char*)&event, sizeof(MidiEvent));
 }
 
 // JACK callback: called in real-time audio thread
@@ -77,8 +88,11 @@ int InterfaceJack::jackCallback(jack_nframes_t nframes, void *arg)
 // Process events from ring buffer and send to JACK ports
 void InterfaceJack::processRingBuffer(jack_nframes_t nframes)
 {
-    for (auto &port : outputPorts) {
-        void *buf = jack_port_get_buffer(port, nframes);
+    const int port_count = this->output_port_count.load(std::memory_order_acquire);
+    for (int i = 0; i < port_count; ++i) {
+        if (!this->output_ports[i])
+            continue;
+        void *buf = jack_port_get_buffer(this->output_ports[i], nframes);
         jack_midi_clear_buffer(buf);
     }
     
@@ -89,9 +103,9 @@ void InterfaceJack::processRingBuffer(jack_nframes_t nframes)
     while (jack_ringbuffer_read_space(ringBuffer) >= sizeof(MidiEvent)) {
         jack_ringbuffer_read(ringBuffer, (char*)&ev, sizeof(MidiEvent));
         
-        if (ev.port < 0 || ev.port >= (int)outputPorts.size()) continue;
+        if (ev.port < 0 || ev.port >= port_count || !this->output_ports[ev.port]) continue;
         
-        void *buf = jack_port_get_buffer(outputPorts[ev.port], nframes);
+        void *buf = jack_port_get_buffer(this->output_ports[ev.port], nframes);
         unsigned char midi[3];
         
         switch (ev.type) {
@@ -141,8 +155,8 @@ void InterfaceJack::keyReleaseEvent(int port, int channel, uint8_t midicode, uin
 
 void InterfaceJack::keyPanicEvent(int port, int channel)
 {
-    for (uint8_t i = 0; i < 128; ++i)
-        pushEvent({port, channel, MidiEvent::NOTE_OFF, i, 127});
+    // CC 123: All Notes Off (128 single note-offs per channel and tab flooded the buffer)
+    pushEvent({port, channel, MidiEvent::CC, 123, 0});
 }
 
 void InterfaceJack::keyStopAllEvent(int port, int channel)

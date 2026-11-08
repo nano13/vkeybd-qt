@@ -109,7 +109,7 @@ enum KeysRaw : uint8_t
     Control_L = 29,
     Control_R = 97,
     Super_L = 125,
-    Super_R = 125,
+    Super_R = 126,
     
     F1 = 59,
     F2 = 60,

@@ -10,6 +10,7 @@
 #include <QKeyEvent>
 
 #include <QUdpSocket>
+#include <QNetworkDatagram>
 #include <QCoreApplication>
 #include <QScrollArea>
 
@@ -93,6 +94,7 @@ private:
     QSpinBox *spin_port;
 
     QUdpSocket *socket;
+    static constexpr int MAX_UDP_MESSAGE_SIZE = 64;
     void rebindSocketIP(QString ip);
     void rebindSocket(int value);
     bool send_udp = false;

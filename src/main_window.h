@@ -66,7 +66,7 @@ private:
     MainTabsSwitcher *switcher;
     void changeCurrentTab(int keyboard_id, int tab_id);
     void currentTabChanged(int keyboard_id, int tab_id);
-    void tabsCheckChanged(QList<int> list_of_tab_ids);
+    void tabsCheckChanged(int keyboard_id, QList<int> list_of_tab_ids);
     
     QWidget* newKeyboardInstance(int id, OutputSystem output);
     

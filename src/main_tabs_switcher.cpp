@@ -90,6 +90,10 @@ void MainTabsSwitcher::rightClicked(QRightClickButton *button, int tab_id)
 {
     if (button->isChecked())
     {
+        // the last checked tab stays checked: one tab always has to be active
+        if (getCheckedTabsList().length() <= 1)
+            return;
+        
         button->setChecked(false);
         
         // we need to check if the currently active tab became inactive. if this happens, change to the first active tab instead

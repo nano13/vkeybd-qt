@@ -5,6 +5,9 @@
 
 #include <QObject>
 #include <QDebug>
+
+#include <array>
+#include <atomic>
 #include <jack/jack.h>
 #include <jack/ringbuffer.h>
 #include <jack/midiport.h>
@@ -59,7 +62,12 @@ public:
     
 private:
     jack_client_t *client;
-    std::vector<jack_port_t*> outputPorts;
+    // Ports are registered while the client is already active, so the
+    // real-time callback must never see a container being reallocated:
+    // fixed slots, published by an atomic count. Index = tab id.
+    static constexpr int MAX_PORTS = 256;
+    std::array<jack_port_t*, MAX_PORTS> output_ports{};
+    std::atomic<int> output_port_count{0};
     
     jack_ringbuffer_t* ringBuffer = nullptr;
     

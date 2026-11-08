@@ -80,14 +80,7 @@ void InterfaceNotifyDBus::sendKeyShiftNotification(int keyshift)
         << data.hints
         << data.timeout;
     
-    // MUST be blocking to get the returned ID
-    QDBusMessage reply = QDBusConnection::sessionBus().call(msg);
-    
-    if (reply.type() == QDBusMessage::ReplyMessage &&
-        reply.arguments().size() == 1)
-    {
-        this->keyshift_last_id = reply.arguments().at(0).toUInt();
-    }
+    notifyAsync(msg, &this->keyshift_last_id);
 }
 
 void InterfaceNotifyDBus::sendTabChangeNotification(const QString &text)
@@ -108,13 +101,23 @@ void InterfaceNotifyDBus::sendTabChangeNotification(const QString &text)
         << QVariantMap()
         << int(-1);          // timeout
     
-    QDBusMessage reply = QDBusConnection::sessionBus().call(msg);
+    notifyAsync(msg, &this->tabchange_last_id);
+}
+
+void InterfaceNotifyDBus::notifyAsync(const QDBusMessage &msg, uint32_t *last_id)
+{
+    // not blocking: this runs on every tab switch, also while playing
+    QDBusPendingCall call = QDBusConnection::sessionBus().asyncCall(msg);
+    QDBusPendingCallWatcher *watcher = new QDBusPendingCallWatcher(call, this);
     
-    if (reply.type() == QDBusMessage::ReplyMessage &&
-        reply.arguments().size() == 1)
-    {
-        this->tabchange_last_id = reply.arguments().at(0).toUInt();
-    }
+    connect(watcher, &QDBusPendingCallWatcher::finished, this, [last_id](QDBusPendingCallWatcher *finished_watcher){
+        QDBusPendingReply<uint> reply = *finished_watcher;
+        if (!reply.isError())
+        {
+            *last_id = reply.value();
+        }
+        finished_watcher->deleteLater();
+    });
 }
 
 

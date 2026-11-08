@@ -3,6 +3,8 @@
 #include <QTimer>
 #include <QScrollBar>
 
+#include <linux/input.h>   // KEY_MAX
+
 MainTabs::MainTabs(QList<QString> labels, int id, Config *config, MainTabsSwitcher *switcher, OutputSystem output, InputKeyboardSelect *input_keyboard_select, QLineEdit *line_udp_ip, QSpinBox *spin_port, QWidget *parent)
     : QWidget(parent)
 {
@@ -195,30 +197,26 @@ void MainTabs::sendUDPMessage(QString message)
 
 void MainTabs::receiveUDPMessage()
 {
-    QByteArray buffer;
-    buffer.resize(socket->pendingDatagramSize());
-    
-    QHostAddress sender;
-    quint16 senderPort;
-    
-    socket->readDatagram(buffer.data(), buffer.size(),
-                         &sender, &senderPort);
-    
-    QString input = QString(buffer);
-    QStringList splitted = input.split("/");
-    
-    int type = splitted.at(0).toInt();
-    int key = splitted.at(1).toInt();
-    
-    if (type == QEvent::KeyPress)
+    // the sender (an instance started with "-o network") sends
+    // "keypress/<linux key code>" and "keyrelease/<linux key code>"
+    while (this->socket->hasPendingDatagrams())
     {
-        QKeyEvent *event = new QKeyEvent(QEvent::KeyPress, key, Qt::NoModifier);
-        QCoreApplication::postEvent(this, event);
-    }
-    else if (type == QEvent::KeyRelease)
-    {
-        QKeyEvent *event = new QKeyEvent(QEvent::KeyRelease, key, Qt::NoModifier);
-        QCoreApplication::postEvent(this, event);
+        QNetworkDatagram datagram = this->socket->receiveDatagram(MAX_UDP_MESSAGE_SIZE);
+        QList<QByteArray> parts = datagram.data().trimmed().split('/');
+        
+        // anything else that arrives on the port is ignored
+        if (parts.length() != 2)
+            continue;
+        
+        bool ok = false;
+        int keycode = parts.at(1).toInt(&ok);
+        if (!ok || keycode < 0 || keycode > KEY_MAX)
+            continue;
+        
+        if (parts.at(0) == "keypress")
+            rawKeyPressed(keycode);
+        else if (parts.at(0) == "keyrelease")
+            rawKeyReleased(keycode);
     }
 }
 

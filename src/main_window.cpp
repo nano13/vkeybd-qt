@@ -127,7 +127,8 @@ QWidget* MainWindow::newKeyboardInstance(int id, OutputSystem output)
     
     this->switcher = new MainTabsSwitcher(id, this->config, this->notify_dbus, this);
     connect(this->switcher, &MainTabsSwitcher::signalTabSwitched, this, &MainWindow::changeCurrentTab);
-    connect(this->switcher, &MainTabsSwitcher::signalTabCheckChanged, this, &MainWindow::tabsCheckChanged);
+    // the checked tabs belong to this keyboard only
+    connect(this->switcher, &MainTabsSwitcher::signalTabCheckChanged, this, [this, id](QList<int> list_of_tab_ids){ tabsCheckChanged(id, list_of_tab_ids); });
     this->list_of_maintab_switchers.append(this->switcher);
     
     QList<QString> labels = this->switcher->getLabelsList();
@@ -202,11 +203,11 @@ void MainWindow::currentTabChanged(int keyboard_id, int tab_id)
     //this->list_of_maintab_switchers.at(keyboard_id)->blockSignals(false);
 }
 
-void MainWindow::tabsCheckChanged(QList<int> list_of_tab_ids)
+void MainWindow::tabsCheckChanged(int keyboard_id, QList<int> list_of_tab_ids)
 {
-    for (int i=0; i < this->list_of_maintabs.length(); i++)
+    if (keyboard_id >= 0 && keyboard_id < this->list_of_maintabs.length())
     {
-        this->list_of_maintabs.at(i)->listOfCheckTabsChanged(list_of_tab_ids);
+        this->list_of_maintabs.at(keyboard_id)->listOfCheckTabsChanged(list_of_tab_ids);
     }
 }
 

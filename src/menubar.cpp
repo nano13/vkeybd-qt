@@ -32,29 +32,11 @@ void MenuBar::addFileMenu()
     
     
     
-    QAction *actionSaveJackQuick = new QAction(QIcon::fromTheme("document-save"), "QuickSave MIDI Connections");
-    connect(actionSaveJackQuick, &QAction::triggered, this, [this]{ emit signalMIDISaveQuick(); });
-    
-    QAction *actionLoadJackQuick = new QAction(QIcon::fromTheme("document-open"), "QuickLoad MIDI Connections");
-    connect(actionLoadJackQuick, &QAction::triggered, this, [this]{ emit signalMIDILoadQuick(); });
-    
-    QAction *actionSaveJack = new QAction(QIcon::fromTheme("document-save"), "Save MIDI Connections");
-    connect(actionSaveJack, &QAction::triggered, this, [this]{ emit signalMIDISave(); });
-    
-    QAction *actionLoadJack = new QAction(QIcon::fromTheme("document-open"), "Load MIDI Connections");
-    connect(actionLoadJack, &QAction::triggered, this, [this]{ emit signalMIDILoad(); });
-    
     menuFile->addAction(actionQuickSave);
     menuFile->addAction(actionQuickLoad);
     //menuFile->addSeparator();
     menuFile->addAction(actionSave);
     menuFile->addAction(actionLoad);
-    menuFile->addSeparator();
-    menuFile->addAction(actionSaveJackQuick);
-    menuFile->addAction(actionLoadJackQuick);
-    //menuFile->addSeparator();
-    menuFile->addAction(actionSaveJack);
-    menuFile->addAction(actionLoadJack);
     menuFile->addSeparator();
     menuFile->addAction(actionExit);
 }
@@ -90,32 +72,32 @@ void MenuBar::addViewMenu()
     this->showNetwork = new QAction("Show Network Section");
     this->showNetwork->setCheckable(true);
     this->showNetwork->setChecked(false);
-    connect(this->showNetwork, &QAction::changed, this, &MenuBar::showNetworkActionChanged);
+    connect(this->showNetwork, &QAction::toggled, this, &MenuBar::showNetworkActionChanged);
     
     this->showKeys = new QAction("Show Keys Section");
     this->showKeys->setCheckable(true);
     this->showKeys->setChecked(true);
-    connect(this->showKeys, &QAction::changed, this, &MenuBar::showKeysActionChanged);
+    connect(this->showKeys, &QAction::toggled, this, &MenuBar::showKeysActionChanged);
     
     this->showPitch = new QAction("Show Pitchwheel and Volume Section");
     this->showPitch->setCheckable(true);
     this->showPitch->setChecked(true);
-    connect(this->showPitch, &QAction::changed, this, &MenuBar::showPitchActionChanged);
+    connect(this->showPitch, &QAction::toggled, this, &MenuBar::showPitchActionChanged);
     
     this->showNotes = new QAction("Show Notes Section");
     this->showNotes->setCheckable(true);
     this->showNotes->setChecked(true);
-    connect(this->showNotes, &QAction::changed, this, &MenuBar::showNotesActionChanged);
+    connect(this->showNotes, &QAction::toggled, this, &MenuBar::showNotesActionChanged);
     
     this->showPCKeyboard = new QAction("Show PC-Keyboard Section");
     this->showPCKeyboard->setCheckable(true);
     this->showPCKeyboard->setChecked(true);
-    connect(this->showPCKeyboard, &QAction::changed, this, &MenuBar::showPCKeyboardActionChanged);
+    connect(this->showPCKeyboard, &QAction::toggled, this, &MenuBar::showPCKeyboardActionChanged);
     
     this->showPianoKeyboard = new QAction("Show Piano-Keyboard Section");
     this->showPianoKeyboard->setCheckable(true);
     this->showPianoKeyboard->setChecked(false);
-    connect(this->showPianoKeyboard, &QAction::changed, this, &MenuBar::showPianoKeyboardActionChanged);
+    connect(this->showPianoKeyboard, &QAction::toggled, this, &MenuBar::showPianoKeyboardActionChanged);
     
     menuView->addAction(showNetwork);
     menuView->addAction(showKeys);

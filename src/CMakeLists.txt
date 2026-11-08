@@ -8,19 +8,15 @@ add_executable(vkeybd-qt
     input_keyboard_qt.cpp
     input_keyboard_raw.cpp
     input_keyboard_select.cpp
-    input_keyboard_udp.cpp
-    input_midi.cpp
     interface_alsa.cpp
     interface_audio.cpp
     interface_jack.cpp
     interface_notify.cpp
     interface_notify_dbus.cpp
-    jack_save_load.cpp
     keyboard_notes.cpp
     keyboard_pc.cpp
     keyboard_piano.cpp
     main.cpp
-    main_subtabs_switcher.cpp
     main_tabs.cpp
     main_tabs_switcher.cpp
     main_window.cpp
@@ -45,18 +41,14 @@ add_executable(vkeybd-qt
     input_keyboard_qt.h
     input_keyboard_raw.h
     input_keyboard_select.h
-    input_keyboard_udp.h
-    input_midi.h
     interface_alsa.h
     interface_audio.h
     interface_jack.h
     interface_notify.h
     interface_notify_dbus.h
-    jack_save_load.h
     keyboard_notes.h
     keyboard_pc.h
     keyboard_piano.h
-    main_subtabs_switcher.h
     main_tabs.h
     main_tabs_switcher.h
     main_window.h

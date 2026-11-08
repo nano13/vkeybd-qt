@@ -32,8 +32,6 @@ public:
     virtual void setReleaseChanged(int port, int channel, uint8_t value);
     virtual void setTremoloChanged(int port, int channel, uint8_t value);
     
-    virtual void saveMIDISettings();
-    virtual void loadMIDISettings();
     
 protected:
     int id;

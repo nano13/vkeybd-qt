@@ -33,7 +33,6 @@
 
 #include "main_tabs_switcher.h"
 
-#include "jack_save_load.h"
 
 #include "enums_structs.h"
 
@@ -93,10 +92,6 @@ private slots:
     void restoreParams(int maintab, QString tab, QMap<QString, QVariant> data);
     void restoreGeneral(int maintab, QMap<QString,QVariant> data);
     
-    void saveMIDIQuick();
-    void loadMIDIQuick();
-    void saveMIDI();
-    void loadMIDI();
     
     void showActionChanged(GUIElements elements, bool is_checked);
     

@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QWidget>
+#include <QHash>
 #include <QHBoxLayout>
 #include <QGraphicsScene>
 #include <QGraphicsView>
@@ -40,6 +41,14 @@ private:
     QMap<int, QGraphicsSvgItem*> map_of_sharps;
     QMap<int, QGraphicsSvgItem*> map_of_flats;
     QMap<int, QList<QGraphicsLineItem*>> map_of_auxiliary_lines;
+    
+    // An item can be needed by several pressed notes at once (e.g. C is shown for
+    // C and for C#), so it is only hidden when the last of them is released.
+    QHash<QGraphicsItem*, int> visible_count;
+    void changeVisible(QGraphicsItem *item, int delta);
+    void changeNote(int midicode, int delta);
+    void changeAuxiliaryLines(int midicode, int delta);
+    void hideAll();
     //QMap<int, QGraphicsEllipseItem*> map_of_notes_half;
     
     qreal NOTE_SIZE = 10;
@@ -48,7 +57,7 @@ private:
     void drawSharps(qreal pos_x, qreal pos_y, int note, Qt::GlobalColor color);
     void drawFlats(qreal pos_x, qreal pos_y, int note, Qt::GlobalColor color);
     void drawAuxiliaryLines(int note, int pos_x, int pos_y, int i);
-    void showHideAuxiliaryLines(int midicode, bool show);
+
     void showAll();
     bool show_all = false;
     

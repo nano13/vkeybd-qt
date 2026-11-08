@@ -53,8 +53,6 @@ public:
     void rawKeyPressed(int keycode);
     void rawKeyReleased(int keycode);
     void MIDISignal(MIDISignalTypes type);
-    void saveMIDIConnections();
-    void loadMIDIConnections();
 
     void globalKeyShiftChanged(int value, bool is_relative);
     int globalKeyShiftGet();

@@ -50,7 +50,7 @@ public:
     QString NAME = "vkeybd-qt";
     
 private:
-    snd_seq_t *seq;
+    snd_seq_t *seq = nullptr;     // nullptr if the sequencer could not be opened
     snd_seq_event_t ev;
     
     void sendEvent(bool drain);

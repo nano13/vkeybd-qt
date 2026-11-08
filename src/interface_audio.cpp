@@ -135,11 +135,3 @@ void InterfaceAudio::setTremoloChanged(int port, int channel, uint8_t value)
     Q_UNUSED(value);
 }
 
-void InterfaceAudio::saveMIDISettings()
-{
-    
-}
-void InterfaceAudio::loadMIDISettings()
-{
-     
-}

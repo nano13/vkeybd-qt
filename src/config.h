@@ -19,7 +19,6 @@ public:
     explicit Config(QObject *parent = nullptr);
     
     //void setValue(QString key, QVariant value);
-    void saveChannelSettings(QSettings *settings, int id, QString label, QList<QMap<QString, QVariant> > channels);
     void loadChannelSettings(QSettings *settings);
     void saveParams(QSettings *settings, int id, QString label, QString channel, QMap<QString,QVariant> params);
     

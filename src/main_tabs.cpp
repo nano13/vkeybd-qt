@@ -180,8 +180,8 @@ void MainTabs::restoreParams(QString tab, QMap<QString,QVariant> data)
 
 void MainTabs::showHideGUIElements(GUIElements elements, bool show)
 {
+    // no resize() here: forcing the size of a widget inside a layout made it collapse
     this->view->showHideGUIElements(elements, show);
-    resize(10, 10);
 }
 
 void MainTabs::sendUDPMessage(QString message)
@@ -618,12 +618,4 @@ void MainTabs::MIDISignal(MIDISignalTypes type)
     }
 }
 
-void MainTabs::saveMIDIConnections()
-{
-    this->interface_audio->saveMIDISettings();
-}
-void MainTabs::loadMIDIConnections()
-{
-    this->interface_audio->loadMIDISettings();
-}
 

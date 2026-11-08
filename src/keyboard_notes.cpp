@@ -278,146 +278,118 @@ void KeyboardNotes::drawFlats(qreal pos_x, qreal pos_y, int note, Qt::GlobalColo
 
 void KeyboardNotes::keyPressed(int midicode)
 {
-    if (this->map_of_notes_full.contains(midicode))
-    {
-        this->map_of_notes_full[midicode]->show();
-        
-    }
-    else if (this->list_notes_half.contains(midicode))
-    {
-        keyPressed(midicode-1);
-        keyPressed(midicode+1);
-        
-        this->map_of_sharps[midicode-1]->show();
-        this->map_of_flats[midicode+1]->show();
-    }
-    
-    showHideAuxiliaryLines(midicode, true);
+    changeNote(midicode, 1);
 }
 void KeyboardNotes::keyReleased(int midicode)
 {
+    changeNote(midicode, -1);
+}
+
+void KeyboardNotes::changeNote(int midicode, int delta)
+{
     if (this->map_of_notes_full.contains(midicode))
     {
-        this->map_of_notes_full[midicode]->hide();
+        changeVisible(this->map_of_notes_full.value(midicode), delta);
+        changeAuxiliaryLines(midicode, delta);
     }
     else if (this->list_notes_half.contains(midicode))
     {
-        keyReleased(midicode-1);
-        keyReleased(midicode+1);
-        
-        this->map_of_sharps[midicode-1]->hide();
-        this->map_of_flats[midicode+1]->hide();
-    }
-    
-    showHideAuxiliaryLines(midicode, false);
-}
-void KeyboardNotes::showHideAuxiliaryLines(int midicode, bool show)
-{
-    if (this->map_of_auxiliary_lines.contains(midicode))
-    {
-        QList<QGraphicsLineItem*> lines = this->map_of_auxiliary_lines[midicode];
-        for (int i=0; i < lines.length(); i++)
+        // a half note is shown as both neighbours, with sharp and flat
+        for (int neighbour : {midicode - 1, midicode + 1})
         {
-            if (show)
+            if (this->map_of_notes_full.contains(neighbour))
             {
-                lines.at(i)->show();
-            }
-            else
-            {
-                lines.at(i)->hide();
+                changeVisible(this->map_of_notes_full.value(neighbour), delta);
+                changeAuxiliaryLines(neighbour, delta);
             }
         }
+        
+        changeVisible(this->map_of_sharps.value(midicode - 1, nullptr), delta);
+        changeVisible(this->map_of_flats.value(midicode + 1, nullptr), delta);
+    }
+}
+
+void KeyboardNotes::changeVisible(QGraphicsItem *item, int delta)
+{
+    if (!item)
+        return;
+    
+    int count = qMax(0, this->visible_count.value(item, 0) + delta);
+    if (count == 0)
+        this->visible_count.remove(item);
+    else
+        this->visible_count.insert(item, count);
+    
+    item->setVisible(count > 0 || this->show_all);
+}
+
+void KeyboardNotes::changeAuxiliaryLines(int midicode, int delta)
+{
+    QList<QGraphicsLineItem*> lines = this->map_of_auxiliary_lines.value(midicode);
+    for (QGraphicsLineItem *line : lines)
+    {
+        changeVisible(line, delta);
     }
 }
 void KeyboardNotes::allKeysUp()
 {
     this->show_all = false;
+    this->visible_count.clear();
     
-    QList<int> keys_full = this->map_of_notes_full.keys();
-    for (int i=0; i < keys_full.length(); i++)
-    {
-        this->map_of_notes_full[keys_full.at(i)]->hide();
-    }
+    hideAll();
+}
+
+void KeyboardNotes::hideAll()
+{
+    QList<QGraphicsEllipseItem*> notes = this->map_of_notes_full.values();
+    for (QGraphicsEllipseItem *note : notes)
+        note->hide();
     
-    QList<int> keys_sharps = this->map_of_sharps.keys();
-    for (int i=0; i < keys_sharps.length(); i++)
-    {
-        this->map_of_sharps[keys_sharps.at(i)]->hide();
-    }
+    QList<QGraphicsSvgItem*> sharps = this->map_of_sharps.values();
+    for (QGraphicsSvgItem *sharp : sharps)
+        sharp->hide();
     
-    QList<int> keys_flats = this->map_of_flats.keys();
-    for (int i=0; i < keys_flats.length(); i++)
-    {
-        this->map_of_flats[keys_sharps.at(i)]->hide();
-    }
+    QList<QGraphicsSvgItem*> flats = this->map_of_flats.values();
+    for (QGraphicsSvgItem *flat : flats)
+        flat->hide();
     
-    QList<int> keys_lines = this->map_of_auxiliary_lines.keys();
-    for (int i=0; i < keys_lines.length(); i++)
+    QList<QList<QGraphicsLineItem*>> line_lists = this->map_of_auxiliary_lines.values();
+    for (const QList<QGraphicsLineItem*> &lines : line_lists)
     {
-        QList<QGraphicsLineItem*> lines = this->map_of_auxiliary_lines[keys_lines.at(i)];
-        for (int j=0; j < lines.length(); j++)
-        {
-            lines.at(j)->hide();
-        }
+        for (QGraphicsLineItem *line : lines)
+            line->hide();
     }
 }
 
 void KeyboardNotes::showAll()
 {
-    QList<int> keys_full = this->map_of_notes_full.keys();
-    for (int i=0; i < keys_full.length(); i++)
+    if (!this->show_all)
     {
-        if (this->show_all)
-        {
-            this->map_of_notes_full[keys_full.at(i)]->show();
-        }
-        else
-        {
-            this->map_of_notes_full[keys_full.at(i)]->hide();
-        }
+        // back to showing only what is pressed
+        hideAll();
+        QList<QGraphicsItem*> items = this->visible_count.keys();
+        for (QGraphicsItem *item : items)
+            item->show();
+        return;
     }
     
-    QList<int> keys_sharps = this->map_of_sharps.keys();
-    for (int i=0; i < keys_sharps.length(); i++)
-    {
-        if (this->show_all)
-        {
-            this->map_of_sharps[keys_sharps.at(i)]->show();
-        }
-        else
-        {
-            this->map_of_sharps[keys_sharps.at(i)]->hide();
-        }
-    }
+    QList<QGraphicsEllipseItem*> notes = this->map_of_notes_full.values();
+    for (QGraphicsEllipseItem *note : notes)
+        note->show();
     
-    QList<int> keys_flats = this->map_of_flats.keys();
-    for (int i=0; i < keys_flats.length(); i++)
-    {
-        if (this->show_all)
-        {
-            this->map_of_flats[keys_sharps.at(i)]->show();
-        }
-        else
-        {
-            this->map_of_flats[keys_sharps.at(i)]->hide();
-        }
-    }
+    QList<QGraphicsSvgItem*> sharps = this->map_of_sharps.values();
+    for (QGraphicsSvgItem *sharp : sharps)
+        sharp->show();
     
-    QList<int> keys_lines = this->map_of_auxiliary_lines.keys();
-    for (int i=0; i < keys_lines.length(); i++)
+    QList<QGraphicsSvgItem*> flats = this->map_of_flats.values();
+    for (QGraphicsSvgItem *flat : flats)
+        flat->show();
+    
+    QList<QList<QGraphicsLineItem*>> line_lists = this->map_of_auxiliary_lines.values();
+    for (const QList<QGraphicsLineItem*> &lines : line_lists)
     {
-        QList<QGraphicsLineItem*> lines = this->map_of_auxiliary_lines[keys_lines.at(i)];
-        for (int j=0; j < lines.length(); j++)
-        {
-            if (this->show_all)
-            {
-                lines.at(j)->show();
-            }
-            else
-            {
-                lines.at(j)->hide();
-            }
-        }
+        for (QGraphicsLineItem *line : lines)
+            line->show();
     }
 }
 

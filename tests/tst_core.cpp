@@ -514,7 +514,7 @@ private slots:
         TabPreset loaded = PresetSerializer::load(&settings, 0, "F01-1");
         QVERIFY(loaded == preset);
 
-        // INI layout as written by Config::saveChannelSettings / saveParams
+        // INI layout of the save files (same as written by the former Config code)
         QCOMPARE(settings.value("0/F01-1/005/volume").toInt(), 99);
         QCOMPARE(settings.value("0/F01-1/005/cc_001_active").toString(), QString("false"));
         QCOMPARE(settings.value("0/F01-1/main/keys").toString(), QString("01000100"));

@@ -13,8 +13,16 @@ InterfaceAlsa::InterfaceAlsa(int id, InterfaceAudio *parent)
 {
     //this->label_string = label;
     
-    snd_seq_open(&this->seq, "default", SND_SEQ_OPEN_DUPLEX, 0);
-    snd_seq_set_client_name(this->seq, this->NAME.toLatin1());
+    int error = snd_seq_open(&this->seq, "default", SND_SEQ_OPEN_DUPLEX, 0);
+    if (error < 0)
+    {
+        qWarning() << "Cannot open the ALSA sequencer:" << snd_strerror(error);
+        this->seq = nullptr;
+    }
+    else
+    {
+        snd_seq_set_client_name(this->seq, this->NAME.toLatin1());
+    }
     
     /*
     int port;
@@ -35,14 +43,21 @@ InterfaceAlsa::InterfaceAlsa(int id, InterfaceAudio *parent)
 
 void InterfaceAlsa::createNewPort(QString label)
 {
-    int port;
-    port = snd_seq_create_simple_port(this->seq, label.toLatin1(),
+    if (!this->seq)
+        return;
+    
+    int port = snd_seq_create_simple_port(this->seq, label.toLatin1(),
         SND_SEQ_PORT_CAP_READ | SND_SEQ_PORT_CAP_SUBS_READ | SND_SEQ_PORT_CAP_WRITE,
         SND_SEQ_PORT_TYPE_APPLICATION);
+    if (port < 0)
+        qWarning() << "Cannot create ALSA port" << label << ":" << snd_strerror(port);
 }
 
 InterfaceAlsa::~InterfaceAlsa()
 {
+    if (!this->seq)
+        return;
+    
     for (int i=0; i < 16; i++)
     {
         snd_seq_ev_set_controller(&this->ev, i, MIDI_CTL_ALL_NOTES_OFF, 127);
@@ -217,6 +232,9 @@ void InterfaceAlsa::setTremoloChanged(int port, int channel, uint8_t value)
 
 void InterfaceAlsa::sendEvent(bool drain)
 {
+    if (!this->seq)
+        return;
+    
     snd_seq_ev_set_direct(&this->ev);
     snd_seq_event_output(this->seq, &this->ev);
     

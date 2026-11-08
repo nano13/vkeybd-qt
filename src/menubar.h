@@ -40,10 +40,6 @@ signals:
     void signalSave();
     void signalLoad();
     
-    void signalMIDISaveQuick();
-    void signalMIDILoadQuick();
-    void signalMIDISave();
-    void signalMIDILoad();
     
     void signalShowActionChanged(GUIElements elements, bool is_checked);
     

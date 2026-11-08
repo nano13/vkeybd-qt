@@ -43,10 +43,6 @@ MainWindow::MainWindow(OutputSystem output, int number_of_keyboards, QWidget *pa
         connect(menu, &MenuBar::signalSave, this, &MainWindow::saveParams);
         connect(menu, &MenuBar::signalLoad, this, &MainWindow::loadParams);
         
-        connect(menu, &MenuBar::signalMIDISaveQuick, this, &MainWindow::saveMIDIQuick);
-        connect(menu, &MenuBar::signalMIDILoadQuick, this, &MainWindow::loadMIDIQuick);
-        connect(menu, &MenuBar::signalMIDISave, this, &MainWindow::saveMIDI);
-        connect(menu, &MenuBar::signalMIDILoad, this, &MainWindow::loadMIDI);
         
         connect(menu, &MenuBar::signalShowActionChanged, this, &MainWindow::showActionChanged);
         connect(menu, &MenuBar::signalGlobalKeyShift, this, &MainWindow::showGlobalKeyShift);
@@ -296,28 +292,6 @@ void MainWindow::restoreGeneral(int maintab, QMap<QString,QVariant> data)
     }
 }
 
-void MainWindow::saveMIDIQuick()
-{
-    for (int i=0; i < this->list_of_maintabs.length(); i++)
-    {
-        this->list_of_maintabs.at(i)->saveMIDIConnections();
-    }
-}
-void MainWindow::loadMIDIQuick()
-{
-    for (int i=0; i < this->list_of_maintabs.length(); i++)
-    {
-        this->list_of_maintabs.at(i)->loadMIDIConnections();
-    }
-}
-void MainWindow::saveMIDI()
-{
-    
-}
-void MainWindow::loadMIDI()
-{
-    
-}
 
 void MainWindow::showActionChanged(GUIElements elements, bool is_checked)
 {

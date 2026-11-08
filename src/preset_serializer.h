@@ -15,7 +15,7 @@
  *  - the GUI maps (channel maps + Orgelwerk::getParams())
  *  - the "restore data" emitted by Config::restoreParams
  *    (keys "0".."15" and "main", each holding a QMap<QString,QVariant>)
- *  - the INI layout written by Config::saveChannelSettings / Config::saveParams:
+ *  - the INI layout of the save files:
  *      <keyboard>/<tab-label>/<000..015>/<key>
  *      <keyboard>/<tab-label>/main/<key>
  */

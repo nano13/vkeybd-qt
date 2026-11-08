@@ -1,0 +1,86 @@
+#include "midi_key_selector.h"
+
+MIDIKeySelector::MIDIKeySelector(QWidget *parent) : QWidget(parent)
+{
+    QVBoxLayout *layout_vertical = new QVBoxLayout;
+    QHBoxLayout *layout_keys = new QHBoxLayout;
+    QHBoxLayout *layout_shift = new QHBoxLayout;
+    
+    setLayout(layout_vertical);
+    
+    layout_vertical->setContentsMargins(0, 0, 0, 0);
+    layout_keys->setContentsMargins(0, 0, 0, 0);
+    layout_shift->setContentsMargins(0, 0, 0, 0);
+    
+    this->labels = {0, 12, 24, 36, 48, 60, 72, 84};
+    
+    for (int i=0; i<8; i++)
+    {
+        QCheckBox *check = new QCheckBox(QString::number(labels.at(i)));
+        
+        layout_keys->addWidget(check);
+        
+        if (i == 4)
+        {
+            check->setChecked(true);
+        }
+        
+        connect(check, &QCheckBox::toggled, this, &MIDIKeySelector::signalSelectionChanged);
+        
+        this->list_of_checkboxes.append(check);
+    }
+    
+    layout_vertical->addLayout(layout_keys);
+    
+    setMaximumHeight(20);
+    this->setContentsMargins(0, 0, 0, 0);
+}
+
+QList<int> MIDIKeySelector::getListOfSelectedKeys()
+{
+    QList<int> result;
+    for (int i=0; i < this->list_of_checkboxes.length(); i++)
+    {
+        QCheckBox *check = this->list_of_checkboxes.at(i);
+        if (check->isChecked())
+        {
+            result.append(this->labels.at(i));
+        }
+    }
+    return result;
+}
+
+QString MIDIKeySelector::getBitmaskOfKeys()
+{
+    QString result;
+    
+    for (int i=0; i < this->list_of_checkboxes.length(); i++)
+    {
+        if (this->list_of_checkboxes.at(i)->isChecked())
+        {
+            result += "1";
+        }
+        else
+        {
+            result += "0";
+        }
+    }
+    
+    return result;
+}
+void MIDIKeySelector::restoreBitmaskOfKeys(QString bitmask)
+{
+    // ignore surplus characters (e.g. from an edited file)
+    for (int i=0; i < bitmask.length() && i < this->list_of_checkboxes.length(); i++)
+    {
+        QChar c = bitmask.at(i);
+        if (c == "0")
+        {
+            this->list_of_checkboxes.at(i)->setChecked(false);
+        }
+        else if (c == "1")
+        {
+            this->list_of_checkboxes.at(i)->setChecked(true);
+        }
+    }
+}

@@ -1,0 +1,21 @@
+<RCC>
+    <qresource prefix="/">
+        <file alias="gpl">../LICENSE</file>
+        <file alias="splash">../assets/img/splash2.png</file>
+        <file alias="icon">../assets/img/icon.png</file>
+        
+        <file alias="bass_violin">../assets/svg/bass_violin.svg</file>
+        <file alias="clef_bass">../assets/svg/clef_bass.svg</file>
+        <file alias="clef_violin">../assets/svg/clef_violin.svg</file>
+        <file alias="flat">../assets/svg/flat.svg</file>
+        <file alias="sharp">../assets/svg/sharp.svg</file>
+        <file alias="note_whole">../assets/svg/note_whole.svg</file>
+        <file alias="octave_contrabass">../assets/svg/octave_contrabass.svg</file>
+        <file alias="octave_treble">../assets/svg/octave_treble.svg</file>
+        
+        <file alias="css_dark">../assets/css/dark.css</file>
+        <file alias="css_light">../assets/css/light.css</file>
+        <file alias="css_green">../assets/css/green.css</file>
+        <file alias="css_allen_heath">../assets/css/allen_heath.css</file>
+    </qresource>
+</RCC>

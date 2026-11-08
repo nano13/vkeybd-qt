@@ -75,3 +75,20 @@ Thumbs.db
 *.dll
 *.exe
 
+
+# Out-of-source CMake / Ninja builds
+/build-*/
+/cmake-build-*/
+/CMakeCache.txt
+/CMakeFiles/
+/Testing/
+/build.ninja
+/.ninja_deps
+/.ninja_log
+/compile_commands.json
+/CTestTestfile.cmake
+
+# Legacy in-source qmake test artifacts
+/tests/tst_core
+/tests/moc_predefs.h
+/tests/target_wrapper.sh

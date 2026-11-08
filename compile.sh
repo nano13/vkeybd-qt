@@ -1,10 +1,9 @@
-#!/usr/bin/bash
+#!/usr/bin/env bash
+set -euo pipefail
 
-#qmake-qt5 -o Makefile vkeybd-qt.pro
-qmake6 -o Makefile vkeybd-qt.pro 
-make -j $(nproc)
-
-if [ $? -eq 0 ]
-then
-    ./debug/vkeybd-qt
-fi
+# Backward-compatible build-and-run entry point; no qmake dependency.
+# Usage: ./compile.sh [debug|release]
+root="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
+"$root/compile_linux.sh" "$@"
+mode="${1:-debug}"
+exec "$root/build-$mode/vkeybd-qt"

@@ -4,8 +4,9 @@
 #include <QCommandLineParser>
 #include <QCommandLineOption>
 #include <QSplashScreen>
+#include <QTimer>
 
-#include <QDebug>
+#include <memory>
 
 #include "config.h"
 #include "enums_structs.h"
@@ -15,24 +16,7 @@ int main(int argc, char *argv[])
     QApplication app(argc, argv);
     QApplication::setApplicationVersion("0.5");
     QApplication::setApplicationName("vkeybd-qt");
-    //qDebug() << 
-    //app.inputMethod()->show();
-    
-    QPixmap pixmap(":/splash");
-    QSplashScreen splash(pixmap, Qt::WindowStaysOnTopHint);
-    app.processEvents();
-    splash.show();
-    app.processEvents();
-    splash.showMessage("Starting vkeybd-qt");
-    app.processEvents();
-    
-    Config *config = new Config;
-    int config_number_of_keyboards = config->getNumberOfKeyboards();
-    int config_number_of_layers = config->getNumberOfLayers();
-    QString config_output_system = config->getOutputSystem();
-    QString config_keyboard_config = config->getKeyboardConfig();
-    delete config;
-    
+
     QCommandLineParser parser;
     parser.setApplicationDescription("vkeybd-qt is a powerful and most feature-complete software midi controller");
     parser.addHelpOption();
@@ -55,67 +39,75 @@ int main(int argc, char *argv[])
     
     parser.process(app);
     
-    int number_of_keyboards = parser.value("number-of-keyboards").toInt();
-    if (number_of_keyboards == -1)
-    {
-        number_of_keyboards = config_number_of_keyboards;
-    }
-    
-    if (number_of_keyboards <= 0)
-    {
-        number_of_keyboards = 1;
-        
-        fprintf(stderr, "%s\n", qPrintable(QCoreApplication::translate("main", "ERROR: --number-of-keyboards can not be zero or negative. Defaulting to \"1\".")));
-    }
-    else if (number_of_keyboards > 10)
-    {
-        number_of_keyboards = 10;
-        
-        fprintf(stderr, "%s\n", qPrintable(QCoreApplication::translate("main", "ERROR: --number-of-keyboards higher than 10 is probably not a good idea. Defaulting to \"10\".")));
-    }
-    
-    int number_of_layers = parser.value("number-of-layers").toInt();
-    if (number_of_layers == -1)
-    {
-        number_of_layers = config_number_of_layers;
-    }
-    
-    QString output_system = QString::fromStdString(parser.value("output").toStdString());
-    if (output_system == "config")
-    {
-        output_system = config_output_system;
-    }
-    
-    if ((output_system != "alsa") && (output_system != "jack") && (output_system != "network"))
-    {
-        fprintf(stderr, "%s\n", qPrintable(QCoreApplication::translate("main", "ERROR: Option \"-o\" / \"--output\" has to be one of: \"alsa\", \"jack\" or \"network\".")));
-        fprintf(stderr, "\n");
-        
-        // showHelp also stops program execution
-        parser.showHelp(1);
-    }
-    else
-    {
-        app.processEvents();
-        
-        OutputSystem output;
-        output = OutputSystem::Alsa;
-        if (output_system == "alsa")
-            output = OutputSystem::Alsa;
-        else if (output_system == "jack")
-            output = OutputSystem::Jack;
-        else if (output_system == "network")
-            output = OutputSystem::Network;
-        
-        app.processEvents();
-        MainWindow win(output, number_of_keyboards);
-        app.processEvents();
-        win.show();
-        app.processEvents();
-        
-        splash.finish(&win);
-        
-        return app.exec();
-    }
-}
+    // Show the splash before any potentially expensive configuration or MIDI setup.
+    // Running the event loop first gives Qt and the window manager time to paint it.
+    QSplashScreen splash(QPixmap(":/splash"), Qt::WindowStaysOnTopHint);
+    splash.showMessage("Starting vkeybd-qt");
+    splash.show();
 
+    std::unique_ptr<MainWindow> window;
+    QTimer::singleShot(120, &app, [&]() {
+        Config config;
+        const int config_number_of_keyboards = config.getNumberOfKeyboards();
+        const int config_number_of_layers = config.getNumberOfLayers();
+        const QString config_output_system = config.getOutputSystem();
+
+        int number_of_keyboards = parser.value("number-of-keyboards").toInt();
+        if (number_of_keyboards == -1)
+        {
+            number_of_keyboards = config_number_of_keyboards;
+        }
+    
+        if (number_of_keyboards <= 0)
+        {
+            number_of_keyboards = 1;
+        
+            fprintf(stderr, "%s\n", qPrintable(QCoreApplication::translate("main", "ERROR: --number-of-keyboards can not be zero or negative. Defaulting to \"1\".")));
+        }
+        else if (number_of_keyboards > 10)
+        {
+            number_of_keyboards = 10;
+        
+            fprintf(stderr, "%s\n", qPrintable(QCoreApplication::translate("main", "ERROR: --number-of-keyboards higher than 10 is probably not a good idea. Defaulting to \"10\".")));
+        }
+    
+        int number_of_layers = parser.value("number-of-layers").toInt();
+        if (number_of_layers == -1)
+        {
+            number_of_layers = config_number_of_layers;
+        }
+    
+        QString output_system = QString::fromStdString(parser.value("output").toStdString());
+        if (output_system == "config")
+        {
+            output_system = config_output_system;
+        }
+    
+        if ((output_system != "alsa") && (output_system != "jack") && (output_system != "network"))
+        {
+            fprintf(stderr, "%s\n", qPrintable(QCoreApplication::translate("main", "ERROR: Option \"-o\" / \"--output\" has to be one of: \"alsa\", \"jack\" or \"network\".")));
+            fprintf(stderr, "\n");
+        
+            // showHelp also stops program execution
+            parser.showHelp(1);
+        }
+        else
+        {
+            OutputSystem output;
+            output = OutputSystem::Alsa;
+            if (output_system == "alsa")
+                output = OutputSystem::Alsa;
+            else if (output_system == "jack")
+                output = OutputSystem::Jack;
+            else if (output_system == "network")
+                output = OutputSystem::Network;
+        
+            window = std::make_unique<MainWindow>(output, number_of_keyboards);
+            window->show();
+        
+            splash.finish(window.get());
+        }
+    });
+
+    return app.exec();
+}

@@ -92,3 +92,7 @@ Thumbs.db
 /tests/tst_core
 /tests/moc_predefs.h
 /tests/target_wrapper.sh
+
+# compiled helper tools (built by tools/compile_*.sh)
+/tools/jack_volume
+/tools/midi_filter_volume

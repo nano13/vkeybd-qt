@@ -43,13 +43,14 @@ private:
     void disconnectRawKeyboards();
     
     bool locked = false;
+    bool suppress_not_available = false;
     void toggleKeyboardLock();
     
     void autoSelectPressedKeyboard(QString name);
     void rawKeyboardSelected(int index);
     
 private slots:
-    void keyboardNotAvailable();
+    void keyboardNotAvailable(QString message);
     void keyRawPressed(int keycode);
     void keyRawReleased(int keycode);
     

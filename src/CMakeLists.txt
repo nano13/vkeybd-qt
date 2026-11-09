@@ -93,6 +93,17 @@ target_link_libraries(vkeybd-qt PRIVATE
     PkgConfig::JACK
 )
 
+# raw keyboard input: one backend per platform (see input_keyboard_raw.h)
+if(WIN32)
+    target_sources(vkeybd-qt PRIVATE input_keyboard_raw_windows.cpp)
+    target_link_libraries(vkeybd-qt PRIVATE hid)
+elseif(APPLE)
+    target_sources(vkeybd-qt PRIVATE input_keyboard_raw_macos.cpp)
+    target_link_libraries(vkeybd-qt PRIVATE "-framework IOKit" "-framework CoreFoundation")
+else()
+    target_sources(vkeybd-qt PRIVATE input_keyboard_raw_linux.cpp)
+endif()
+
 if(VKEYBD_WITH_LIBREMIDI)
     target_sources(vkeybd-qt PRIVATE
         interface_libremidi.cpp

@@ -1,75 +1,81 @@
 #ifndef INPUTKEYBOARDRAW_H
 #define INPUTKEYBOARDRAW_H
 
+#include <QList>
 #include <QObject>
-#include <QSocketNotifier>
-#include <QThread>
-#include <linux/input.h>
-#include <unistd.h>
+#include <QSet>
+#include <QString>
+
+#include <memory>
+
 #include "enums_structs.h"
 
-// ---------------- Worker ----------------
-class InputKeyboardRawWorker : public QObject
+/*
+ * Raw keyboard input: key events of ONE physical keyboard, independent of
+ * the window focus, so several keyboards can play different keyboard
+ * sections. All platforms report Linux input key codes (KEY_* of
+ * <linux/input.h>), like the focused-window input.
+ *
+ *   Linux    evdev (/dev/input/event*), lock = EVIOCGRAB
+ *   Windows  Interception driver if installed (listen + lock),
+ *            otherwise Raw Input (WM_INPUT, listen only)
+ *   macOS    IOKit HID Manager, listen only; needs the Input Monitoring permission
+ *
+ * A lock that is not possible is an error (deviceNotAvailable), never a
+ * silent fallback to listening: on stage, other applications must not get
+ * the keys of a locked keyboard.
+ *
+ * The platform part lives in input_keyboard_raw_<platform>.cpp.
+ */
+
+// one opened keyboard of a platform backend
+class InputKeyboardRawBackend
 {
-    Q_OBJECT
 public:
-    explicit InputKeyboardRawWorker(int fd, QObject *parent = nullptr);
-    ~InputKeyboardRawWorker() override;
-    
-    void stop();
-    
-public slots:
-    void initialize();
-    
-signals:
-    void rawKeyPressed(int code);
-    void rawKeyReleased(int code);
-    void deviceDisconnected();
-    
-private slots:
-    void readEvent(int);
-    
-private:
-    int fd = -1;
-    QSocketNotifier *notifier = nullptr;
+    virtual ~InputKeyboardRawBackend() = default;
 };
 
-// ---------------- Meta ----------------
 class InputKeyboardRawMeta : public QObject
 {
     Q_OBJECT
 public:
     explicit InputKeyboardRawMeta(QObject *parent = nullptr);
     
-    QList<QMap<QString, QString>> detectKeyboards();
+    // display names ("name\n@id"), as shown in the combo box
     QList<QString> getKeyboardNames();
+    // device id for InputKeyboardRawController; empty if unknown
     QString getPathForName(QString name);
     
+    // whether keyboardLock() can keep the keys away from other applications
+    static bool canLock();
+    
+    struct Keyboard
+    {
+        QString name;
+        QString id;
+    };
+    
 private:
-    QString getKeyboardName(QMap<QString, QString> keyboard);
+    // platform part
+    static QList<Keyboard> detectKeyboards();
 };
 
-
-
-
-
-// ---------------- Controller ----------------
 class InputKeyboardRawController : public QObject
 {
     Q_OBJECT
 public:
     explicit InputKeyboardRawController(QObject *parent = nullptr);
-    ~InputKeyboardRawController();
+    ~InputKeyboardRawController() override;
     
     void keyboardListen(QString devpath);
+    // fails with deviceNotAvailable() if the keyboard cannot be locked
     void keyboardLock(QString devpath);
-    void keyboardHelper(QString devpath, KeyboardMode mode);
-    void keyboardDisconnected();
+    // stops listening; held keys are released first
     void keyboardRelease();
     
-private slots:
-    void rawKeyPressed(int keycode);
-    void rawKeyReleased(int keycode);
+    // used by the platform backends (GUI thread)
+    void reportKey(int keycode, bool pressed);
+    void keyboardDisconnected();
     
 signals:
     void deviceNotAvailable(QString message);
@@ -77,8 +83,13 @@ signals:
     void signalRawKeyReleased(int keycode);
     
 private:
-    QThread *thread = nullptr;
-    InputKeyboardRawWorker *worker = nullptr;
+    std::unique_ptr<InputKeyboardRawBackend> backend;
+    QSet<int> held_keys;
+    
+    void keyboardOpen(QString devpath, KeyboardMode mode);
 };
+
+// platform part: opens the keyboard with the given id, or returns nullptr and sets error
+std::unique_ptr<InputKeyboardRawBackend> createRawKeyboardBackend(InputKeyboardRawController *owner, const QString &id, KeyboardMode mode, QString &error);
 
 #endif // INPUTKEYBOARDRAW_H

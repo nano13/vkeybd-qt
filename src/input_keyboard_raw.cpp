@@ -1,77 +1,6 @@
 #include "input_keyboard_raw.h"
-#include <QFile>
-#include <QTextStream>
+
 #include <QDebug>
-#include <fcntl.h>
-#include <errno.h>
-#include <string.h>
-#include <sys/ioctl.h>
-
-// ---------------- Worker ----------------
-InputKeyboardRawWorker::InputKeyboardRawWorker(int fd, QObject *parent)
-    : QObject(parent), fd(fd)
-{
-
-}
-
-InputKeyboardRawWorker::~InputKeyboardRawWorker()
-{
-    stop();
-}
-
-void InputKeyboardRawWorker::initialize()
-{
-    if (!notifier)
-    {
-        notifier = new QSocketNotifier(fd, QSocketNotifier::Read, this);
-        connect(notifier, &QSocketNotifier::activated,
-                this, &InputKeyboardRawWorker::readEvent, Qt::DirectConnection);
-    }
-}
-
-void InputKeyboardRawWorker::readEvent(int)
-{
-    struct input_event ev;
-    ssize_t n = read(fd, &ev, sizeof(ev));
-    
-    if (n == sizeof(ev))
-    {
-        if (ev.type == EV_KEY && ev.value >= 0 && ev.value <= 2)
-        {
-            if (ev.value == 1)
-                emit rawKeyPressed(ev.code);
-            else if (ev.value == 0)
-                emit rawKeyReleased(ev.code);
-        }
-    }
-    else
-    {
-        qWarning() << "Keyboard read error or disconnected:" << strerror(errno);
-        emit deviceDisconnected();
-    }
-}
-
-void InputKeyboardRawWorker::stop()
-{
-    if (notifier) {
-        notifier->setEnabled(false);
-        notifier->deleteLater();
-        notifier = nullptr;
-    }
-    
-    if (fd != -1) {
-        ioctl(fd, EVIOCGRAB, 0);  // IMPORTANT
-        ::close(fd);
-        fd = -1;
-    }
-}
-
-
-
-
-
-
-
 
 // ---------------- Meta ----------------
 InputKeyboardRawMeta::InputKeyboardRawMeta(QObject *parent)
@@ -79,90 +8,25 @@ InputKeyboardRawMeta::InputKeyboardRawMeta(QObject *parent)
 {
 }
 
-QList<QMap<QString, QString>> InputKeyboardRawMeta::detectKeyboards()
-{
-    QList<QMap<QString, QString>> keyboards;
-    
-    QFile file("/proc/bus/input/devices");
-    if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
-        return keyboards;
-    
-    QTextStream stream(&file);
-    QString devs = stream.readAll();
-    QList<QString> lines = devs.split("\n");
-    
-    QMap<QString, QString> device;
-    
-    for (const QString &line : lines)
-    {
-        if (line.isEmpty())
-        {
-            QString ev = device["EV"];
-            int evi = ev.toUInt(nullptr, 16);
-            if ((evi & 0x120013) == 0x120013)
-                keyboards.append(device);
-            device.clear();
-        }
-        else
-        {
-            if (line.contains(": "))
-            {
-                QList<QString> splitted = line.split(": ").at(1).split("=");
-                if (splitted.length() > 1)
-                {
-                    if (splitted.at(0) == "Handlers")
-                    {
-                        for (const QString &hand : splitted.at(1).split(" "))
-                        {
-                            if (hand.startsWith("event"))
-                            {
-                                device["devpath"] = "/dev/input/" + hand;
-                                device["dev"] = hand;
-                            }
-                        }
-                    }
-                    
-                    // FIX: create a copy so remove() can be called
-                    QString key = splitted.at(0);
-                    QString value = splitted.at(1);
-                    value.remove("\"");  // safe now
-                    device[key] = value;
-                }
-            }
-        }
-    }
-    
-    return keyboards;
-}
-
-
 QList<QString> InputKeyboardRawMeta::getKeyboardNames()
 {
-    QList<QMap<QString, QString>> keyboards = detectKeyboards();
-    QList<QString> result;
-    for (auto &k : keyboards)
-        result.append(getKeyboardName(k));
-    return result;
+    QList<QString> names;
+    const QList<Keyboard> keyboards = detectKeyboards();
+    for (const Keyboard &keyboard : keyboards)
+        names.append(keyboard.name);
+    return names;
 }
 
 QString InputKeyboardRawMeta::getPathForName(QString name)
 {
-    for (auto &k : detectKeyboards())
+    const QList<Keyboard> keyboards = detectKeyboards();
+    for (const Keyboard &keyboard : keyboards)
     {
-        if (getKeyboardName(k) == name)
-            return k["devpath"];
+        if (keyboard.name == name)
+            return keyboard.id;
     }
-    return "";
+    return QString();
 }
-
-QString InputKeyboardRawMeta::getKeyboardName(QMap<QString, QString> keyboard)
-{
-    return keyboard["Name"] + "\n@" + (keyboard["Uniq"].isEmpty() ? keyboard["dev"] : keyboard["Uniq"]);
-}
-
-
-
-
 
 // ---------------- Controller ----------------
 InputKeyboardRawController::InputKeyboardRawController(QObject *parent)
@@ -172,98 +36,67 @@ InputKeyboardRawController::InputKeyboardRawController(QObject *parent)
 
 InputKeyboardRawController::~InputKeyboardRawController()
 {
-    keyboardRelease();
+    // no releases from a destructor: the receivers may be gone already
+    this->held_keys.clear();
+    this->backend.reset();
 }
 
 void InputKeyboardRawController::keyboardListen(QString devpath)
 {
-    keyboardHelper(devpath, KeyboardMode::listen);
+    keyboardOpen(devpath, KeyboardMode::listen);
 }
 
 void InputKeyboardRawController::keyboardLock(QString devpath)
 {
-    keyboardHelper(devpath, KeyboardMode::lock);
+    keyboardOpen(devpath, KeyboardMode::lock);
 }
 
-void InputKeyboardRawController::keyboardHelper(QString devpath, KeyboardMode mode)
+void InputKeyboardRawController::keyboardOpen(QString devpath, KeyboardMode mode)
 {
-    keyboardRelease(); // release previous keyboard safely
+    keyboardRelease();
     
-    QByteArray devBytes = devpath.toLocal8Bit();
-    const char* dev = devBytes.constData();
-    
-    int newFd = open(dev, O_RDONLY);
-    if (newFd < 0)
+    QString error;
+    this->backend = createRawKeyboardBackend(this, devpath, mode, error);
+    if (!this->backend)
     {
-        qDebug() << "ERROR: device not available:" << strerror(errno);
-        emit deviceNotAvailable("evdev open");
+        qWarning() << "Keyboard not available:" << devpath << error;
+        emit deviceNotAvailable(error);
+    }
+}
+
+void InputKeyboardRawController::keyboardRelease()
+{
+    this->backend.reset();
+    
+    // a key held while switching would otherwise never be released
+    const QList<int> keys = this->held_keys.values();
+    this->held_keys.clear();
+    for (const int key : keys)
+        emit signalRawKeyReleased(key);
+}
+
+void InputKeyboardRawController::reportKey(int keycode, bool pressed)
+{
+    if (keycode < 0)
         return;
-    }
     
-    if (mode == KeyboardMode::lock)
+    // backends may report auto-repeat as further presses
+    if (pressed)
     {
-        if (ioctl(newFd, EVIOCGRAB, 1))
-            qWarning() << "Failed to grab keyboard:" << strerror(errno);
+        if (this->held_keys.contains(keycode))
+            return;
+        this->held_keys.insert(keycode);
+        emit signalRawKeyPressed(keycode);
     }
-    
-    worker = new InputKeyboardRawWorker(newFd);
-    thread = new QThread(this);
-    
-    worker->moveToThread(thread);
-    
-    connect(worker, &InputKeyboardRawWorker::rawKeyPressed,
-            this, &InputKeyboardRawController::rawKeyPressed);
-    connect(worker, &InputKeyboardRawWorker::rawKeyReleased,
-            this, &InputKeyboardRawController::rawKeyReleased);
-    
-    connect(worker, &InputKeyboardRawWorker::deviceDisconnected,
-            this, &InputKeyboardRawController::keyboardDisconnected);
-    
-    connect(thread, &QThread::started, worker, &InputKeyboardRawWorker::initialize);
-    connect(thread, &QThread::finished, worker, &QObject::deleteLater);
-    connect(thread, &QThread::finished, thread, &QObject::deleteLater);
-    
-    thread->start();
+    else if (this->held_keys.remove(keycode))
+    {
+        emit signalRawKeyReleased(keycode);
+    }
 }
 
 void InputKeyboardRawController::keyboardDisconnected()
 {
     qDebug() << "Keyboard disconnected";
-    emit deviceNotAvailable("Keyboard disconnected");
     keyboardRelease();
-}
-void InputKeyboardRawController::keyboardRelease()
-{
-    if (!worker)
-        return;
-    
-    InputKeyboardRawWorker *w = worker;
-    QThread *t = thread;
-    
-    worker = nullptr;
-    thread = nullptr;
-    
-    // Stop notifier + fd inside worker thread, synchronously
-    QMetaObject::invokeMethod(
-        w,
-        &InputKeyboardRawWorker::stop,
-        Qt::BlockingQueuedConnection
-        );
-    
-    t->quit();
-    t->wait();
-    
-    //w->deleteLater();
-    //t->deleteLater();
-}
-
-
-void InputKeyboardRawController::rawKeyPressed(int keycode)
-{
-    emit signalRawKeyPressed(keycode);
-}
-
-void InputKeyboardRawController::rawKeyReleased(int keycode)
-{
-    emit signalRawKeyReleased(keycode);
+    emit deviceNotAvailable("Keyboard disconnected");
 }

@@ -1,4 +1,6 @@
 #include "input_keyboard_select.h"
+
+#include <QMessageBox>
 #include "qabstractitemview.h"
 #include "qpainter.h"
 #include "qstyleditemdelegate.h"
@@ -192,8 +194,8 @@ void InputKeyboardSelect::autoSelectPressedKeyboard(QString name)
 
 void InputKeyboardSelect::rawKeyboardSelected(int index)
 {
-    qDebug() << "RAW SELECTED";
-    this->button_keyboard_lock->setDisabled(false);
+    // the lock is not available on every platform
+    this->button_keyboard_lock->setDisabled(!InputKeyboardRawMeta::canLock());
     emit keyboardSelectionChangedSignal(index, this->locked);
     
     disconnectRawKeyboards();
@@ -206,18 +208,19 @@ void InputKeyboardSelect::rawKeyboardSelected(int index)
     {
         if (name == keys.at(i))
         {
-            if (this->locked)
-            {
-                this->map_of_raw_keyboards[name]->keyboardLock(path);
-            }
-            else
-            {
-                this->map_of_raw_keyboards[name]->keyboardListen(path);
-            }
+            InputKeyboardRawController *keyboard = this->map_of_raw_keyboards[name];
             
-            connect(this->map_of_raw_keyboards[name], &InputKeyboardRawController::signalRawKeyPressed, this, &InputKeyboardSelect::keyRawPressed);
-            connect(this->map_of_raw_keyboards[name], &InputKeyboardRawController::signalRawKeyReleased, this, &InputKeyboardSelect::keyRawReleased);
-            connect(this->map_of_raw_keyboards[name], &InputKeyboardRawController::deviceNotAvailable, this, &InputKeyboardSelect::keyboardNotAvailable);
+            // connected before opening, so an open/lock failure is reported;
+            // unique: a failed lock re-enters this function while unlocking
+            connect(keyboard, &InputKeyboardRawController::signalRawKeyPressed, this, &InputKeyboardSelect::keyRawPressed, Qt::UniqueConnection);
+            connect(keyboard, &InputKeyboardRawController::signalRawKeyReleased, this, &InputKeyboardSelect::keyRawReleased, Qt::UniqueConnection);
+            connect(keyboard, &InputKeyboardRawController::deviceNotAvailable, this, &InputKeyboardSelect::keyboardNotAvailable, Qt::UniqueConnection);
+            
+            if (this->locked)
+                keyboard->keyboardLock(path);
+            else
+                keyboard->keyboardListen(path);
+            break;
         }
     }
 }
@@ -272,11 +275,25 @@ void InputKeyboardSelect::cleanupRawKeyboards()
     this->map_of_raw_keyboards.clear();
 }
 
-void InputKeyboardSelect::keyboardNotAvailable()
+void InputKeyboardSelect::keyboardNotAvailable(QString message)
 {
+    // a failure while unlocking/reopening belongs to the same incident
+    if (this->suppress_not_available)
+        return;
+    
+    // not modal: the other keyboards keep playing
+    QMessageBox *box = new QMessageBox(QMessageBox::Warning, "Keyboard not available",
+                                       this->combo_keyboard_selector->currentText().replace("\n", " ") + "\n\n" + message,
+                                       QMessageBox::Ok, this->button_keyboard_lock->window());
+    box->setAttribute(Qt::WA_DeleteOnClose);
+    box->open();
+    
+    // the button must never show "Unlock" for a keyboard that is not locked
     if (this->locked)
     {
+        this->suppress_not_available = true;
         this->toggleKeyboardLock();
+        this->suppress_not_available = false;
     }
 }
 

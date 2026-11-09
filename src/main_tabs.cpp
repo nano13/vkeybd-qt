@@ -21,6 +21,12 @@ MainTabs::MainTabs(QList<QString> labels, int id, Config *config, MainTabsSwitch
     {
         this->interface_audio = new InterfaceJack(id);
     }
+#ifdef VKEYBD_HAS_LIBREMIDI
+    else if (output == OutputSystem::Libremidi)
+    {
+        this->interface_audio = new InterfaceLibremidi(id, this);
+    }
+#endif
     else if (output == OutputSystem::Network)
     {
         this->send_udp = true;

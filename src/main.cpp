@@ -30,7 +30,7 @@ int main(int argc, char *argv[])
         {{"l", "number-of-layers"},
             QCoreApplication::translate("main", "Nubmer of Layers. '1' gives you 12 layers, '2' gives 24 layers"), "number", "-1"},
         {{"o", "output"},
-            QCoreApplication::translate("main", "Which Audio System to use: \"alsa\" (default), \"jack\" or \"network\" (remote control another vkeybd-qt instance)"), "string", "config"},
+            QCoreApplication::translate("main", "Which MIDI system to use: \"alsa\", \"jack\", \"libremidi\" or \"network\" (remote control another vkeybd-qt instance). Default: the value in config.ini (\"jack\" initially)"), "string", "config"},
         {{"k", "keyboard-config"},
             QCoreApplication::translate("main", "Keyboard Configs and Mappings to use"), "string", "builtin"},
         {{"q", "quicksave-path"},
@@ -83,9 +83,17 @@ int main(int argc, char *argv[])
             output_system = config_output_system;
         }
     
-        if ((output_system != "alsa") && (output_system != "jack") && (output_system != "network"))
+#ifndef VKEYBD_HAS_LIBREMIDI
+        if (output_system == "libremidi")
         {
-            fprintf(stderr, "%s\n", qPrintable(QCoreApplication::translate("main", "ERROR: Option \"-o\" / \"--output\" has to be one of: \"alsa\", \"jack\" or \"network\".")));
+            fprintf(stderr, "%s\n", qPrintable(QCoreApplication::translate("main", "ERROR: this build has no libremidi support (CMake option VKEYBD_WITH_LIBREMIDI).")));
+            fprintf(stderr, "\n");
+            parser.showHelp(1);
+        }
+#endif
+        if ((output_system != "alsa") && (output_system != "jack") && (output_system != "libremidi") && (output_system != "network"))
+        {
+            fprintf(stderr, "%s\n", qPrintable(QCoreApplication::translate("main", "ERROR: Option \"-o\" / \"--output\" has to be one of: \"alsa\", \"jack\", \"libremidi\" or \"network\".")));
             fprintf(stderr, "\n");
         
             // showHelp also stops program execution
@@ -99,6 +107,8 @@ int main(int argc, char *argv[])
                 output = OutputSystem::Alsa;
             else if (output_system == "jack")
                 output = OutputSystem::Jack;
+            else if (output_system == "libremidi")
+                output = OutputSystem::Libremidi;
             else if (output_system == "network")
                 output = OutputSystem::Network;
         

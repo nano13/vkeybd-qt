@@ -92,3 +92,16 @@ target_link_libraries(vkeybd-qt PRIVATE
     PkgConfig::ALSA
     PkgConfig::JACK
 )
+
+if(VKEYBD_WITH_LIBREMIDI)
+    target_sources(vkeybd-qt PRIVATE
+        interface_libremidi.cpp
+        interface_libremidi.h
+    )
+    target_compile_definitions(vkeybd-qt PRIVATE VKEYBD_HAS_LIBREMIDI)
+    if(TARGET libremidi::libremidi)
+        target_link_libraries(vkeybd-qt PRIVATE libremidi::libremidi)
+    else()
+        target_link_libraries(vkeybd-qt PRIVATE libremidi)
+    endif()
+endif()

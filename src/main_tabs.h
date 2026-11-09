@@ -24,6 +24,9 @@
 #include "interface_audio.h"
 #include "interface_alsa.h"
 #include "interface_jack.h"
+#ifdef VKEYBD_HAS_LIBREMIDI
+#include "interface_libremidi.h"
+#endif
 
 #include "midi_engine.h"
 #include "midi_channel_selector.h"

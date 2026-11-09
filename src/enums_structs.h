@@ -8,6 +8,7 @@ enum OutputSystem : uint8_t
     Alsa,
     Jack,
     Network,
+    Libremidi,
 };
 
 enum class GUIElements

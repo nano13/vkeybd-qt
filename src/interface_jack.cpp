@@ -35,6 +35,10 @@ InterfaceJack::~InterfaceJack()
         jack_deactivate(client);
         jack_client_close(client);
     }
+    if (this->input_ring_buffer) {
+        jack_ringbuffer_free(this->input_ring_buffer);
+        this->input_ring_buffer = nullptr;
+    }
     if (ringBuffer) {
         jack_ringbuffer_free(ringBuffer);
         ringBuffer = nullptr;
@@ -81,6 +85,7 @@ void InterfaceJack::pushEvent(const MidiEvent &event)
 int InterfaceJack::jackCallback(jack_nframes_t nframes, void *arg)
 {
     InterfaceJack *self = static_cast<InterfaceJack*>(arg);
+    self->readInputPort(nframes);
     self->processRingBuffer(nframes);
     return 0;
 }
@@ -249,4 +254,73 @@ void InterfaceJack::setReleaseChanged(int port, int channel, uint8_t value)
 void InterfaceJack::setTremoloChanged(int port, int channel, uint8_t value)
 {
     pushEvent({port, channel, MidiEvent::CC, 1, value});
+}
+
+void InterfaceJack::createMidiInput(QString label)
+{
+    if (!this->client || this->input_port.load(std::memory_order_acquire))
+        return;
+    
+    this->input_ring_buffer = jack_ringbuffer_create(64 * 1024);
+    if (!this->input_ring_buffer) {
+        qWarning() << "Failed to create JACK MIDI input ring buffer";
+        return;
+    }
+    
+    jack_port_t *port = jack_port_register(this->client,
+                                           label.toUtf8(),
+                                           JACK_DEFAULT_MIDI_TYPE,
+                                           JackPortIsInput,
+                                           0);
+    if (!port) {
+        qWarning() << "Failed to register JACK MIDI input port" << label;
+        return;
+    }
+    
+    // from now on the real-time callback reads the port
+    this->input_port.store(port, std::memory_order_release);
+    
+    this->input_timer = new QTimer(this);
+    this->input_timer->setInterval(2);
+    this->input_timer->setTimerType(Qt::PreciseTimer);
+    connect(this->input_timer, &QTimer::timeout, this, &InterfaceJack::drainMidiInput);
+    this->input_timer->start();
+}
+
+// real-time thread: no allocation, no locking
+void InterfaceJack::readInputPort(jack_nframes_t nframes)
+{
+    jack_port_t *port = this->input_port.load(std::memory_order_acquire);
+    if (!port)
+        return;
+    
+    void *buffer = jack_port_get_buffer(port, nframes);
+    const jack_nframes_t count = jack_midi_get_event_count(buffer);
+    
+    for (jack_nframes_t i = 0; i < count; ++i) {
+        jack_midi_event_t event;
+        if (jack_midi_event_get(&event, buffer, i) != 0)
+            continue;
+        
+        // channel voice messages only (sysex and other long messages are skipped)
+        if (event.size < 2 || event.size > MIDI_MESSAGE_SIZE || (event.buffer[0] & 0x80) == 0)
+            continue;
+        
+        unsigned char message[MIDI_MESSAGE_SIZE] = {0, 0, 0};
+        for (size_t b = 0; b < event.size; ++b)
+            message[b] = event.buffer[b];
+        
+        if (jack_ringbuffer_write_space(this->input_ring_buffer) >= MIDI_MESSAGE_SIZE)
+            jack_ringbuffer_write(this->input_ring_buffer, reinterpret_cast<const char*>(message), MIDI_MESSAGE_SIZE);
+    }
+}
+
+// GUI thread
+void InterfaceJack::drainMidiInput()
+{
+    unsigned char message[MIDI_MESSAGE_SIZE];
+    while (jack_ringbuffer_read_space(this->input_ring_buffer) >= MIDI_MESSAGE_SIZE) {
+        jack_ringbuffer_read(this->input_ring_buffer, reinterpret_cast<char*>(message), MIDI_MESSAGE_SIZE);
+        dispatchMidiMessage(message[0], message[1], message[2]);
+    }
 }

@@ -1,7 +1,12 @@
 #include "keyboard_pc.h"
 
+#include <algorithm>
+
 KeyboardPC::KeyboardPC(QWidget *parent) : QWidget(parent)
 {
+    this->midi_codes = defaultMIDICodes();
+    for (const QList<int> &row : this->midi_codes)
+        this->active_midi_codes.append(QList<int>(row.size(), -1));
     setMinimumWidth(qRound(450 * this->button_scale));
     setFixedHeight(qRound(5 * 30 * this->button_scale));
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
@@ -15,7 +20,6 @@ void KeyboardPC::drawButtons()
     QList<QList<int>> sizes = getButtonSizes();
     QList<QList<QString>> colors = getButtonColors();
     QList<QList<QString>> labels = getButtonLabels();
-    QList<QList<int>> midicodes = getMIDICodes();
     QList<QList<int>> keycodes = getButtonKeycodesRaw();
     
     for (int row = 0; row < sizes.length(); row++)
@@ -27,12 +31,19 @@ void KeyboardPC::drawButtons()
             QString button_text = labels.at(row).at(col);
             button->setText(button_text.replace("|", "\n"));
 
-            int midicode = midicodes.at(row).at(col);
-            if (midicode > -1)
-            {
-                connect(button, &QPushButton::pressed, this, [this, midicode]{ emit MIDIPress(midicode); });
-                connect(button, &QPushButton::released, this, [this, midicode]{ emit MIDIRelease(midicode); });
-            }
+            // Look up the current mapping at event time, not at construction.
+            connect(button, &QPushButton::pressed, this, [this, row, col]{
+                const int note = this->midi_codes.at(row).at(col);
+                this->active_midi_codes[row][col] = note;
+                if (note >= 0)
+                    emit MIDIPress(note);
+            });
+            connect(button, &QPushButton::released, this, [this, row, col]{
+                const int note = this->active_midi_codes.at(row).at(col);
+                this->active_midi_codes[row][col] = -1;
+                if (note >= 0)
+                    emit MIDIRelease(note);
+            });
             int keycode = keycodes.at(row).at(col);
             if (keycode == KeysRaw::Control_L)
             {
@@ -149,7 +160,7 @@ QList<QList<int>> KeyboardPC::getButtonKeycodesRaw()
     return list;
 }
 
-QList<QList<int>> KeyboardPC::getMIDICodes()
+QList<QList<int>> KeyboardPC::defaultMIDICodes()
 {
     QList<QList<int>> list;
     list = {{8, 11, 14, 17, 20, 23, 26, 29, 32, 35, 38, 41, 44, 47},
@@ -160,55 +171,115 @@ QList<QList<int>> KeyboardPC::getMIDICodes()
     return list;
 }
 
+QList<QList<int>> KeyboardPC::midiMapping() const
+{
+    return this->midi_codes;
+}
+
+QList<int> KeyboardPC::midiNotes() const
+{
+    QList<int> notes;
+    for (const QList<int> &row : this->midi_codes)
+    {
+        for (int note : row)
+        {
+            if (note >= 0 && !notes.contains(note))
+                notes.append(note);
+        }
+    }
+    std::sort(notes.begin(), notes.end());
+    return notes;
+}
+
+bool KeyboardPC::setMidiMapping(const QList<QList<int>> &mapping)
+{
+    if (mapping.size() != this->midi_codes.size())
+        return false;
+
+    for (int row = 0; row < mapping.size(); ++row)
+    {
+        if (mapping.at(row).size() != this->midi_codes.at(row).size())
+            return false;
+        for (int note : mapping.at(row))
+        {
+            if (note < -1 || note > 127)
+                return false;
+        }
+    }
+
+    if (mapping == this->midi_codes)
+        return true;
+
+    // A remap while keys are down must release the notes from the OLD mapping.
+    for (int row = 0; row < this->list_of_buttons.size(); ++row)
+    {
+        for (int col = 0; col < this->list_of_buttons.at(row).size(); ++col)
+        {
+            QPushButton *button = this->list_of_buttons.at(row).at(col);
+            const int old_note = this->active_midi_codes.at(row).at(col);
+            button->setDown(false);
+            this->active_midi_codes[row][col] = -1;
+            if (old_note >= 0)
+                emit MIDIRelease(old_note);
+        }
+    }
+
+    this->midi_codes = mapping;
+    emit midiMappingChanged();
+    return true;
+}
+
 void KeyboardPC::keyDownRaw(int keycode)
 {
-    QList<QList<int>> keycodes = getButtonKeycodesRaw();
-    for (int row=0; row < keycodes.length(); row++)
+    const QList<QList<int>> keycodes = getButtonKeycodesRaw();
+    for (int row = 0; row < keycodes.size(); ++row)
     {
-        for (int col=0; col < keycodes.at(row).length(); col++)
+        for (int col = 0; col < keycodes.at(row).size(); ++col)
         {
-            if (keycodes.at(row).at(col) == keycode)
-            {
-                this->list_of_buttons.at(row).at(col)->setDown(true);
-                
-                QList<QList<int>> midicodes = getMIDICodes();
-                if (midicodes.at(row).at(col) > -1)
-                {
-                    emit MIDIPress(midicodes.at(row).at(col));
-                }
-            }
+            if (keycodes.at(row).at(col) != keycode)
+                continue;
+
+            QPushButton *button = this->list_of_buttons.at(row).at(col);
+            if (button->isDown())
+                continue;
+
+            button->setDown(true);
+            const int note = this->midi_codes.at(row).at(col);
+            this->active_midi_codes[row][col] = note;
+            if (note >= 0)
+                emit MIDIPress(note);
         }
     }
 }
+
 void KeyboardPC::keyUpRaw(int keycode)
 {
-    QList<QList<int>> keycodes = getButtonKeycodesRaw();
-    for (int row=0; row < keycodes.length(); row++)
+    const QList<QList<int>> keycodes = getButtonKeycodesRaw();
+    for (int row = 0; row < keycodes.size(); ++row)
     {
-        for (int col=0; col < keycodes.at(row).length(); col++)
+        for (int col = 0; col < keycodes.at(row).size(); ++col)
         {
-            if (keycodes.at(row).at(col) == keycode)
-            {
-                this->list_of_buttons.at(row).at(col)->setDown(false);
-                
-                QList<QList<int>> midicodes = getMIDICodes();
-                if (midicodes.at(row).at(col) > -1)
-                {
-                    emit MIDIRelease(midicodes.at(row).at(col));
-                }
-            }
+            if (keycodes.at(row).at(col) != keycode)
+                continue;
+
+            QPushButton *button = this->list_of_buttons.at(row).at(col);
+            button->setDown(false);
+            const int note = this->active_midi_codes.at(row).at(col);
+            this->active_midi_codes[row][col] = -1;
+            if (note >= 0)
+                emit MIDIRelease(note);
         }
     }
 }
 
 void KeyboardPC::allKeysUp()
 {
-    QList<QList<int>> keycodes = getButtonKeycodesRaw();
-    for (int row=0; row < keycodes.length(); row++)
+    for (int row = 0; row < this->list_of_buttons.size(); ++row)
     {
-        for (int col=0; col < keycodes.at(row).length(); col++)
+        for (int col = 0; col < this->list_of_buttons.at(row).size(); ++col)
         {
             this->list_of_buttons.at(row).at(col)->setDown(false);
+            this->active_midi_codes[row][col] = -1;
         }
     }
 }

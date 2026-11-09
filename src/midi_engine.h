@@ -33,6 +33,11 @@ public:
     // The lower full octave of the PC keyboard is in the range 12..23 (to be able
     // to add some even deeper keys to the left), therefore the offset of 12.
     static constexpr int SOURCE_KEY_OFFSET = 12;
+    // MIDI input, see midiNoteOn()
+    static constexpr int MIDI_INPUT_REFERENCE_OCTAVE = 48;
+    static constexpr int MIDI_INPUT_NEUTRAL_VELOCITY = 64;
+    // held notes of the MIDI input are kept apart from the PC keys (8..48)
+    static constexpr int MIDI_INPUT_HELD_KEY_BASE = 1000;
     // range of the key shift spin boxes
     static constexpr int KEY_SHIFT_LIMIT = 64;
 
@@ -62,6 +67,15 @@ public:
     // ---- notes ----
     void noteOn(int tab, int source_key);
     void noteOff(int source_key);
+    
+    // MIDI input: notes are routed like PC keys (key ranges, shifts, octave checkboxes;
+    // the default octave 48 plays the note as it is). They are held separately from
+    // the PC keys. The velocity is scaled by the channel's velocity setting relative
+    // to mf (64), so the default setting passes it through unchanged.
+    void midiNoteOn(int tab, int note, int velocity);
+    void midiNoteOff(int note);
+    // sends a CC to all activated channels of a tab
+    void forwardControlChange(int tab, int cc, int value);
     void pitchBend(int tab, int value);
 
     // sends note-off for everything still held
@@ -115,6 +129,9 @@ private:
     void ensureTab(int tab);
     void recompile(int tab);
 
+    // velocity < 0: use the channel's velocity setting
+    void startNotes(int tab, int held_key, int keycode, int velocity);
+    
     // only_tab < 0: release for all tabs
     void releaseHeld(int source_key, int only_tab);
 

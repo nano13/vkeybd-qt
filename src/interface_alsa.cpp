@@ -1,5 +1,7 @@
 #include "interface_alsa.h"
 
+#include <cerrno>
+
 /*
  * http://jack-keyboard.sourceforge.net/
  * https://stackoverflow.com/questions/21161118/send-midi-messages-from-c
@@ -55,6 +57,14 @@ void InterfaceAlsa::createNewPort(QString label)
 
 InterfaceAlsa::~InterfaceAlsa()
 {
+    if (this->seq_in)
+    {
+        for (QSocketNotifier *notifier : this->input_notifiers)
+            notifier->setEnabled(false);
+        snd_seq_close(this->seq_in);
+        this->seq_in = nullptr;
+    }
+    
     if (!this->seq)
         return;
     
@@ -241,5 +251,86 @@ void InterfaceAlsa::sendEvent(bool drain)
     if (drain)
     {
         snd_seq_drain_output(this->seq);
+    }
+}
+
+void InterfaceAlsa::createMidiInput(QString label)
+{
+    if (this->seq_in)
+        return;
+    
+    int error = snd_seq_open(&this->seq_in, "default", SND_SEQ_OPEN_INPUT, SND_SEQ_NONBLOCK);
+    if (error < 0)
+    {
+        qWarning() << "Cannot open the ALSA sequencer for MIDI input:" << snd_strerror(error);
+        this->seq_in = nullptr;
+        return;
+    }
+    snd_seq_set_client_name(this->seq_in, (this->NAME + "-in").toLatin1());
+    
+    int port = snd_seq_create_simple_port(this->seq_in, label.toLatin1(),
+        SND_SEQ_PORT_CAP_WRITE | SND_SEQ_PORT_CAP_SUBS_WRITE,
+        SND_SEQ_PORT_TYPE_MIDI_GENERIC | SND_SEQ_PORT_TYPE_APPLICATION);
+    if (port < 0)
+    {
+        qWarning() << "Cannot create ALSA MIDI input port" << label << ":" << snd_strerror(port);
+        snd_seq_close(this->seq_in);
+        this->seq_in = nullptr;
+        return;
+    }
+    
+    int count = snd_seq_poll_descriptors_count(this->seq_in, POLLIN);
+    if (count <= 0)
+        return;
+    
+    QList<struct pollfd> descriptors(count);
+    snd_seq_poll_descriptors(this->seq_in, descriptors.data(), count, POLLIN);
+    for (const struct pollfd &descriptor : descriptors)
+    {
+        QSocketNotifier *notifier = new QSocketNotifier(descriptor.fd, QSocketNotifier::Read, this);
+        connect(notifier, &QSocketNotifier::activated, this, &InterfaceAlsa::readMidiInput);
+        this->input_notifiers.append(notifier);
+    }
+}
+
+void InterfaceAlsa::readMidiInput()
+{
+    if (!this->seq_in)
+        return;
+    
+    // read everything that is pending; the handle is non-blocking
+    while (snd_seq_event_input_pending(this->seq_in, 1) > 0)
+    {
+        snd_seq_event_t *event = nullptr;
+        int result = snd_seq_event_input(this->seq_in, &event);
+        if (result == -ENOSPC)
+        {
+            qWarning() << "ALSA MIDI input overrun, events lost";
+            continue;
+        }
+        if (result < 0 || !event)
+            break;
+        
+        switch (event->type)
+        {
+        case SND_SEQ_EVENT_NOTEON:
+            dispatchMidiMessage(0x90, event->data.note.note, event->data.note.velocity);
+            break;
+        case SND_SEQ_EVENT_NOTEOFF:
+            dispatchMidiMessage(0x80, event->data.note.note, event->data.note.velocity);
+            break;
+        case SND_SEQ_EVENT_CONTROLLER:
+            dispatchMidiMessage(0xB0, event->data.control.param, event->data.control.value);
+            break;
+        case SND_SEQ_EVENT_PITCHBEND:
+        {
+            // ALSA: -8192..8191, MIDI: 0..16383
+            int value = qBound(0, event->data.control.value + 8192, 16383);
+            dispatchMidiMessage(0xE0, value & 0x7F, (value >> 7) & 0x7F);
+            break;
+        }
+        default:
+            break;
+        }
     }
 }

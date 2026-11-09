@@ -135,3 +135,37 @@ void InterfaceAudio::setTremoloChanged(int port, int channel, uint8_t value)
     Q_UNUSED(value);
 }
 
+
+void InterfaceAudio::createMidiInput(QString label)
+{
+    Q_UNUSED(label);
+}
+
+void InterfaceAudio::dispatchMidiMessage(uint8_t status, uint8_t data1, uint8_t data2)
+{
+    data1 &= 0x7F;
+    data2 &= 0x7F;
+    
+    switch (status & 0xF0)
+    {
+    case 0x90:
+        // note on with velocity 0 is a note off
+        if (data2 == 0)
+            emit signalMidiNoteOff(data1);
+        else
+            emit signalMidiNoteOn(data1, data2);
+        break;
+    case 0x80:
+        emit signalMidiNoteOff(data1);
+        break;
+    case 0xB0:
+        emit signalMidiControlChange(data1, data2);
+        break;
+    case 0xE0:
+        emit signalMidiPitchBend(data1 | (data2 << 7));
+        break;
+    default:
+        // program change, aftertouch, system messages: not used
+        break;
+    }
+}

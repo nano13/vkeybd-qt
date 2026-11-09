@@ -18,6 +18,11 @@ public:
     
     float button_scale = .799;
     
+    // The PC-keyboard mapping is authoritative for the piano view.
+    QList<QList<int>> midiMapping() const;
+    QList<int> midiNotes() const;
+    bool setMidiMapping(const QList<QList<int>> &mapping);
+
     void keyDownRaw(int keycode);
     void keyUpRaw(int keycode);
     void allKeysUp();
@@ -28,9 +33,11 @@ private:
     QList<QList<QString>> getButtonLabels();
     // "raw" means: as read directly from /dev/input
     QList<QList<int>> getButtonKeycodesRaw();
-    QList<QList<int>> getMIDICodes();
+    static QList<QList<int>> defaultMIDICodes();
     
     QList<QList<QPushButton*>> list_of_buttons;
+    QList<QList<int>> midi_codes;
+    QList<QList<int>> active_midi_codes;
     
     void drawButtons();
     void layoutButtons();
@@ -41,6 +48,7 @@ protected:
     void resizeEvent(QResizeEvent *event) override;
 
 signals:
+    void midiMappingChanged();
     void MIDIPress(int midicode);
     void MIDIRelease(int midicode);
     

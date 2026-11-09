@@ -1,54 +1,39 @@
 #ifndef KEYBOARDPIANO_H
 #define KEYBOARDPIANO_H
 
-#include <QObject>
-#include <QWidget>
-#include <QDebug>
-#include <QMap>
 #include <QList>
-#include <QPalette>
-#include <QPushButton>
+#include <QMap>
+#include <QResizeEvent>
+#include <QWidget>
 
 #include "button_piano.h"
 
+// A visual representation of the MIDI notes assigned to the PC keyboard.
+// KeyboardPC owns the note mapping; this widget does not invent an octave range.
 class KeyboardPiano : public QWidget
 {
     Q_OBJECT
 public:
     explicit KeyboardPiano(QWidget *parent = nullptr);
-    
-    QList<QString> notes_full = {"c", "d", "e", "f", "g", "a", "b"};
-    QList<QString> notes_half = {"cis", "dis", "fis", "gis", "ais"};
-    
-    void setOctaves(int octaves);
-    int octaves = 1;
-    
-    int button_width_full = 18;
-    int button_height_full = 80;
-    int button_width_half = 14;
-    int button_height_half = 50;
-    bool invert_colors = false;
-    
-    void drawOneOctave(int octave);
-    
-    //QMap<QString, ButtonPiano*> list_of_keys;
-    //QList<ButtonPiano*> list_of_keys_full;
-    //QList<ButtonPiano*> list_of_keys_half;
-    QMap<int, ButtonPiano*> list_of_keys_midi;
-    
-    QSize size;
-    
+
+    void setMidiNotes(const QList<int> &notes);
+    QList<int> midiNotes() const;
+
     void keyPressed(int midicode);
     void keyReleased(int midicode);
     void allKeysUp();
-    
+
+protected:
+    void resizeEvent(QResizeEvent *event) override;
+
 private:
+    static bool isBlackKey(int midicode);
+    void layoutKeys();
     void colorizeBlackKeys(ButtonPiano *button);
     void colorizeWhiteKeys(ButtonPiano *button);
-    
-    
-signals:
-    
+
+    QMap<int, ButtonPiano*> list_of_keys_midi;
+    static constexpr int keyboard_height = 79;
 };
 
 #endif // KEYBOARDPIANO_H

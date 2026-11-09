@@ -4,6 +4,8 @@
 #include <QObject>
 #include <QMap>
 
+#include <cstdint>
+
 class InterfaceAudio : public QObject
 {
     Q_OBJECT
@@ -32,12 +34,22 @@ public:
     virtual void setReleaseChanged(int port, int channel, uint8_t value);
     virtual void setTremoloChanged(int port, int channel, uint8_t value);
     
+    // MIDI input of this keyboard instance. Messages of all MIDI channels are
+    // accepted and reported with the signals below.
+    virtual void createMidiInput(QString label);
+    
+    // decodes one channel voice message and emits the matching signal
+    void dispatchMidiMessage(uint8_t status, uint8_t data1, uint8_t data2);
     
 protected:
     int id;
     
 signals:
-    
+    void signalMidiNoteOn(int note, int velocity);
+    void signalMidiNoteOff(int note);
+    void signalMidiControlChange(int cc, int value);
+    // 0..16383, center 8192
+    void signalMidiPitchBend(int value);
 };
 
 #endif // INTERFACEAUDIO_H

@@ -45,6 +45,13 @@ MainTabs::MainTabs(QList<QString> labels, int id, Config *config, MainTabsSwitch
     
     initializeTabs();
     
+    // MIDI input of this keyboard: played on the same tabs as the PC keyboard
+    this->interface_audio->createMidiInput(QString::number(this->id + 1) + "-MIDI-in");
+    connect(this->interface_audio, &InterfaceAudio::signalMidiNoteOn, this, &MainTabs::midiInputNoteOn);
+    connect(this->interface_audio, &InterfaceAudio::signalMidiNoteOff, this, &MainTabs::midiInputNoteOff);
+    connect(this->interface_audio, &InterfaceAudio::signalMidiControlChange, this, &MainTabs::midiInputControlChange);
+    connect(this->interface_audio, &InterfaceAudio::signalMidiPitchBend, this, &MainTabs::midiInputPitchBend);
+    
     // the one view of this keyboard
     this->view = new Orgelwerk(this->id, this->midi_engine, this);
     connect(this->view, &Orgelwerk::signalMIDIEvent, this, &MainTabs::routeMIDIEvent);
@@ -146,6 +153,48 @@ void MainTabs::routeMIDIEvent(int value, MIDIMode mode)
             this->midi_engine->noteOn(tab, value);
         else if (mode == MIDIMode::PitchBend)
             this->midi_engine->pitchBend(tab, value);
+    }
+}
+
+void MainTabs::midiInputNoteOn(int note, int velocity)
+{
+    QList<int> tabs = soundingTabs();
+    for (int tab : tabs)
+    {
+        this->midi_engine->midiNoteOn(tab, note, velocity);
+    }
+}
+void MainTabs::midiInputNoteOff(int note)
+{
+    // releases exactly what was sent for this note, on whatever tabs
+    this->midi_engine->midiNoteOff(note);
+}
+void MainTabs::midiInputControlChange(int cc, int value)
+{
+    // the pedals go to all sounding tabs, like the ones on the PC keyboard
+    const int SUSTAIN = 64;
+    const int SOSTENUTO = 66;
+    const int SOFT = 67;
+    
+    QList<int> tabs = soundingTabs();
+    for (int tab : tabs)
+    {
+        if (cc == SUSTAIN)
+            this->midi_engine->sustain(tab, value >= 64);
+        else if (cc == SOSTENUTO)
+            this->midi_engine->sostenuto(tab, value >= 64);
+        else if (cc == SOFT)
+            this->midi_engine->soft(tab, value >= 64);
+        else
+            this->midi_engine->forwardControlChange(tab, cc, value);
+    }
+}
+void MainTabs::midiInputPitchBend(int value)
+{
+    QList<int> tabs = soundingTabs();
+    for (int tab : tabs)
+    {
+        this->midi_engine->pitchBend(tab, value);
     }
 }
 

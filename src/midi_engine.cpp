@@ -187,49 +187,85 @@ MidiEngine::CompiledTab MidiEngine::compile(const TabPreset &preset)
 
 void MidiEngine::noteOn(int tab, int source_key)
 {
+    startNotes(tab, source_key, source_key - SOURCE_KEY_OFFSET, -1);
+}
+
+void MidiEngine::midiNoteOn(int tab, int note, int velocity)
+{
+    // the default octave checkbox (48) plays the incoming note as it is
+    startNotes(tab, MIDI_INPUT_HELD_KEY_BASE + note, note - MIDI_INPUT_REFERENCE_OCTAVE, velocity);
+}
+
+void MidiEngine::midiNoteOff(int note)
+{
+    releaseHeld(MIDI_INPUT_HELD_KEY_BASE + note, -1);
+}
+
+void MidiEngine::forwardControlChange(int tab, int cc, int value)
+{
     if (!this->compiled.contains(tab))
         return;
+    
+    const CompiledTab compiled_tab = this->compiled.value(tab);
+    for (const NoteRoute &route : compiled_tab.routes)
+    {
+        sendControlChange(tab, route.channel, cc, value);
+    }
+}
 
+void MidiEngine::startNotes(int tab, int held_key, int keycode, int velocity)
+{
+    if (!this->compiled.contains(tab))
+        return;
+    
     // a second press without release (e.g. lost key-up while the window had no focus):
     // release what this tab still holds for this key before re-triggering
-    releaseHeld(source_key, tab);
-
+    releaseHeld(held_key, tab);
+    
     const CompiledTab compiled_tab = this->compiled.value(tab);
-    const int keycode = source_key - SOURCE_KEY_OFFSET;
-
+    
     QList<SentNote> sent_notes;
     for (int octave_offset : compiled_tab.octave_offsets)
     {
         const int m_code = keycode + octave_offset;
-
+        
         for (const NoteRoute &route : compiled_tab.routes)
         {
             if (m_code < route.key_min || m_code > route.key_max)
                 continue;
-
+            
             const int note = m_code + route.key_shift + compiled_tab.master_key_shift;
             if (note < 0 || note > 127)
                 continue;
-
+            
             SentNote sent;
             sent.tab = tab;
             sent.channel = route.channel;
             sent.note = note;
-            sent.velocity = route.velocity;
+            if (velocity < 0)
+            {
+                // PC keyboard: the channel's velocity setting
+                sent.velocity = route.velocity;
+            }
+            else
+            {
+                // MIDI input: played velocity, scaled by the channel setting relative to mf (64)
+                sent.velocity = qBound(1, velocity * route.velocity / MIDI_INPUT_NEUTRAL_VELOCITY, 127);
+            }
             sent_notes.append(sent);
         }
     }
-
+    
     // update the bookkeeping first, then talk to the outside world
     if (!sent_notes.isEmpty())
     {
-        this->held_notes[source_key].append(sent_notes);
+        this->held_notes[held_key].append(sent_notes);
     }
-    if (!this->held_source_tabs[source_key].contains(tab))
+    if (!this->held_source_tabs[held_key].contains(tab))
     {
-        this->held_source_tabs[source_key].append(tab);
+        this->held_source_tabs[held_key].append(tab);
     }
-
+    
     for (const SentNote &sent : sent_notes)
     {
         if (this->interface_audio)
@@ -238,8 +274,8 @@ void MidiEngine::noteOn(int tab, int source_key)
         }
         emit signalNoteOn(sent.tab, sent.note);
     }
-
-    emit signalSourceKey(tab, source_key, true);
+    
+    emit signalSourceKey(tab, held_key, true);
 }
 
 void MidiEngine::noteOff(int source_key)

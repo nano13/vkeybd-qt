@@ -81,8 +81,8 @@ void Orgelwerk::drawGUI()
     this->grid->addWidget(this->group_keys, 4, 0, 1, 2);
     this->grid->addWidget(this->group_pitch, 5, 0, 1, 2);
     drawNotesKeyboard(6);
-    drawPianoKeyboard(7);
     drawPCKeyboard(8);
+    drawPianoKeyboard(7);
     this->grid->addLayout(layout_panic_stop, 10, 0, 1, 2);
 }
 
@@ -96,9 +96,13 @@ void Orgelwerk::drawNotesKeyboard(int grid_row)
 void Orgelwerk::drawPianoKeyboard(int grid_row)
 {
     this->piano = new KeyboardPiano;
+    this->piano->setMidiNotes(this->pc->midiNotes());
+    connect(this->pc, &KeyboardPC::midiMappingChanged, this->piano, [this]{
+        this->piano->setMidiNotes(this->pc->midiNotes());
+    });
 
+    // Expand to the same column width as the PC keyboard below.
     this->grid->addWidget(this->piano, grid_row, 0, 1, 2);
-    this->grid->setAlignment(this->piano, Qt::AlignHCenter);
     this->piano->hide();
 }
 void Orgelwerk::drawPCKeyboard(int grid_row)

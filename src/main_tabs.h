@@ -103,6 +103,12 @@ private:
 
     // note / pitch events of the view
     void routeMIDIEvent(int value, MIDIMode mode);
+    
+    // the MIDI input of this keyboard (omni)
+    void midiInputNoteOn(int note, int velocity);
+    void midiInputNoteOff(int note);
+    void midiInputControlChange(int cc, int value);
+    void midiInputPitchBend(int value);
 
     bool is_escape_pressed = false;
     bool is_space_pressed = false;

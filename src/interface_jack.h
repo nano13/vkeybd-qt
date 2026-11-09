@@ -5,6 +5,7 @@
 
 #include <QObject>
 #include <QDebug>
+#include <QTimer>
 
 #include <array>
 #include <atomic>
@@ -60,6 +61,8 @@ public:
     void setReleaseChanged(int port, int channel, uint8_t value) override;
     void setTremoloChanged(int port, int channel, uint8_t value) override;
     
+    void createMidiInput(QString label) override;
+    
 private:
     jack_client_t *client;
     // Ports are registered while the client is already active, so the
@@ -70,6 +73,16 @@ private:
     std::atomic<int> output_port_count{0};
     
     jack_ringbuffer_t* ringBuffer = nullptr;
+    
+    // MIDI input: the real-time callback copies incoming channel messages
+    // (3 bytes each) into input_ring_buffer, the GUI thread drains it by timer.
+    // input_port is published only after input_ring_buffer exists.
+    std::atomic<jack_port_t*> input_port{nullptr};
+    jack_ringbuffer_t *input_ring_buffer = nullptr;
+    QTimer *input_timer = nullptr;
+    static constexpr size_t MIDI_MESSAGE_SIZE = 3;
+    void readInputPort(jack_nframes_t nframes);
+    void drainMidiInput();
     
     void pushEvent(const MidiEvent &event);
     void processRingBuffer(jack_nframes_t nframes);

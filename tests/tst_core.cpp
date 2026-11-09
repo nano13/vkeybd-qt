@@ -470,6 +470,108 @@ private slots:
         QCOMPARE(audio.events.at(0).value, NOTE + 1);
     }
     
+    // ---------------- MIDI input ----------------
+    
+    void midiInputPlaysAsPlayed()
+    {
+        RecordingInterface audio;
+        MidiEngine engine(&audio);
+        engine.setPreset(0, TabPreset());
+        
+        engine.midiNoteOn(0, 60, 100);
+        QCOMPARE(audio.events.length(), 1);
+        QCOMPARE(audio.events.at(0).value, 60);
+        
+        engine.midiNoteOff(60);
+        QCOMPARE(audio.events.last().type, QString("off"));
+        QCOMPARE(engine.heldNoteCount(), 0);
+    }
+    
+    void midiInputAndPCKeysAreIndependent()
+    {
+        RecordingInterface audio;
+        MidiEngine engine(&audio);
+        engine.setPreset(0, TabPreset());
+        
+        engine.midiNoteOn(0, 60, 100);
+        engine.noteOn(0, KEY);
+        engine.noteOff(KEY);                    // releases only the PC note
+        QCOMPARE(engine.heldNoteCount(), 1);
+        QCOMPARE(audio.events.last().value, NOTE);
+        
+        engine.midiNoteOff(60);
+        QCOMPARE(engine.heldNoteCount(), 0);
+    }
+    
+    void midiInputVelocityScaledByChannel()
+    {
+        RecordingInterface audio;
+        MidiEngine engine(&audio);
+        TabPreset preset;
+        preset.channels[0].velocity = 96;       // ff: 1.5 x
+        engine.setPreset(0, preset);
+        
+        engine.midiNoteOn(0, 60, 40);
+        QCOMPARE(audio.events.last().value2, 60);
+        engine.midiNoteOff(60);
+        
+        engine.midiNoteOn(0, 60, 100);
+        QCOMPARE(audio.events.last().value2, 127);
+    }
+    
+    void midiInputUsesOctavesAndShifts()
+    {
+        RecordingInterface audio;
+        MidiEngine engine(&audio);
+        TabPreset preset;
+        preset.octave_mask = "00011000";        // one octave lower in addition
+        preset.master_key_shift = 2;
+        engine.setPreset(0, preset);
+        
+        engine.midiNoteOn(0, 60, 64);
+        QCOMPARE(audio.events.length(), 2);
+        QCOMPARE(audio.events.at(0).value, 50);
+        QCOMPARE(audio.events.at(1).value, 62);
+    }
+    
+    void midiInputControlChangeForwarded()
+    {
+        RecordingInterface audio;
+        MidiEngine engine(&audio);
+        TabPreset preset;
+        preset.channels[3].activated = true;
+        engine.setPreset(0, preset);
+        
+        engine.forwardControlChange(0, 1, 77);
+        QCOMPARE(audio.count("cc"), 2);
+        QCOMPARE(audio.events.at(0).value, 1);
+        QCOMPARE(audio.events.at(0).value2, 77);
+    }
+    
+    void midiMessageDecoding()
+    {
+        InterfaceAudio audio;
+        QSignalSpy spy_on(&audio, &InterfaceAudio::signalMidiNoteOn);
+        QSignalSpy spy_off(&audio, &InterfaceAudio::signalMidiNoteOff);
+        QSignalSpy spy_cc(&audio, &InterfaceAudio::signalMidiControlChange);
+        QSignalSpy spy_bend(&audio, &InterfaceAudio::signalMidiPitchBend);
+        
+        audio.dispatchMidiMessage(0x93, 60, 100);   // any channel
+        audio.dispatchMidiMessage(0x90, 60, 0);     // note on with velocity 0
+        audio.dispatchMidiMessage(0x81, 61, 10);
+        audio.dispatchMidiMessage(0xB0, 64, 127);
+        audio.dispatchMidiMessage(0xE0, 0, 64);
+        audio.dispatchMidiMessage(0xC0, 5, 0);      // program change: ignored
+        
+        QCOMPARE(spy_on.count(), 1);
+        QCOMPARE(spy_on.at(0).at(0).toInt(), 60);
+        QCOMPARE(spy_on.at(0).at(1).toInt(), 100);
+        QCOMPARE(spy_off.count(), 2);
+        QCOMPARE(spy_cc.count(), 1);
+        QCOMPARE(spy_bend.count(), 1);
+        QCOMPARE(spy_bend.at(0).at(0).toInt(), 8192);
+    }
+    
     // ---------------- instruments ----------------
     
     void everyInstrumentRoundTrips()

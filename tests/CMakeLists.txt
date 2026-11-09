@@ -17,18 +17,17 @@ target_link_libraries(tst_core PRIVATE Qt6::Core Qt6::Test)
 
 add_test(NAME core COMMAND tst_core)
 
-# Exercise the Qt-default key tracker without physical input devices or a display.
-add_executable(tst_keyboard_qt
-    tst_keyboard_qt.cpp
-    ${PROJECT_SOURCE_DIR}/src/input_keyboard_qt.cpp
-    ${PROJECT_SOURCE_DIR}/src/input_keyboard_qt.h
+# Exercise the focused-window key tracker without physical input devices or a display.
+add_executable(tst_keyboard_window
+    tst_keyboard_window.cpp
+    ${PROJECT_SOURCE_DIR}/src/input_keyboard_window.cpp
+    ${PROJECT_SOURCE_DIR}/src/input_keyboard_window.h
 )
 
-target_include_directories(tst_keyboard_qt PRIVATE ${PROJECT_SOURCE_DIR}/src)
-# input_keyboard_qt.h includes enums_structs.h, which declares Qt Widgets types.
-target_link_libraries(tst_keyboard_qt PRIVATE Qt6::Core Qt6::Gui Qt6::Widgets Qt6::Test)
+target_include_directories(tst_keyboard_window PRIVATE ${PROJECT_SOURCE_DIR}/src)
+target_link_libraries(tst_keyboard_window PRIVATE Qt6::Core Qt6::Gui Qt6::Test)
 
-add_test(NAME keyboard_qt COMMAND tst_keyboard_qt)
+add_test(NAME keyboard_window COMMAND tst_keyboard_window)
 
 # Exercise the PC-owned note mapping and responsive piano widget geometry.
 add_executable(tst_keyboard_layout

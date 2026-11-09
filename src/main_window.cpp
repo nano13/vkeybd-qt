@@ -57,8 +57,8 @@ MainWindow::MainWindow(OutputSystem output, int number_of_keyboards, QWidget *pa
         layout->addWidget(newKeyboardInstance(i, output));
     }
 
-    connect(this->inputQt, &InputKeyboardQt::keyPressSignal, this, &MainWindow::rawKeyPressed);
-    connect(this->inputQt, &InputKeyboardQt::keyReleaseSignal, this, &MainWindow::rawKeyReleased);                    
+    connect(this->input_window, &InputKeyboardWindow::keyPressSignal, this, &MainWindow::rawKeyPressed);
+    connect(this->input_window, &InputKeyboardWindow::keyReleaseSignal, this, &MainWindow::rawKeyReleased);
     
     connect(this->global_key_shift_widget, &MIDIKeyShiftGlobal::signalKeyShiftChanged, this, &MainWindow::globalKeyShiftValueChanged);
     
@@ -98,11 +98,13 @@ QWidget* MainWindow::newKeyboardInstance(int id, OutputSystem output)
     
     ComboKeyboardSelect *combo_keyboard_selector = new ComboKeyboardSelect();
     InputKeyboardSelect *input_keyboard_select = new InputKeyboardSelect(combo_keyboard_selector, button_keyboard_lock, button_keyboard_rescan, this);
-    connect(input_keyboard_select, &InputKeyboardSelect::keyboardSelectionChangedSignal, this, &MainWindow::keyboardSelectionChanged);
+    this->keyboard_selections.append(KeyboardSelection::None);
+    this->keyboard_locks.append(false);
+    connect(input_keyboard_select, &InputKeyboardSelect::keyboardSelectionChangedSignal, this, [this, id](int selection, bool locked){ keyboardSelectionChanged(id, selection, locked); });
     input_keyboard_select->keyboardRescan();
-    // set default value
-    combo_keyboard_selector->setCurrentIndex(KeyboardSelection::Default);
-    //combo_keyboard_selector->currentIndexChanged(combo_keyboard_selector->currentIndex());
+    // the first keyboard plays the typed keys; the others start disabled, as
+    // the focused-window keys would otherwise play on all keyboards at once
+    combo_keyboard_selector->setCurrentIndex((id == 0) ? KeyboardSelection::Window : KeyboardSelection::None);
     input_keyboard_select->keyboardSelectionChanged(combo_keyboard_selector->currentIndex());
     
     QLineEdit *line_udp_ip = new QLineEdit(this);
@@ -132,8 +134,6 @@ QWidget* MainWindow::newKeyboardInstance(int id, OutputSystem output)
     MainTabs *tabs = new MainTabs(labels, id, this->config, this->switcher, output, input_keyboard_select, line_udp_ip, spin_port, this);
     //connect(tabs, &MainTabs::currentChanged, this, [this, id](MainTabs::currentChanged index){ currentTabChanged(index, id); });
     connect(tabs, &MainTabs::currentChanged, this, [this, tabs, id](int index){ currentTabChanged(id, index); });
-    //connect(tabs, &MainTabs::useInputKbdQtNativeSignal, this, &MainWindow::useInputKbdQtNative);
-    //connect(tabs, &MainTabs::useInputKbdQtDefaultSignal, this, &MainWindow::useInputKbdQtDefault);
     //connect(tabs, &MainTabs::keyboardSelectionChanged, this, &MainWindow::keyboardSelectionChanged);
     connect(tabs, &MainTabs::signalKeyShiftChanged, this, &MainWindow::globalKeyShiftValueChanged);
     
@@ -341,7 +341,7 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *ev)
     if ((obj == qApp && ev->type() == QEvent::ApplicationDeactivate) ||
         (obj == this && ev->type() == QEvent::WindowDeactivate))
     {
-        this->inputQt->releaseAllKeys();
+        this->input_window->releaseAllKeys();
         return false;
     }
 
@@ -356,43 +356,63 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *ev)
     if (!target || target->window() != this)
         return false;
 
-    return this->inputQt->callEventFilter(obj, ev);
+    return this->input_window->handleKeyEvent(ev);
 }
 
-void MainWindow::keyboardSelectionChanged(int selection, bool locked)
+void MainWindow::keyboardSelectionChanged(int keyboard_id, int selection, bool locked)
 {
-    if (this->keyboard_selection == KeyboardSelection::Default)
-        this->inputQt->releaseAllKeys();
+    // keys held on the focused window would never be released for this keyboard
+    if (this->keyboard_selections.at(keyboard_id) == KeyboardSelection::Window && selection != KeyboardSelection::Window)
+        this->input_window->releaseAllKeys();
+    
+    this->keyboard_selections[keyboard_id] = selection;
+    this->keyboard_locks[keyboard_id] = locked;
+    
+    updateWindowInput();
+}
 
-    this->keyboard_selection = selection;
-
-    if (selection == KeyboardSelection::Default)
+void MainWindow::updateWindowInput()
+{
+    bool window_used = false;
+    bool window_locked = false;
+    for (int id = 0; id < this->keyboard_selections.size(); id++)
     {
+        if (this->keyboard_selections.at(id) == KeyboardSelection::Window)
+        {
+            window_used = true;
+            if (this->keyboard_locks.at(id))
+                window_locked = true;
+        }
+    }
+    
+    // installing twice does not add a second filter
+    if (window_used)
         qApp->installEventFilter(this);
-
-        if (locked)
-            grabKeyboard();
-        else
-            releaseKeyboard();
-    }
     else
-    {
         qApp->removeEventFilter(this);
-
-        if (selection == KeyboardSelection::Native && locked)
-            grabKeyboard();
-        else
-            releaseKeyboard();
-    }
+    
+    // locked: keys reach vkeybd-qt even while another window has the focus
+    if (window_locked)
+        grabKeyboard();
+    else
+        releaseKeyboard();
 }
 
 void MainWindow::rawKeyPressed(int key)
 {
-    this->list_of_maintabs.first()->rawKeyPressed(key);
+    for (int id = 0; id < this->keyboard_selections.size() && id < this->list_of_maintabs.size(); id++)
+    {
+        if (this->keyboard_selections.at(id) == KeyboardSelection::Window)
+            this->list_of_maintabs.at(id)->rawKeyPressed(key);
+    }
 }
 void MainWindow::rawKeyReleased(int key)
 {
-    this->list_of_maintabs.first()->rawKeyReleased(key);
+    for (int id = 0; id < this->keyboard_selections.size() && id < this->list_of_maintabs.size(); id++)
+    {
+        if (this->keyboard_selections.at(id) == KeyboardSelection::Window)
+            this->list_of_maintabs.at(id)->rawKeyReleased(key);
+    }
 }
 
 void MainWindow::showGlobalKeyShift()

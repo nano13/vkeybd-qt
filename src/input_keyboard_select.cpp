@@ -97,14 +97,7 @@ void InputKeyboardSelect::keyboardSelectionChanged(int index)
         
         emit keyboardSelectionChangedSignal(index, false);
     }
-    else if (index == KeyboardSelection::Native)
-    {
-        this->button_keyboard_lock->setDisabled(false);
-        disconnectRawKeyboards();
-        
-        emit keyboardSelectionChangedSignal(index, this->locked);
-    }
-    else if (index == KeyboardSelection::Default)
+    else if (index == KeyboardSelection::Window)
     {
         this->button_keyboard_lock->setDisabled(false);
         disconnectRawKeyboards();
@@ -235,8 +228,7 @@ void InputKeyboardSelect::keyboardRescan()
         this->button_keyboard_lock->setDown(false);
     
     this->combo_keyboard_input_labels[KeyboardSelection::None] = "[Disabled]";
-    this->combo_keyboard_input_labels[KeyboardSelection::Native] = "Qt native";
-    this->combo_keyboard_input_labels[KeyboardSelection::Default] = "Qt default";
+    this->combo_keyboard_input_labels[KeyboardSelection::Window] = "Focused window";
     this->combo_keyboard_input_labels[KeyboardSelection::Detect] = "[Detect RAW event]";
     
     if (!this->keyboard_raw)

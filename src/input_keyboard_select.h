@@ -54,11 +54,6 @@ private slots:
     void keyRawReleased(int keycode);
     
 signals:
-    /*
-    void keyboardSelectedNone();
-    void keyboardSelectedNative();
-    void KeyboardSeletedDefaul();
-    */
     void keyboardSelectionChangedSignal(int selection, bool locked);
     
     void keyRawPressedSignal(int keycode);

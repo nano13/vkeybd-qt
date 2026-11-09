@@ -12,7 +12,6 @@
 #include <QSpinBox>
 #include <QComboBox>
 #include <QIcon>
-#include <QAbstractNativeEventFilter>
 #include <QAbstractEventDispatcher>
 #include <QStyle>
 #include <QStyledItemDelegate>
@@ -25,7 +24,7 @@
 #include "help_message.h"
 #include "help_about_widget.h"
 
-#include "input_keyboard_qt.h"
+#include "input_keyboard_window.h"
 #include "combo_keyboard_select.h"
 
 #include "midi_key_shift_widget.h"
@@ -69,11 +68,13 @@ private:
     
     QWidget* newKeyboardInstance(int id, OutputSystem output);
     
-    //bool input_kbd_qt_native = true;
-    //bool input_kbd_qt_default = false;
-    int keyboard_selection = KeyboardSelection::None;
+    // per keyboard: selected input (KeyboardSelection or raw device index) and lock state
+    QList<int> keyboard_selections;
+    QList<bool> keyboard_locks;
     
-    InputKeyboardQt *inputQt = new InputKeyboardQt(this);
+    // "Focused window" input; its keys go to every keyboard that selected it
+    InputKeyboardWindow *input_window = new InputKeyboardWindow(this);
+    void updateWindowInput();
     
     MIDIKeyShiftGlobal *global_key_shift_widget = new MIDIKeyShiftGlobal(this);
     
@@ -95,7 +96,7 @@ private slots:
     
     void showActionChanged(GUIElements elements, bool is_checked);
     
-    void keyboardSelectionChanged(int selection, bool locked);
+    void keyboardSelectionChanged(int keyboard_id, int selection, bool locked);
     
     void rawKeyPressed(int key);
     void rawKeyReleased(int key);

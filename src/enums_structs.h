@@ -132,11 +132,12 @@ enum KeysRaw : uint8_t
     Pause = 119
 };
 
+// fixed entries at the top of the keyboard input combo box; the raw
+// keyboard devices follow after Detect
 enum KeyboardSelection : uint8_t
 {
     None,
-    Native,
-    Default,
+    Window,     // keys typed while the vkeybd-qt window has the focus
     Detect,
 };
 enum KeyboardMode

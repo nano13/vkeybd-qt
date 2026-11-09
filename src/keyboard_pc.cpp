@@ -6,7 +6,10 @@ KeyboardPC::KeyboardPC(QWidget *parent) : QWidget(parent)
 {
     this->midi_codes = defaultMIDICodes();
     for (const QList<int> &row : this->midi_codes)
+    {
         this->active_midi_codes.append(QList<int>(row.size(), -1));
+        this->physical_key_down.append(QList<bool>(row.size(), false));
+    }
     setMinimumWidth(qRound(450 * this->button_scale));
     setFixedHeight(qRound(5 * 30 * this->button_scale));
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
@@ -33,16 +36,19 @@ void KeyboardPC::drawButtons()
 
             // Look up the current mapping at event time, not at construction.
             connect(button, &QPushButton::pressed, this, [this, row, col]{
+                this->physical_key_down[row][col] = true;
                 const int note = this->midi_codes.at(row).at(col);
                 this->active_midi_codes[row][col] = note;
                 if (note >= 0)
                     emit MIDIPress(note);
             });
             connect(button, &QPushButton::released, this, [this, row, col]{
+                this->physical_key_down[row][col] = false;
                 const int note = this->active_midi_codes.at(row).at(col);
                 this->active_midi_codes[row][col] = -1;
                 if (note >= 0)
                     emit MIDIRelease(note);
+                updateButtonVisual(row, col);
             });
             int keycode = keycodes.at(row).at(col);
             if (keycode == KeysRaw::Control_L)
@@ -215,9 +221,8 @@ bool KeyboardPC::setMidiMapping(const QList<QList<int>> &mapping)
     {
         for (int col = 0; col < this->list_of_buttons.at(row).size(); ++col)
         {
-            QPushButton *button = this->list_of_buttons.at(row).at(col);
             const int old_note = this->active_midi_codes.at(row).at(col);
-            button->setDown(false);
+            this->physical_key_down[row][col] = false;
             this->active_midi_codes[row][col] = -1;
             if (old_note >= 0)
                 emit MIDIRelease(old_note);
@@ -225,6 +230,7 @@ bool KeyboardPC::setMidiMapping(const QList<QList<int>> &mapping)
     }
 
     this->midi_codes = mapping;
+    updateButtonVisuals();
     emit midiMappingChanged();
     return true;
 }
@@ -239,11 +245,11 @@ void KeyboardPC::keyDownRaw(int keycode)
             if (keycodes.at(row).at(col) != keycode)
                 continue;
 
-            QPushButton *button = this->list_of_buttons.at(row).at(col);
-            if (button->isDown())
+            if (this->physical_key_down.at(row).at(col))
                 continue;
 
-            button->setDown(true);
+            this->physical_key_down[row][col] = true;
+            updateButtonVisual(row, col);
             const int note = this->midi_codes.at(row).at(col);
             this->active_midi_codes[row][col] = note;
             if (note >= 0)
@@ -262,10 +268,13 @@ void KeyboardPC::keyUpRaw(int keycode)
             if (keycodes.at(row).at(col) != keycode)
                 continue;
 
-            QPushButton *button = this->list_of_buttons.at(row).at(col);
-            button->setDown(false);
+            if (!this->physical_key_down.at(row).at(col))
+                continue;
+
+            this->physical_key_down[row][col] = false;
             const int note = this->active_midi_codes.at(row).at(col);
             this->active_midi_codes[row][col] = -1;
+            updateButtonVisual(row, col);
             if (note >= 0)
                 emit MIDIRelease(note);
         }
@@ -274,12 +283,46 @@ void KeyboardPC::keyUpRaw(int keycode)
 
 void KeyboardPC::allKeysUp()
 {
+    this->midi_held_notes.clear();
     for (int row = 0; row < this->list_of_buttons.size(); ++row)
     {
         for (int col = 0; col < this->list_of_buttons.at(row).size(); ++col)
         {
-            this->list_of_buttons.at(row).at(col)->setDown(false);
+            this->physical_key_down[row][col] = false;
             this->active_midi_codes[row][col] = -1;
+            updateButtonVisual(row, col);
         }
+    }
+}
+
+void KeyboardPC::setMidiNoteDown(int note, bool down)
+{
+    if (down)
+        this->midi_held_notes.insert(note);
+    else
+        this->midi_held_notes.remove(note);
+    updateButtonVisuals();
+}
+
+void KeyboardPC::clearMidiNoteHighlights()
+{
+    this->midi_held_notes.clear();
+    updateButtonVisuals();
+}
+
+void KeyboardPC::updateButtonVisual(int row, int col)
+{
+    const int note = this->midi_codes.at(row).at(col);
+    const bool highlighted = this->physical_key_down.at(row).at(col)
+        || (note >= 0 && this->midi_held_notes.contains(note));
+    this->list_of_buttons.at(row).at(col)->setDown(highlighted);
+}
+
+void KeyboardPC::updateButtonVisuals()
+{
+    for (int row = 0; row < this->list_of_buttons.size(); ++row)
+    {
+        for (int col = 0; col < this->list_of_buttons.at(row).size(); ++col)
+            updateButtonVisual(row, col);
     }
 }

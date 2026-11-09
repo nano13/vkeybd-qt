@@ -10,6 +10,7 @@
 #include <QPushButton>
 #include <QCheckBox>
 #include <QLabel>
+#include <QHash>
 
 #include "midi_key_selector.h"
 #include "midi_pitchwheel.h"
@@ -80,6 +81,10 @@ private:
 
     // true while the widgets are filled from the engine: nothing is written back
     bool loading = false;
+
+    // Track each source separately so physical keys and MIDI input can overlap.
+    QHash<int, int> displayed_source_notes;
+    QHash<int, int> displayed_note_counts;
 
     void drawGUI();
     void drawNotesKeyboard(int grid_row);

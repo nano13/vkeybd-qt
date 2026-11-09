@@ -185,6 +185,13 @@ MidiEngine::CompiledTab MidiEngine::compile(const TabPreset &preset)
     return result;
 }
 
+int MidiEngine::displayNoteForSourceKey(int source_key)
+{
+    if (source_key >= MIDI_INPUT_HELD_KEY_BASE)
+        return source_key - MIDI_INPUT_HELD_KEY_BASE - MIDI_INPUT_REFERENCE_OCTAVE;
+    return source_key;
+}
+
 void MidiEngine::noteOn(int tab, int source_key)
 {
     startNotes(tab, source_key, source_key - SOURCE_KEY_OFFSET, -1);

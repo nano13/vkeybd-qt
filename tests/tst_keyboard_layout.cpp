@@ -120,6 +120,75 @@ private slots:
         QCOMPARE(changed.size(), 1);
     }
 
+    void midiInputHighlightsPcKeysWithoutSendingNotes()
+    {
+        KeyboardPC pc;
+        const QList<QPushButton*> buttons = pc.findChildren<QPushButton*>();
+        QSignalSpy pressed(&pc, &KeyboardPC::MIDIPress);
+        QSignalSpy released(&pc, &KeyboardPC::MIDIRelease);
+
+        // Incoming MIDI 60 maps to PC note 12, which is on row 2, column 2.
+        QPushButton *middle_c = buttons.at(14 + 1);
+        QVERIFY(!middle_c->isDown());
+        pc.setMidiNoteDown(12, true);
+        QVERIFY(middle_c->isDown());
+        QCOMPARE(pressed.size(), 0);
+        QCOMPARE(released.size(), 0);
+
+        // Pressing and releasing the physical key must not clear the MIDI hold.
+        pc.keyDownRaw(16);
+        QCOMPARE(pressed.size(), 1);
+        pc.keyUpRaw(16);
+        QCOMPARE(released.size(), 1);
+        QVERIFY(middle_c->isDown());
+
+        pc.setMidiNoteDown(12, false);
+        QVERIFY(!middle_c->isDown());
+        QCOMPARE(pressed.size(), 1);
+        QCOMPARE(released.size(), 1);
+
+        // The reverse order is also safe: MIDI release cannot cancel a PC hold.
+        pc.keyDownRaw(16);
+        pc.setMidiNoteDown(12, true);
+        pc.setMidiNoteDown(12, false);
+        QVERIFY(middle_c->isDown());
+        pc.keyUpRaw(16);
+        QVERIFY(!middle_c->isDown());
+        QCOMPARE(pressed.size(), 2);
+        QCOMPARE(released.size(), 2);
+    }
+
+    void midiInputHighlightsAllMappedKeysAndClearsOnRemap()
+    {
+        KeyboardPC pc;
+        const QList<QPushButton*> buttons = pc.findChildren<QPushButton*>();
+        QSignalSpy pressed(&pc, &KeyboardPC::MIDIPress);
+        QSignalSpy released(&pc, &KeyboardPC::MIDIRelease);
+
+        // Two PC buttons share MIDI note 8.
+        QPushButton *top = buttons.at(0);
+        QPushButton *bottom = buttons.at(14 + 14 + 13);
+        pc.setMidiNoteDown(8, true);
+        QVERIFY(top->isDown());
+        QVERIFY(bottom->isDown());
+
+        QList<QList<int>> mapping = pc.midiMapping();
+        mapping[0][0] = 60;
+        mapping[3][0] = 60;
+        QVERIFY(pc.setMidiMapping(mapping));
+        QVERIFY(!top->isDown());
+        QVERIFY(!bottom->isDown());
+
+        pc.setMidiNoteDown(60, true);
+        QVERIFY(top->isDown());
+        QVERIFY(bottom->isDown());
+        pc.clearMidiNoteHighlights();
+        QVERIFY(!top->isDown());
+        QVERIFY(!bottom->isDown());
+        QCOMPARE(pressed.size(), 0);
+        QCOMPARE(released.size(), 0);
+    }
+
     void sparseMappingKeepsOnlyAssignedKeys()
     {
         KeyboardPiano piano;

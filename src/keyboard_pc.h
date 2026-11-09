@@ -6,6 +6,7 @@
 #include <QPushButton>
 #include <QResizeEvent>
 #include <QList>
+#include <QSet>
 #include <QDebug>
 
 #include "enums_structs.h"
@@ -26,6 +27,11 @@ public:
     void keyDownRaw(int keycode);
     void keyUpRaw(int keycode);
     void allKeysUp();
+
+    // Highlight MIDI input without emitting MIDIPress/MIDIRelease or changing
+    // the physical-key state. The note is in this widget's MIDI mapping range.
+    void setMidiNoteDown(int note, bool down);
+    void clearMidiNoteHighlights();
     
 private:
     QList<QList<int>> getButtonSizes();
@@ -38,9 +44,13 @@ private:
     QList<QList<QPushButton*>> list_of_buttons;
     QList<QList<int>> midi_codes;
     QList<QList<int>> active_midi_codes;
-    
+    QList<QList<bool>> physical_key_down;
+    QSet<int> midi_held_notes;
+
     void drawButtons();
     void layoutButtons();
+    void updateButtonVisual(int row, int col);
+    void updateButtonVisuals();
     
     void buttonPressed(int midicode);
 

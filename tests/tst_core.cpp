@@ -487,6 +487,29 @@ private slots:
         QCOMPARE(engine.heldNoteCount(), 0);
     }
     
+    void midiInputSourceKeysMapToPcDisplayNotes()
+    {
+        RecordingInterface audio;
+        MidiEngine engine(&audio);
+        engine.setPreset(0, TabPreset());
+
+        QSignalSpy sources(&engine, &MidiEngine::signalSourceKey);
+        engine.midiNoteOn(0, 60, 100);
+        QCOMPARE(sources.size(), 1);
+        QCOMPARE(sources.at(0).at(0).toInt(), 0);
+        const int held_source = sources.at(0).at(1).toInt();
+        QCOMPARE(held_source, MidiEngine::MIDI_INPUT_HELD_KEY_BASE + 60);
+        QCOMPARE(MidiEngine::displayNoteForSourceKey(held_source), 12);
+        QVERIFY(sources.at(0).at(2).toBool());
+
+        engine.midiNoteOff(60);
+        QCOMPARE(sources.size(), 2);
+        QCOMPARE(sources.at(1).at(1).toInt(), held_source);
+        QVERIFY(!sources.at(1).at(2).toBool());
+        QCOMPARE(MidiEngine::displayNoteForSourceKey(12), 12);
+        QCOMPARE(engine.heldNoteCount(), 0);
+    }
+
     void midiInputAndPCKeysAreIndependent()
     {
         RecordingInterface audio;

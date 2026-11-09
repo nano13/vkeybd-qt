@@ -99,6 +99,13 @@ void Orgelwerk::drawPianoKeyboard(int grid_row)
     this->piano->setMidiNotes(this->pc->midiNotes());
     connect(this->pc, &KeyboardPC::midiMappingChanged, this->piano, [this]{
         this->piano->setMidiNotes(this->pc->midiNotes());
+        // The piano rebuilds its buttons when the PC mapping changes.
+        for (QHash<int, int>::const_iterator it = this->displayed_note_counts.cbegin();
+             it != this->displayed_note_counts.cend(); ++it)
+        {
+            if (it.value() > 0)
+                this->piano->keyPressed(it.key());
+        }
     });
 
     // Expand to the same column width as the PC keyboard below.
@@ -309,13 +316,43 @@ void Orgelwerk::engineNoteOff(int tab, int note)
 }
 void Orgelwerk::engineSourceKey(int tab, int source_key, bool pressed)
 {
-    if (tab != this->tab_id || !this->piano)
+    if (tab != this->tab_id || !this->piano || !this->pc)
         return;
 
+    const bool from_midi_input = source_key >= MidiEngine::MIDI_INPUT_HELD_KEY_BASE;
+    const int note = MidiEngine::displayNoteForSourceKey(source_key);
+
     if (pressed)
-        this->piano->keyPressed(source_key);
+    {
+        if (this->displayed_source_notes.contains(source_key))
+            return;
+
+        this->displayed_source_notes.insert(source_key, note);
+        const int count = this->displayed_note_counts.value(note);
+        this->displayed_note_counts.insert(note, count + 1);
+        if (count == 0)
+            this->piano->keyPressed(note);
+    }
     else
-        this->piano->keyReleased(source_key);
+    {
+        if (!this->displayed_source_notes.contains(source_key))
+            return;
+
+        const int old_note = this->displayed_source_notes.take(source_key);
+        const int count = this->displayed_note_counts.value(old_note);
+        if (count <= 1)
+        {
+            this->displayed_note_counts.remove(old_note);
+            this->piano->keyReleased(old_note);
+        }
+        else
+            this->displayed_note_counts.insert(old_note, count - 1);
+    }
+
+    // MIDI input affects the display only; it must not send another note back
+    // through the PC keyboard's MIDIPress/MIDIRelease signals.
+    if (from_midi_input)
+        this->pc->setMidiNoteDown(note, pressed);
 }
 void Orgelwerk::enginePresetReplaced(int tab)
 {
@@ -325,8 +362,12 @@ void Orgelwerk::enginePresetReplaced(int tab)
 
 void Orgelwerk::resetNoteDisplays()
 {
+    this->displayed_source_notes.clear();
+    this->displayed_note_counts.clear();
     if (this->piano)
         this->piano->allKeysUp();
+    if (this->pc)
+        this->pc->clearMidiNoteHighlights();
     if (this->notes)
         this->notes->allKeysUp();
 }

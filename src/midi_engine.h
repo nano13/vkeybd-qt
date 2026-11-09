@@ -38,6 +38,9 @@ public:
     static constexpr int MIDI_INPUT_NEUTRAL_VELOCITY = 64;
     // held notes of the MIDI input are kept apart from the PC keys (8..48)
     static constexpr int MIDI_INPUT_HELD_KEY_BASE = 1000;
+    // Converts an internal held source key to the PC keyboard's unshifted note.
+    // E.g. incoming MIDI note 60 corresponds to PC keyboard note 12.
+    static int displayNoteForSourceKey(int source_key);
     // range of the key shift spin boxes
     static constexpr int KEY_SHIFT_LIMIT = 64;
 

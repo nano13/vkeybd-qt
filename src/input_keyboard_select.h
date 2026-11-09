@@ -44,13 +44,15 @@ private:
     
     bool locked = false;
     bool suppress_not_available = false;
+    // set when reopening without lock failed too (while suppress_not_available)
+    bool listen_failed = false;
     void toggleKeyboardLock();
     
     void autoSelectPressedKeyboard(QString name);
     void rawKeyboardSelected(int index);
     
 private slots:
-    void keyboardNotAvailable(QString message);
+    void keyboardNotAvailable(QString message, RawKeyboardProblem problem);
     void keyRawPressed(int keycode);
     void keyRawReleased(int keycode);
     

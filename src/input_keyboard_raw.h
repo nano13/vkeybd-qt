@@ -28,6 +28,19 @@
  * The platform part lives in input_keyboard_raw_<platform>.cpp.
  */
 
+// why a keyboard could not be opened or locked; the GUI explains each one
+enum class RawKeyboardProblem
+{
+    Unavailable,            // generic, see the message
+    Disconnected,           // unplugged or gone
+    PermissionDenied,       // Linux: no read access to /dev/input/event*
+    LockBusy,               // Linux: another program has grabbed the keyboard
+    LockNeedsInterception,  // Windows: interception.dll missing
+    InterceptionNotRunning, // Windows: interception.dll found, driver not running (reboot pending?)
+    LockUnsupported,        // macOS: locking is not possible
+    InputMonitoring,        // macOS: Input Monitoring permission missing
+};
+
 // one opened keyboard of a platform backend
 class InputKeyboardRawBackend
 {
@@ -47,6 +60,7 @@ public:
     QString getPathForName(QString name);
     
     // whether keyboardLock() can keep the keys away from other applications
+    // (Windows: only with the Interception driver)
     static bool canLock();
     
     struct Keyboard
@@ -78,7 +92,7 @@ public:
     void keyboardDisconnected();
     
 signals:
-    void deviceNotAvailable(QString message);
+    void deviceNotAvailable(QString message, RawKeyboardProblem problem);
     void signalRawKeyPressed(int keycode);
     void signalRawKeyReleased(int keycode);
     
@@ -89,7 +103,7 @@ private:
     void keyboardOpen(QString devpath, KeyboardMode mode);
 };
 
-// platform part: opens the keyboard with the given id, or returns nullptr and sets error
-std::unique_ptr<InputKeyboardRawBackend> createRawKeyboardBackend(InputKeyboardRawController *owner, const QString &id, KeyboardMode mode, QString &error);
+// platform part: opens the keyboard with the given id, or returns nullptr and sets error and problem
+std::unique_ptr<InputKeyboardRawBackend> createRawKeyboardBackend(InputKeyboardRawController *owner, const QString &id, KeyboardMode mode, QString &error, RawKeyboardProblem &problem);
 
 #endif // INPUTKEYBOARDRAW_H

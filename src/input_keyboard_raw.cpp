@@ -56,11 +56,12 @@ void InputKeyboardRawController::keyboardOpen(QString devpath, KeyboardMode mode
     keyboardRelease();
     
     QString error;
-    this->backend = createRawKeyboardBackend(this, devpath, mode, error);
+    RawKeyboardProblem problem = RawKeyboardProblem::Unavailable;
+    this->backend = createRawKeyboardBackend(this, devpath, mode, error, problem);
     if (!this->backend)
     {
         qWarning() << "Keyboard not available:" << devpath << error;
-        emit deviceNotAvailable(error);
+        emit deviceNotAvailable(error, problem);
     }
 }
 
@@ -98,5 +99,5 @@ void InputKeyboardRawController::keyboardDisconnected()
 {
     qDebug() << "Keyboard disconnected";
     keyboardRelease();
-    emit deviceNotAvailable("Keyboard disconnected");
+    emit deviceNotAvailable("The keyboard was disconnected.", RawKeyboardProblem::Disconnected);
 }

@@ -133,13 +133,18 @@ QList<InputKeyboardRawMeta::Keyboard> InputKeyboardRawMeta::detectKeyboards()
     return keyboards;
 }
 
-std::unique_ptr<InputKeyboardRawBackend> createRawKeyboardBackend(InputKeyboardRawController *owner, const QString &id, KeyboardMode mode, QString &error)
+std::unique_ptr<InputKeyboardRawBackend> createRawKeyboardBackend(InputKeyboardRawController *owner, const QString &id, KeyboardMode mode, QString &error, RawKeyboardProblem &problem)
 {
     const QByteArray path = id.toLocal8Bit();
     const int fd = ::open(path.constData(), O_RDONLY | O_NONBLOCK | O_CLOEXEC);
     if (fd < 0)
     {
-        error = QString("evdev open: ") + strerror(errno);
+        const int open_error = errno;
+        error = QString("Cannot open ") + id + ": " + strerror(open_error);
+        if (open_error == EACCES || open_error == EPERM)
+            problem = RawKeyboardProblem::PermissionDenied;
+        else if (open_error == ENOENT || open_error == ENODEV || open_error == ENXIO)
+            problem = RawKeyboardProblem::Disconnected;
         return nullptr;
     }
     
@@ -152,9 +157,14 @@ std::unique_ptr<InputKeyboardRawBackend> createRawKeyboardBackend(InputKeyboardR
             const int grab_error = errno;
             ::close(fd);
             if (grab_error == EBUSY)
+            {
                 error = "Cannot lock the keyboard: another program has grabbed it already.";
+                problem = RawKeyboardProblem::LockBusy;
+            }
             else
+            {
                 error = QString("Cannot lock the keyboard: ") + strerror(grab_error);
+            }
             return nullptr;
         }
         grabbed = true;

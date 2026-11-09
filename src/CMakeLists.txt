@@ -16,6 +16,7 @@ add_executable(vkeybd-qt
     keyboard_notes.cpp
     keyboard_pc.cpp
     keyboard_piano.cpp
+    keyboard_problem_dialog.cpp
     main.cpp
     main_tabs.cpp
     main_tabs_switcher.cpp
@@ -49,6 +50,7 @@ add_executable(vkeybd-qt
     keyboard_notes.h
     keyboard_pc.h
     keyboard_piano.h
+    keyboard_problem_dialog.h
     main_tabs.h
     main_tabs_switcher.h
     main_window.h

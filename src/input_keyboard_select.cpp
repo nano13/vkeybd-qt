@@ -1,6 +1,6 @@
 #include "input_keyboard_select.h"
 
-#include <QMessageBox>
+#include "keyboard_problem_dialog.h"
 #include "qabstractitemview.h"
 #include "qpainter.h"
 #include "qstyleditemdelegate.h"
@@ -194,8 +194,8 @@ void InputKeyboardSelect::autoSelectPressedKeyboard(QString name)
 
 void InputKeyboardSelect::rawKeyboardSelected(int index)
 {
-    // the lock is not available on every platform
-    this->button_keyboard_lock->setDisabled(!InputKeyboardRawMeta::canLock());
+    // always enabled: a lock that is not possible explains itself in a dialog
+    this->button_keyboard_lock->setDisabled(false);
     emit keyboardSelectionChangedSignal(index, this->locked);
     
     disconnectRawKeyboards();
@@ -275,26 +275,30 @@ void InputKeyboardSelect::cleanupRawKeyboards()
     this->map_of_raw_keyboards.clear();
 }
 
-void InputKeyboardSelect::keyboardNotAvailable(QString message)
+void InputKeyboardSelect::keyboardNotAvailable(QString message, RawKeyboardProblem problem)
 {
     // a failure while unlocking/reopening belongs to the same incident
     if (this->suppress_not_available)
+    {
+        this->listen_failed = true;
         return;
-    
-    // not modal: the other keyboards keep playing
-    QMessageBox *box = new QMessageBox(QMessageBox::Warning, "Keyboard not available",
-                                       this->combo_keyboard_selector->currentText().replace("\n", " ") + "\n\n" + message,
-                                       QMessageBox::Ok, this->button_keyboard_lock->window());
-    box->setAttribute(Qt::WA_DeleteOnClose);
-    box->open();
+    }
     
     // the button must never show "Unlock" for a keyboard that is not locked
-    if (this->locked)
+    const bool was_locked = this->locked;
+    bool listening = false;
+    if (was_locked)
     {
         this->suppress_not_available = true;
-        this->toggleKeyboardLock();
+        this->listen_failed = false;
+        this->toggleKeyboardLock(); // reopens the keyboard without lock
         this->suppress_not_available = false;
+        
+        // a lock problem leaves the keyboard listening; a gone keyboard does not
+        listening = !this->listen_failed;
     }
+    
+    showKeyboardProblemDialog(this->button_keyboard_lock->window(), this->combo_keyboard_selector->currentText(), message, problem, listening);
 }
 
 void InputKeyboardSelect::keyRawPressed(int keycode)

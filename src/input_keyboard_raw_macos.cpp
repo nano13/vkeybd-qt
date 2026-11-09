@@ -270,17 +270,21 @@ QList<InputKeyboardRawMeta::Keyboard> InputKeyboardRawMeta::detectKeyboards()
     return HidHub::instance().keyboards();
 }
 
-std::unique_ptr<InputKeyboardRawBackend> createRawKeyboardBackend(InputKeyboardRawController *owner, const QString &id, KeyboardMode mode, QString &error)
+std::unique_ptr<InputKeyboardRawBackend> createRawKeyboardBackend(InputKeyboardRawController *owner, const QString &id, KeyboardMode mode, QString &error, RawKeyboardProblem &problem)
 {
     // seizing a keyboard needs a root helper; never pretend to lock
     if (mode == KeyboardMode::lock)
     {
         error = "Locking keyboards is not supported on macOS.";
+        problem = RawKeyboardProblem::LockUnsupported;
         return nullptr;
     }
 
     std::unique_ptr<HidBackend> backend = std::make_unique<HidBackend>(owner, id);
     if (!HidHub::instance().add(backend.get(), error))
+    {
+        problem = RawKeyboardProblem::InputMonitoring;
         return nullptr;
+    }
     return backend;
 }

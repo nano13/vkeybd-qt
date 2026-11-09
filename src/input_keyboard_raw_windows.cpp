@@ -311,6 +311,10 @@ public:
         return hub;
     }
     
+    // why instance() is nullptr
+    static RawKeyboardProblem missing_problem;
+    static QString missing_reason;
+    
     QList<InputKeyboardRawMeta::Keyboard> keyboards();
     bool add(InterceptionBackend *backend, QString &error);
     void remove(InterceptionBackend *backend);
@@ -374,6 +378,8 @@ private:
 };
 
 std::atomic<int> InterceptionHub::filter_device{0};
+RawKeyboardProblem InterceptionHub::missing_problem = RawKeyboardProblem::LockNeedsInterception;
+QString InterceptionHub::missing_reason;
 
 class InterceptionBackend : public InputKeyboardRawBackend
 {
@@ -397,7 +403,11 @@ InterceptionHub *InterceptionHub::create()
 {
     HMODULE library = LoadLibraryW(L"interception.dll");
     if (!library)
+    {
+        missing_problem = RawKeyboardProblem::LockNeedsInterception;
+        missing_reason = "interception.dll was not found next to vkeybd-qt.exe or on the PATH.";
         return nullptr;
+    }
     
     CreateContext create_context = reinterpret_cast<CreateContext>(reinterpret_cast<void*>(GetProcAddress(library, "interception_create_context")));
     SetFilter set_filter = reinterpret_cast<SetFilter>(reinterpret_cast<void*>(GetProcAddress(library, "interception_set_filter")));
@@ -409,6 +419,8 @@ InterceptionHub *InterceptionHub::create()
     if (!create_context || !set_filter || !wait_with_timeout || !send || !receive || !get_hardware_id)
     {
         qWarning() << "interception.dll found, but it is incomplete: keyboard lock not available";
+        missing_problem = RawKeyboardProblem::LockNeedsInterception;
+        missing_reason = "interception.dll was found, but it is not the Interception library (functions missing).";
         FreeLibrary(library);
         return nullptr;
     }
@@ -418,6 +430,8 @@ InterceptionHub *InterceptionHub::create()
     if (!context)
     {
         qWarning() << "interception.dll found, but the Interception driver is not running: keyboard lock not available";
+        missing_problem = RawKeyboardProblem::InterceptionNotRunning;
+        missing_reason = "interception.dll was found, but the Interception driver is not running.";
         FreeLibrary(library);
         return nullptr;
     }
@@ -640,7 +654,7 @@ QList<InputKeyboardRawMeta::Keyboard> InputKeyboardRawMeta::detectKeyboards()
     return keyboards;
 }
 
-std::unique_ptr<InputKeyboardRawBackend> createRawKeyboardBackend(InputKeyboardRawController *owner, const QString &id, KeyboardMode mode, QString &error)
+std::unique_ptr<InputKeyboardRawBackend> createRawKeyboardBackend(InputKeyboardRawController *owner, const QString &id, KeyboardMode mode, QString &error, RawKeyboardProblem &problem)
 {
     if (id.startsWith("interception:"))
     {
@@ -648,6 +662,7 @@ std::unique_ptr<InputKeyboardRawBackend> createRawKeyboardBackend(InputKeyboardR
         if (!interception)
         {
             error = "The Interception driver is not available anymore.";
+            problem = RawKeyboardProblem::InterceptionNotRunning;
             return nullptr;
         }
         std::unique_ptr<InterceptionBackend> backend = std::make_unique<InterceptionBackend>(owner, id.mid(13).toInt(), mode == KeyboardMode::lock);
@@ -659,7 +674,9 @@ std::unique_ptr<InputKeyboardRawBackend> createRawKeyboardBackend(InputKeyboardR
     // never pretend to lock
     if (mode == KeyboardMode::lock)
     {
-        error = "Locking keyboards needs the Interception driver (https://github.com/oblitum/Interception) and interception.dll.";
+        InterceptionHub::instance(); // fills in why it is missing
+        error = InterceptionHub::missing_reason;
+        problem = InterceptionHub::missing_problem;
         return nullptr;
     }
     

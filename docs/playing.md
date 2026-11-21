@@ -26,11 +26,20 @@ the keyboard layout does not matter.
 | Print / Pause | global key shift −1 / +1 (all sections) |
 | Scroll Lock | global key shift back to the start value |
 
-Octave shift, pitch bend, volume and the pedals act on the current tab **and
-all checked tabs** (right click on a tab) — everything that sounds. Volume
-and octave shift move every tab by the same amount, so the balance between
-the tabs stays; a tab that hits its limit (volume 0 or 120) comes back to its
-own value when the change is undone.
+The hotkeys for octave shift, pitch bend, volume and the pedals act on the
+current tab **and all checked tabs** (right click on a tab) — everything that
+sounds:
+
+* **Volume — group DCA:** while more than one tab sounds, a *Group DCA* fader
+  appears below the tab rows, and the volume hotkeys drive it. It scales all
+  sounding tabs by the same factor, so their volume ratios (their balance)
+  stay, like a DCA on a mixing desk. 100 % = the tabs' own volumes. A tab that
+  hits 0 or 120 comes back to its exact share when the DCA goes back.
+* **Octave shift:** the Ctrl keys move all sounding tabs by the same number
+  of semitones.
+
+The controls of a tab itself — its volume slider, its key shift buttons —
+change only that tab. A tab changed that way keeps its new level in the group.
 
 For a live performance, give each section its own physical keyboard and
 **lock** it, so none of these keys (or any other) reaches the operating

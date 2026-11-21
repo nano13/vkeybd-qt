@@ -66,8 +66,32 @@ MainTabs::MainTabs(QList<QString> labels, int id, Config *config, MainTabsSwitch
     connect(this->view, &Orgelwerk::signalEditChannels, this, &MainTabs::showChannelEditor);
     this->view->bindTab(0);
     
+    // group DCA (hidden while only one tab sounds)
+    this->group_volume = new MIDIMasterVolume(this);
+    this->group_dca = new QWidget;
+    this->group_dca->setObjectName("group_dca");
+    QHBoxLayout *layout_dca = new QHBoxLayout;
+    layout_dca->setContentsMargins(0, 0, 0, 0);
+    layout_dca->setSpacing(4);
+    layout_dca->addWidget(this->group_volume->label_volume);
+    layout_dca->addWidget(this->group_volume->slider_volume, 1);
+    this->group_dca->setLayout(layout_dca);
+    // its spring-back strength comes from the tab's tether slider (see MIDISignal)
+    this->group_volume->label_tether->setParent(this->group_dca);
+    this->group_volume->slider_tether->setParent(this->group_dca);
+    this->group_volume->label_tether->hide();
+    this->group_volume->slider_tether->hide();
+    this->group_dca->setToolTip("Group DCA: volume of all sounding tabs (current + checked) together.\n"
+                                "Keeps their volume ratios; 100 % = their own volumes.\n"
+                                "Hotkeys: Up/Down (springs back), Page Up/Page Down (stays).");
+    this->group_dca->hide();
+    connect(this->group_volume, &MIDIMasterVolume::sliderMoved, this, &MainTabs::groupDCAMoved);
+    updateGroupDCALabel();
+    
     QVBoxLayout *layout = new QVBoxLayout;
     layout->setContentsMargins(0, 0, 0, 0);
+    layout->setSpacing(0);
+    layout->addWidget(this->group_dca);
     layout->addWidget(this->view);
     setLayout(layout);
     
@@ -122,6 +146,7 @@ void MainTabs::setCurrentIndex(int index)
     }
     
     syncChannelEditorToCurrentTab();
+    updateGroupDCA();
     
     emit currentChanged(index);
 }
@@ -129,6 +154,70 @@ void MainTabs::setCurrentIndex(int index)
 void MainTabs::listOfCheckTabsChanged(QList<int> list_of_tab_ids)
 {
     this->list_of_checked_tabs = list_of_tab_ids;
+    updateGroupDCA();
+}
+
+void MainTabs::updateGroupDCA()
+{
+    const QList<int> tabs = soundingTabs();
+    const bool group = tabs.size() > 1;
+    
+    // tabs that left the group keep their volume, and are re-anchored if they come back
+    const QList<int> anchored = this->group_anchors.keys();
+    for (const int tab : anchored)
+    {
+        if (!tabs.contains(tab))
+            this->group_anchors.remove(tab);
+    }
+    
+    if (!group)
+    {
+        // the group is gone: the volumes stay as they are, the next group starts at 100 %
+        this->group_anchors.clear();
+        this->group_dca_value = 100;
+        this->group_volume->setValueSilently(100);
+    }
+    
+    updateGroupDCALabel();
+    this->group_dca->setVisible(group);
+}
+
+void MainTabs::updateGroupDCALabel()
+{
+    this->group_volume->label_volume->setText(QString("Group DCA (%1 tabs): %2%").arg(soundingTabs().size()).arg(this->group_dca_value));
+}
+
+void MainTabs::groupDCAMoved(int value)
+{
+    const QList<int> tabs = soundingTabs();
+    const int previous = this->group_dca_value;
+    this->group_dca_value = value;
+    updateGroupDCALabel();
+    
+    if (tabs.size() < 2)
+        return;
+    
+    for (const int tab : tabs)
+    {
+        const int actual = this->midi_engine->preset(tab).master_volume;
+        
+        // anchor = the tab's volume at 100 %. New in the group, or changed on
+        // its own slider meanwhile: anchored again from where it is now.
+        bool anchor_valid = this->group_anchors.contains(tab);
+        if (anchor_valid)
+        {
+            const int expected = qBound(0, qRound(this->group_anchors.value(tab) * previous / 100.0), 120);
+            anchor_valid = (expected == actual);
+        }
+        if (!anchor_valid)
+            this->group_anchors.insert(tab, (previous > 0) ? actual * 100.0 / previous : actual);
+        
+        const int scaled = qBound(0, qRound(this->group_anchors.value(tab) * value / 100.0), 120);
+        this->midi_engine->setMasterVolume(tab, scaled);
+    }
+    
+    // the slider of the current tab shows its new volume
+    this->view->refreshVolume();
 }
 
 QList<int> MainTabs::soundingTabs() const
@@ -655,25 +744,34 @@ void MainTabs::MIDISignal(MIDISignalTypes type)
         o->keyUpRaw(KeysRaw::Super_L);
         o->keyUpRaw(KeysRaw::Super_R);
     }
-    else if (type == MIDISignalTypes::VolumeLowerPressed)
+    else if (type == MIDISignalTypes::VolumeLowerPressed ||
+             type == MIDISignalTypes::VolumeLowerPressedPermanent ||
+             type == MIDISignalTypes::VolumeHigherPressed ||
+             type == MIDISignalTypes::VolumeHigherPressedPermanent)
     {
-        o->volume->volumeKeyPressed(KeysRaw::Down);
-    }
-    else if (type == MIDISignalTypes::VolumeLowerPressedPermanent)
-    {
-        o->volume->volumeKeyPressed(KeysRaw::PageDown);
-    }
-    else if (type == MIDISignalTypes::VolumeHigherPressed)
-    {
-        o->volume->volumeKeyPressed(KeysRaw::Up);
-    }
-    else if (type == MIDISignalTypes::VolumeHigherPressedPermanent)
-    {
-        o->volume->volumeKeyPressed(KeysRaw::PageUp);
+        int key = KeysRaw::Down;
+        if (type == MIDISignalTypes::VolumeLowerPressedPermanent)
+            key = KeysRaw::PageDown;
+        else if (type == MIDISignalTypes::VolumeHigherPressed)
+            key = KeysRaw::Up;
+        else if (type == MIDISignalTypes::VolumeHigherPressedPermanent)
+            key = KeysRaw::PageUp;
+        
+        // several tabs sound: the hotkeys drive the group DCA, else the tab's own volume
+        if (soundingTabs().size() > 1)
+        {
+            this->group_volume->slider_tether->setValue(o->volume->slider_tether->value());
+            this->group_volume->volumeKeyPressed(key);
+        }
+        else
+        {
+            o->volume->volumeKeyPressed(key);
+        }
     }
     else if (type == MIDISignalTypes::VolumeReleased)
     {
         o->volume->volumeKeyReleased();
+        this->group_volume->volumeKeyReleased();
     }
     else if (type == MIDISignalTypes::PitchLowerPressed)
     {

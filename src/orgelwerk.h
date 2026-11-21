@@ -48,8 +48,12 @@ public:
     void bindTab(int tab);
     int boundTab() const;
     // the tabs that sound together with the bound tab (MainTabs: current + checked).
-    // Octave shift, volume and the pedals apply to all of them.
+    // The octave hotkeys and the pedals apply to all of them; the widgets of
+    // this view (volume slider, key shift buttons) only to the bound tab.
+    // The volume hotkeys drive MainTabs' group DCA instead.
     void setSoundingTabs(std::function<QList<int>()> provider);
+    // shows the bound tab's volume after it was changed elsewhere (group DCA)
+    void refreshVolume();
     // shows the engine's current settings of the bound tab (e.g. after a global key shift)
     void reloadFromEngine();
     // writes the pitch wheel position (which is not written back continuously) to the engine
@@ -93,13 +97,13 @@ private:
     // the bound tab first, then the other sounding tabs
     QList<int> soundingTabs() const;
     
-    // Volume and key shift of the other sounding tabs follow the bound tab as
-    // offset, so their own balance stays. Unclamped values, so a temporary
-    // change that hits a limit on one tab returns exactly to where it was.
-    QHash<int, int> follow_volume;
+    // Octave hotkeys: the key shift of the other sounding tabs follows the bound
+    // tab as offset. Unclamped values, so a change that hits the limit on one
+    // tab returns exactly to where it was.
     QHash<int, int> follow_key_shift;
-    enum class Follow { Volume, KeyShift };
-    void followBoundTab(Follow what, int delta);
+    void followKeyShift(int delta);
+    // true while an octave hotkey changes the key shift (not the buttons of the view)
+    bool key_shift_from_hotkey = false;
     
     // tabs a pedal was pressed on: the release goes to them even if the
     // checked tabs changed in between

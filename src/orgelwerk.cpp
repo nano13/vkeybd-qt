@@ -168,7 +168,6 @@ void Orgelwerk::bindTab(int tab)
     this->tab_id = tab;
     
     // the offsets were relative to the previous tab
-    this->follow_volume.clear();
     this->follow_key_shift.clear();
 
     resetNoteDisplays();
@@ -204,7 +203,13 @@ QList<int> Orgelwerk::soundingTabs() const
     return tabs;
 }
 
-void Orgelwerk::followBoundTab(Follow what, int delta)
+void Orgelwerk::refreshVolume()
+{
+    if (this->tab_id >= 0)
+        this->volume->setValueSilently(this->engine->preset(this->tab_id).master_volume);
+}
+
+void Orgelwerk::followKeyShift(int delta)
 {
     if (delta == 0)
         return;
@@ -212,36 +217,29 @@ void Orgelwerk::followBoundTab(Follow what, int delta)
     QList<int> others = soundingTabs();
     others.removeAll(this->tab_id);
     
-    QHash<int, int> &follow = (what == Follow::Volume) ? this->follow_volume : this->follow_key_shift;
-    const int minimum = (what == Follow::Volume) ? 0 : -MidiEngine::KEY_SHIFT_LIMIT;
-    const int maximum = (what == Follow::Volume) ? 120 : MidiEngine::KEY_SHIFT_LIMIT;
+    const int minimum = -MidiEngine::KEY_SHIFT_LIMIT;
+    const int maximum = MidiEngine::KEY_SHIFT_LIMIT;
     
     // a tab that is not checked anymore starts over next time
-    const QList<int> followed = follow.keys();
+    const QList<int> followed = this->follow_key_shift.keys();
     for (const int tab : followed)
     {
         if (!others.contains(tab))
-            follow.remove(tab);
+            this->follow_key_shift.remove(tab);
     }
     
     for (const int tab : others)
     {
-        const TabPreset preset = this->engine->preset(tab);
-        const int actual = (what == Follow::Volume) ? preset.master_volume : preset.master_key_shift;
+        const int actual = this->engine->preset(tab).master_key_shift;
         
-        int value = follow.value(tab, actual);
-        // changed elsewhere in the meantime (e.g. edited on its own tab): continue from there
+        int value = this->follow_key_shift.value(tab, actual);
+        // changed elsewhere in the meantime (e.g. on its own tab): continue from there
         if (qBound(minimum, value, maximum) != actual)
             value = actual;
         
         value += delta;
-        follow.insert(tab, value);
-        
-        const int clamped = qBound(minimum, value, maximum);
-        if (what == Follow::Volume)
-            this->engine->setMasterVolume(tab, clamped);
-        else
-            this->engine->setMasterKeyShift(tab, clamped);
+        this->follow_key_shift.insert(tab, value);
+        this->engine->setMasterKeyShift(tab, qBound(minimum, value, maximum));
     }
 }
 
@@ -338,8 +336,10 @@ void Orgelwerk::keyShiftChanged(int value)
     const int previous = this->engine->preset(this->tab_id).master_key_shift;
     this->engine->setMasterKeyShift(this->tab_id, value);
     
-    // octave keys (Ctrl) and the key shift buttons move the checked tabs along
-    followBoundTab(Follow::KeyShift, this->engine->preset(this->tab_id).master_key_shift - previous);
+    // only the octave hotkeys (Ctrl) move the other sounding tabs along;
+    // the buttons and the spin box of this view belong to the bound tab alone
+    if (this->key_shift_from_hotkey)
+        followKeyShift(this->engine->preset(this->tab_id).master_key_shift - previous);
 }
 
 void Orgelwerk::volumeSliderMoved(int value)
@@ -347,11 +347,8 @@ void Orgelwerk::volumeSliderMoved(int value)
     if (this->loading || this->tab_id < 0)
         return;
 
-    const int previous = this->engine->preset(this->tab_id).master_volume;
+    // the bound tab only; several tabs together: group DCA in MainTabs
     this->engine->setMasterVolume(this->tab_id, value);
-    
-    // volume keys and the slider move the checked tabs along
-    followBoundTab(Follow::Volume, value - previous);
 }
 
 void Orgelwerk::pitchWheelMoved(int pitch)
@@ -501,11 +498,16 @@ void Orgelwerk::keySoft(bool pressed)
 
 void Orgelwerk::octaveDown()
 {
+    // hotkey (or the Ctrl key of the PC keyboard display): all sounding tabs
+    this->key_shift_from_hotkey = true;
     this->key_shift_master->lowerShiftKeyPressed();
+    this->key_shift_from_hotkey = false;
 }
 void Orgelwerk::octaveUp()
 {
+    this->key_shift_from_hotkey = true;
     this->key_shift_master->higherShiftKeyPressed();
+    this->key_shift_from_hotkey = false;
 }
 
 void Orgelwerk::showHideGUIElements(GUIElements elements, bool show)

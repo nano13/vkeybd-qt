@@ -4,6 +4,7 @@
 #include <QObject>
 #include <QWidget>
 #include <QVBoxLayout>
+#include <QHBoxLayout>
 #include <QLineEdit>
 #include <QSpinBox>
 #include <QSettings>
@@ -30,6 +31,9 @@
 
 #include "midi_engine.h"
 #include "midi_channel_selector.h"
+#include "midi_mastervolume.h"
+
+#include <QHash>
 
 /*
  * One keyboard instance: its MIDI engine, its tabs (presets, one MIDI port each)
@@ -87,6 +91,18 @@ private:
     QList<int> list_of_checked_tabs;
     // the current tab plus all additionally checked ones
     QList<int> soundingTabs() const;
+    
+    // Group DCA: shown below the tab rows while more than one tab sounds.
+    // Scales the volumes of all sounding tabs by the same factor, so their
+    // ratios (= dB differences) stay. The volume hotkeys drive it then.
+    QWidget *group_dca = nullptr;
+    MIDIMasterVolume *group_volume = nullptr;
+    // volume of each sounding tab at DCA 100 %
+    QHash<int, double> group_anchors;
+    int group_dca_value = 100;
+    void updateGroupDCA();
+    void groupDCAMoved(int value);
+    void updateGroupDCALabel();
 
     int id;
     Config *config;

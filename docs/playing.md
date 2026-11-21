@@ -23,6 +23,12 @@ the keyboard layout does not matter.
 | Print / Pause | global key shift −1 / +1 (all sections) |
 | Scroll Lock | global key shift back to the start value |
 
+Octave shift, pitch bend, volume and the pedals act on the current tab **and
+all checked tabs** (right click on a tab) — everything that sounds. Volume
+and octave shift move every tab by the same amount, so the balance between
+the tabs stays; a tab that hits its limit (volume 0 or 120) comes back to its
+own value when the change is undone.
+
 For a live performance, give each section its own physical keyboard and
 **lock** it, so none of these keys (or any other) reaches the operating
 system: see [keyboard input](keyboard-input.md).

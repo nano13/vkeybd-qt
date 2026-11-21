@@ -11,6 +11,10 @@
 #include <QCheckBox>
 #include <QLabel>
 #include <QHash>
+#include <QList>
+#include <QSet>
+
+#include <functional>
 
 #include "midi_key_selector.h"
 #include "midi_pitchwheel.h"
@@ -43,6 +47,9 @@ public:
 
     void bindTab(int tab);
     int boundTab() const;
+    // the tabs that sound together with the bound tab (MainTabs: current + checked).
+    // Octave shift, volume and the pedals apply to all of them.
+    void setSoundingTabs(std::function<QList<int>()> provider);
     // shows the engine's current settings of the bound tab (e.g. after a global key shift)
     void reloadFromEngine();
     // writes the pitch wheel position (which is not written back continuously) to the engine
@@ -81,6 +88,25 @@ private:
 
     // true while the widgets are filled from the engine: nothing is written back
     bool loading = false;
+    
+    std::function<QList<int>()> sounding_tabs;
+    // the bound tab first, then the other sounding tabs
+    QList<int> soundingTabs() const;
+    
+    // Volume and key shift of the other sounding tabs follow the bound tab as
+    // offset, so their own balance stays. Unclamped values, so a temporary
+    // change that hits a limit on one tab returns exactly to where it was.
+    QHash<int, int> follow_volume;
+    QHash<int, int> follow_key_shift;
+    enum class Follow { Volume, KeyShift };
+    void followBoundTab(Follow what, int delta);
+    
+    // tabs a pedal was pressed on: the release goes to them even if the
+    // checked tabs changed in between
+    QSet<int> sustain_tabs;
+    QSet<int> sostenuto_tabs;
+    QSet<int> soft_tabs;
+    QList<int> pedalTabs(bool pressed, QSet<int> &held) const;
 
     // Track each source separately so physical keys and MIDI input can overlap.
     QHash<int, int> displayed_source_notes;

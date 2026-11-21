@@ -60,6 +60,8 @@ MainTabs::MainTabs(QList<QString> labels, int id, Config *config, MainTabsSwitch
     
     // the one view of this keyboard
     this->view = new Orgelwerk(this->id, this->midi_engine, this);
+    // octave shift, volume and pedals apply to the current and all checked tabs
+    this->view->setSoundingTabs([this]() { return soundingTabs(); });
     connect(this->view, &Orgelwerk::signalMIDIEvent, this, &MainTabs::routeMIDIEvent);
     connect(this->view, &Orgelwerk::signalEditChannels, this, &MainTabs::showChannelEditor);
     this->view->bindTab(0);

@@ -166,6 +166,10 @@ void Orgelwerk::bindTab(int tab)
     storeToEngine();
 
     this->tab_id = tab;
+    
+    // the offsets were relative to the previous tab
+    this->follow_volume.clear();
+    this->follow_key_shift.clear();
 
     resetNoteDisplays();
     reloadFromEngine();
@@ -174,6 +178,91 @@ void Orgelwerk::bindTab(int tab)
 int Orgelwerk::boundTab() const
 {
     return this->tab_id;
+}
+
+void Orgelwerk::setSoundingTabs(std::function<QList<int>()> provider)
+{
+    this->sounding_tabs = provider;
+}
+
+QList<int> Orgelwerk::soundingTabs() const
+{
+    QList<int> tabs;
+    if (this->tab_id < 0)
+        return tabs;
+    
+    tabs.append(this->tab_id);
+    if (this->sounding_tabs)
+    {
+        const QList<int> provided = this->sounding_tabs();
+        for (const int tab : provided)
+        {
+            if (tab >= 0 && !tabs.contains(tab))
+                tabs.append(tab);
+        }
+    }
+    return tabs;
+}
+
+void Orgelwerk::followBoundTab(Follow what, int delta)
+{
+    if (delta == 0)
+        return;
+    
+    QList<int> others = soundingTabs();
+    others.removeAll(this->tab_id);
+    
+    QHash<int, int> &follow = (what == Follow::Volume) ? this->follow_volume : this->follow_key_shift;
+    const int minimum = (what == Follow::Volume) ? 0 : -MidiEngine::KEY_SHIFT_LIMIT;
+    const int maximum = (what == Follow::Volume) ? 120 : MidiEngine::KEY_SHIFT_LIMIT;
+    
+    // a tab that is not checked anymore starts over next time
+    const QList<int> followed = follow.keys();
+    for (const int tab : followed)
+    {
+        if (!others.contains(tab))
+            follow.remove(tab);
+    }
+    
+    for (const int tab : others)
+    {
+        const TabPreset preset = this->engine->preset(tab);
+        const int actual = (what == Follow::Volume) ? preset.master_volume : preset.master_key_shift;
+        
+        int value = follow.value(tab, actual);
+        // changed elsewhere in the meantime (e.g. edited on its own tab): continue from there
+        if (qBound(minimum, value, maximum) != actual)
+            value = actual;
+        
+        value += delta;
+        follow.insert(tab, value);
+        
+        const int clamped = qBound(minimum, value, maximum);
+        if (what == Follow::Volume)
+            this->engine->setMasterVolume(tab, clamped);
+        else
+            this->engine->setMasterKeyShift(tab, clamped);
+    }
+}
+
+QList<int> Orgelwerk::pedalTabs(bool pressed, QSet<int> &held) const
+{
+    QList<int> tabs = soundingTabs();
+    if (pressed)
+    {
+        for (const int tab : tabs)
+            held.insert(tab);
+    }
+    else
+    {
+        for (const int tab : held)
+        {
+            if (!tabs.contains(tab))
+                tabs.append(tab);
+        }
+        held.clear();
+    }
+    return tabs;
 }
 
 void Orgelwerk::reloadFromEngine()
@@ -246,7 +335,11 @@ void Orgelwerk::keyShiftChanged(int value)
         return;
 
     // set by the user: also the value a relative global reset returns to
+    const int previous = this->engine->preset(this->tab_id).master_key_shift;
     this->engine->setMasterKeyShift(this->tab_id, value);
+    
+    // octave keys (Ctrl) and the key shift buttons move the checked tabs along
+    followBoundTab(Follow::KeyShift, this->engine->preset(this->tab_id).master_key_shift - previous);
 }
 
 void Orgelwerk::volumeSliderMoved(int value)
@@ -254,7 +347,11 @@ void Orgelwerk::volumeSliderMoved(int value)
     if (this->loading || this->tab_id < 0)
         return;
 
+    const int previous = this->engine->preset(this->tab_id).master_volume;
     this->engine->setMasterVolume(this->tab_id, value);
+    
+    // volume keys and the slider move the checked tabs along
+    followBoundTab(Follow::Volume, value - previous);
 }
 
 void Orgelwerk::pitchWheelMoved(int pitch)
@@ -385,18 +482,21 @@ void Orgelwerk::keyUpRaw(int keycode)
 
 void Orgelwerk::keySustain(bool pressed)
 {
-    if (this->tab_id >= 0)
-        this->engine->sustain(this->tab_id, pressed);
+    const QList<int> tabs = pedalTabs(pressed, this->sustain_tabs);
+    for (const int tab : tabs)
+        this->engine->sustain(tab, pressed);
 }
 void Orgelwerk::keySostenuto(bool pressed)
 {
-    if (this->tab_id >= 0)
-        this->engine->sostenuto(this->tab_id, pressed);
+    const QList<int> tabs = pedalTabs(pressed, this->sostenuto_tabs);
+    for (const int tab : tabs)
+        this->engine->sostenuto(tab, pressed);
 }
 void Orgelwerk::keySoft(bool pressed)
 {
-    if (this->tab_id >= 0)
-        this->engine->soft(this->tab_id, pressed);
+    const QList<int> tabs = pedalTabs(pressed, this->soft_tabs);
+    for (const int tab : tabs)
+        this->engine->soft(tab, pressed);
 }
 
 void Orgelwerk::octaveDown()

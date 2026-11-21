@@ -16,6 +16,8 @@ layers).
 * **Right click** checks or unchecks a tab. All checked tabs sound
   together with the current one, so one key can play several presets at
   once. The last checked tab cannot be unchecked.
+* Octave shift, pitch bend, volume and the pedals apply to the current tab
+  and all checked tabs, as offsets (see [playing](playing.md)).
 
 Tabs and checked tabs belong to their keyboard section: playing one section
 never sounds the tabs of another section.

@@ -3,7 +3,8 @@
 By default, vkeybd-qt lays out the notes on the computer keyboard like the
 buttons of a **chromatic button accordion**. If you have never played one:
 you do not need to. The system is quick to learn, because it is completely
-regular.
+regular — it is **isomorphic**: every chord and every scale has one fixed
+pattern of keys, the same in all twelve keys.
 
 ## How the notes are arranged
 
@@ -23,26 +24,101 @@ of the accordion:
   semitone above row 1, row 3 one above row 2. Together, the three rows
   contain every note of the chromatic scale.
 * **Row 4 repeats row 1**, like the extra rows of a five-row accordion: the
-  same note under two fingers gives you alternative fingerings, and shapes
+  same note under two fingers gives you alternative fingerings, and patterns
   that start in row 3 continue there (see below).
 
 The PC keyboard display of vkeybd-qt shows the note on every key.
 
-## One shape for every key
+## Isomorphic: one pattern for every key
 
-Because the system is so regular, a chord or a scale has **one shape**, and
-that shape is the same in every key. Move it one key to the right, and you
-play it a minor third higher; move it one row down, and you play it a
-semitone higher. Learn a piece in one key, and you can play it in all twelve.
+The accordion layout is **isomorphic**: the same musical interval is always
+the same step on the keyboard, wherever you are. On the computer keyboard:
 
-A major chord, for example (German layout):
+| Step on the keyboard | Interval |
+|---|---|
+| one key to the **right** | minor third (+3 semitones) |
+| the key **down-right** (next row) | semitone (+1) |
+| the key **down-left** (next row) | whole tone down (−2) |
+| four keys to the right | octave (+12) |
 
-| Chord | Keys | Rows |
+This holds across all rows — from row 3, *down-right* continues into row 4.
+
+So a chord or a scale is not a set of notes you have to find again in every
+key: it is **one pattern of keys**, a shape for the hand. **Where you put the
+hand decides the key**: the key under the root finger is the root of the
+chord. Put the major pattern on `1`, and you play B major; on `2`, D major;
+on `Q`, C major — the same fingers, the same movement.
+
+### Chord patterns
+
+`R` is the root — the key you put the pattern on. The rows are drawn
+staggered like on the keyboard; each `·` is a key. The examples start on `1`
+(B), German layout.
+
+**Major** — on `1`: 1, W, E
+
+```
+row 1      R   ·   ·   ·
+row 2        ·   3   5   ·
+```
+
+**Minor** — on `1`: 1, 2, E
+
+```
+row 1      R   ♭3  ·   ·
+row 2        ·   ·   5   ·
+```
+
+**Diminished** — on `1`: 1, 2, 3
+
+```
+row 1      R   ♭3  ♭5  ·
+```
+
+**Augmented** — on `1`: 1, W, D
+
+```
+row 1      R   ·   ·   ·
+row 2        ·   3   ·   ·
+row 3         ·   ·   ♯5  ·
+```
+
+**Dominant 7th** — on `1`: 1, W, E, R
+
+```
+row 1      R   ·   ·   ·   ·
+row 2        ·   3   5   ♭7  ·
+```
+
+**Major 7th** — on `1`: 1, W, E, F
+
+```
+row 1      R   ·   ·   ·   ·
+row 2        ·   3   5   ·   ·
+row 3         ·   ·   ·   7   ·
+```
+
+**Minor 7th** — on `1`: 1, 2, E, R
+
+```
+row 1      R   ♭3  ·   ·   ·
+row 2        ·   ·   5   ♭7  ·
+```
+
+### The same pattern in every key
+
+| Chord | Keys | |
 |---|---|---|
-| B major | 1, W, E | root in row 1, third and fifth in row 2 |
-| C major | Q, S, D | the same shape, one row lower |
-| C♯ major | A, X, C | the same shape again: row 4 continues below row 3 |
-| D major | 2, E, R | the B major shape, one key to the right |
+| B major | 1, W, E | root in row 1 |
+| C major | Q, S, D | the same pattern, one row lower (+1 semitone) |
+| C♯ major | A, X, C | one row lower again: row 4 continues below row 3 |
+| D major | 2, E, R | the B major pattern, one key to the right (+3) |
+
+Row 4 has the same notes as row 1: for a root there, use the key in row 1.
+
+Learn a piece in one key, and you can play it in all twelve: move the hand,
+keep the pattern. Transposing on the fly is just as easy — or use the key
+shift, and keep the hand where it is.
 
 ## Range: more than three octaves per keyboard
 

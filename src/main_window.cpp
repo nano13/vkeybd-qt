@@ -1,5 +1,7 @@
 #include "main_window.h"
 
+#include "help_reader.h"
+
 #include <QApplication>
 #include <QCloseEvent>
 
@@ -49,8 +51,10 @@ MainWindow::MainWindow(OutputSystem output, int number_of_keyboards, QWidget *pa
         connect(menu, &MenuBar::signalResendMIDISettings, this, &MainWindow::globalResendMIDISettings);
         
         connect(menu, &MenuBar::signalHelpAbout, this, &MainWindow::helpAbout);
-        connect(menu, &MenuBar::signalHelpKeyboards, this, [this]{ new HelpMessage(":/docs/keyboards.md", "Keyboards for live performance", this); });
-        connect(menu, &MenuBar::signalHelpLayout, this, [this]{ new HelpMessage(":/docs/layout.md", "The keyboard layout", this); });
+        // one help reader with a tab per page
+        connect(menu, &MenuBar::signalHelpLayout, this, [this]{ HelpReader::showPage("layout.md", this); });
+        connect(menu, &MenuBar::signalHelpKeyboards, this, [this]{ HelpReader::showPage("keyboards.md", this); });
+        connect(menu, &MenuBar::signalHelpInterception, this, [this]{ HelpReader::showPage("interception.md", this); });
         setMenuBar(menu);
     }
     

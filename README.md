@@ -11,9 +11,10 @@ made for playing live.
 * **Several keyboard sections** side by side (`-n`), each with its own input,
   its own MIDI ports and its own instrument tabs — play them with two
   keyboards, one per hand, like the manuals of an organ.
-* **Chromatic button accordion layout:** more than three octaves on one
-  computer keyboard, the same fingering in every key, octave shift with the
-  Ctrl keys — see [the keyboard layout](docs/layout.md).
+* **Chromatic button accordion layout:** isomorphic — every chord and scale
+  is one pattern of keys, the same in all twelve keys; more than three
+  octaves on one computer keyboard, octave shift with the Ctrl keys — see
+  [the keyboard layout](docs/layout.md).
 * **Tabs** (`F01-1`, `F02-1`, ...): complete presets of 16 MIDI channels
   each. Switch with the function keys; check several tabs to play them
   together with one key.
@@ -33,14 +34,16 @@ For playing live, use a mechanical keyboard with full n-key rollover — see
 
 * [Playing](docs/playing.md) — key bindings.
 * [The keyboard layout](docs/layout.md) — the chromatic button accordion
-  system: more than three octaves per keyboard, one shape for every key
-  (also in *Help > Keyboard Layout*).
+  system: isomorphic, with the chord patterns; more than three octaves per
+  keyboard (also in *Help > Keyboard Layout*).
 * [Keyboards for live performance](docs/keyboards.md) — two hands on two
   keyboards, n-key rollover, switches, keycaps, a checklist for the show
   (also in *Help > Keyboard Recommendations*).
 * [Keyboard input and keyboard lock](docs/keyboard-input.md) — focused
-  window vs. raw keyboards, locking on Linux, Windows (Interception driver)
-  and macOS, permissions.
+  window vs. raw keyboards, locking on Linux, Windows and macOS, permissions.
+* [Keyboard lock on Windows: the Interception driver](docs/interception.md)
+  — why it is needed, installation, before the show, troubleshooting (also
+  in *Help > Windows Lock Driver (Interception)*).
 * [MIDI output, MIDI input and tabs](docs/midi.md) — ALSA, JACK, libremidi,
   network, ports, checked tabs, MIDI input.
 * [Architecture](docs/architecture.md) — for developers.
@@ -53,7 +56,7 @@ prepared for Windows and macOS; the rest of the port is in progress.
 | | Linux | Windows | macOS |
 |---|---|---|---|
 | raw keyboards (one per section) | yes | yes | yes |
-| keyboard lock | yes | with the [Interception driver](docs/keyboard-input.md#interception-driver-needed-for-lock) | no |
+| keyboard lock | yes | with the [Interception driver](docs/interception.md) | no |
 | MIDI output | ALSA, JACK, libremidi | — | libremidi (CoreMIDI) |
 
 ## Usage

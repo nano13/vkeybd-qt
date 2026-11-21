@@ -108,7 +108,7 @@ key reaches the operating system or another application during the
 performance — no shortcut, no menu, no accidental typing into a window.
 
 * **Linux:** works out of the box (raw keyboard input, *Lock*).
-* **Windows:** needs the free Interception driver.
+* **Windows:** needs the free [Interception driver](interception.md).
 * **macOS:** locking is not possible; the keys always reach the system too.
 
 The details are in the documentation: *Keyboard input and keyboard lock*

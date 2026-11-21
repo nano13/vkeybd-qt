@@ -1,5 +1,7 @@
 #include "keyboard_problem_dialog.h"
 
+#include "help_reader.h"
+
 #include <QDesktopServices>
 #include <QMessageBox>
 #include <QPushButton>
@@ -39,6 +41,8 @@ void showKeyboardProblemDialog(QWidget *parent, const QString &keyboard, const Q
     QString details;
     QString button_text;
     QString button_url;
+    // a page of the help reader with the whole story (docs/*.md)
+    QString help_page;
     
     switch (problem)
     {
@@ -49,6 +53,7 @@ void showKeyboardProblemDialog(QWidget *parent, const QString &keyboard, const Q
                       "and the focused application (shortcuts, the Start menu, ...).</p>" + interceptionSteps();
             button_text = "Open download page";
             button_url = QString::fromLatin1(INTERCEPTION_RELEASES);
+            help_page = "interception.md";
             break;
             
         case RawKeyboardProblem::InterceptionNotRunning:
@@ -57,6 +62,7 @@ void showKeyboardProblemDialog(QWidget *parent, const QString &keyboard, const Q
             details = "<p>Did you reboot after installing the driver? If it is not installed yet:</p>" + interceptionSteps();
             button_text = "Open download page";
             button_url = QString::fromLatin1(INTERCEPTION_RELEASES);
+            help_page = "interception.md";
             break;
             
         case RawKeyboardProblem::LockBusy:
@@ -127,6 +133,15 @@ void showKeyboardProblemDialog(QWidget *parent, const QString &keyboard, const Q
         QPushButton *button = box->addButton(button_text, QMessageBox::ActionRole);
         const QUrl url(button_url);
         QObject::connect(button, &QPushButton::clicked, box, [url]() { QDesktopServices::openUrl(url); });
+    }
+    
+    if (!help_page.isEmpty())
+    {
+        // ActionRole: the box stays open, the guide opens beside it
+        QPushButton *button_help = box->addButton("Installation guide", QMessageBox::ActionRole);
+        QObject::connect(button_help, &QPushButton::clicked, box, [box, help_page]() {
+            HelpReader::showPage(help_page, box->parentWidget());
+        });
     }
     
     // not modal: the other keyboards keep playing

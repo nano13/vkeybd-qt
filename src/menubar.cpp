@@ -121,8 +121,13 @@ void MenuBar::addHelpMenu()
     QAction *actionAbout = new QAction("About");
     connect(actionAbout, &QAction::triggered, this, [this]{ emit signalHelpAbout();} );
     
+    QAction *actionInterception = new QAction("Windows Lock Driver (Interception)");
+    actionInterception->setToolTip("The Interception driver: installation and what to know before a performance");
+    connect(actionInterception, &QAction::triggered, this, [this]{ emit signalHelpInterception();} );
+    
     menuHelp->addAction(actionLayout);
     menuHelp->addAction(actionKeyboards);
+    menuHelp->addAction(actionInterception);
     menuHelp->addSeparator();
     menuHelp->addAction(actionAbout);
 }

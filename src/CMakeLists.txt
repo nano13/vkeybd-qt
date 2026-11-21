@@ -5,6 +5,7 @@ add_executable(vkeybd-qt
     config.cpp
     help_about_widget.cpp
     help_message.cpp
+    help_reader.cpp
     input_keyboard_raw.cpp
     input_keyboard_select.cpp
     input_keyboard_window.cpp
@@ -39,6 +40,7 @@ add_executable(vkeybd-qt
     enums_structs.h
     help_about_widget.h
     help_message.h
+    help_reader.h
     input_keyboard_raw.h
     input_keyboard_select.h
     input_keyboard_window.h

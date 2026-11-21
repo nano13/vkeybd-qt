@@ -77,57 +77,18 @@ key remappers such as keyd, kmonad, kanata or input-remapper.
 
 ## Windows
 
-### Without the Interception driver
+* **Without the Interception driver:** vkeybd-qt reads the keyboards with
+  the Raw Input API. Each keyboard plays its own section, also without the
+  window focus, but the keys always reach Windows and the focused application
+  too. Requesting *Lock* opens a dialog that explains the driver.
+* **With the [Interception driver](interception.md)** (free, installed once):
+  *Lock* keeps the keys of a keyboard away from Windows and all other
+  applications. The keyboard list then shows the slot number of each
+  keyboard, so identical keyboards can be told apart.
 
-vkeybd-qt reads the keyboards with the Raw Input API. Each keyboard plays its
-own section, also without the window focus, but the keys always reach
-Windows and the focused application too. *Lock* is not possible: requesting
-it opens a dialog with the installation steps below.
-
-### Interception driver (needed for Lock)
-
-[Interception](https://github.com/oblitum/Interception) is a signed keyboard
-and mouse filter driver by Francisco Lopes. With it, a normal application can
-receive the keys of each keyboard and decide whether Windows gets them.
-vkeybd-qt uses it for *Listen* (keys are passed on to Windows) and *Lock*
-(keys are kept away from Windows).
-
-Installation:
-
-1. Download **Interception.zip** from the
-   [releases page](https://github.com/oblitum/Interception/releases).
-2. Open a command prompt **as administrator** in the folder
-   `command line installer` and run:
-   ```bat
-   install-interception.exe /install
-   ```
-3. **Reboot** Windows.
-4. Copy **interception.dll** next to **vkeybd-qt.exe**: from `library\x64`
-   for a 64-bit vkeybd-qt, from `library\x86` for a 32-bit one.
-5. Start vkeybd-qt. The log says
-   `Interception driver available: keyboards can be locked`.
-
-vkeybd-qt loads `interception.dll` at runtime; it is not needed for building
-and nothing breaks without it. To uninstall the driver, run
-`install-interception.exe /uninstall` as administrator and reboot.
-
-With the driver, the keyboard list shows the Interception slot number of each
-keyboard (`@3 VID_046D&PID_C31C`), so identical keyboards can be told apart.
-
-Things to know before a performance:
-
-* **Device limit:** the driver has 10 keyboard slots. Every unplug/replug (and
-  resume from hibernation) uses a new one. When they are used up, the
-  keyboard stops working — also in Windows — until the next reboot. Plug in
-  all keyboards, reboot, and do not hot-plug during the show.
-* **Licence:** free for non-commercial use (LGPL library, redistributable
-  driver binaries); commercial use needs a licence from the author. See the
-  [licences](https://github.com/oblitum/Interception/tree/master/licenses).
-* Locked keys are kept away by a separate thread of vkeybd-qt, so a busy
-  window never lets them through. If vkeybd-qt quits or crashes, the driver
-  drops its filters and the keyboards work normally again.
-* Anti-cheat software of some games refuses to run while Interception is
-  installed.
+Installation, what to know before a performance, and troubleshooting:
+[Keyboard lock on Windows: the Interception driver](interception.md) — also
+in *Help > Windows Lock Driver (Interception)*.
 
 ## macOS
 

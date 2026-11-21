@@ -18,4 +18,10 @@
         <file alias="css_green">../assets/css/green.css</file>
         <file alias="css_allen_heath">../assets/css/allen_heath.css</file>
     </qresource>
+    <!-- docs shown in the Help menu: the same files as in the repository,
+         under one prefix, so the relative links between them work -->
+    <qresource prefix="/docs">
+        <file alias="keyboards.md">../docs/keyboards.md</file>
+        <file alias="layout.md">../docs/layout.md</file>
+    </qresource>
 </RCC>

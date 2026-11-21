@@ -49,6 +49,8 @@ MainWindow::MainWindow(OutputSystem output, int number_of_keyboards, QWidget *pa
         connect(menu, &MenuBar::signalResendMIDISettings, this, &MainWindow::globalResendMIDISettings);
         
         connect(menu, &MenuBar::signalHelpAbout, this, &MainWindow::helpAbout);
+        connect(menu, &MenuBar::signalHelpKeyboards, this, [this]{ new HelpMessage(":/docs/keyboards.md", "Keyboards for live performance", this); });
+        connect(menu, &MenuBar::signalHelpLayout, this, [this]{ new HelpMessage(":/docs/layout.md", "The keyboard layout", this); });
         setMenuBar(menu);
     }
     

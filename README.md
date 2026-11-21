@@ -9,7 +9,11 @@ made for playing live.
 ## What it does
 
 * **Several keyboard sections** side by side (`-n`), each with its own input,
-  its own MIDI ports and its own instrument tabs.
+  its own MIDI ports and its own instrument tabs — play them with two
+  keyboards, one per hand, like the manuals of an organ.
+* **Chromatic button accordion layout:** more than three octaves on one
+  computer keyboard, the same fingering in every key, octave shift with the
+  Ctrl keys — see [the keyboard layout](docs/layout.md).
 * **Tabs** (`F01-1`, `F02-1`, ...): complete presets of 16 MIDI channels
   each. Switch with the function keys; check several tabs to play them
   together with one key.
@@ -22,9 +26,18 @@ made for playing live.
   control another vkeybd-qt instance).
 * Pedals, pitch bend, volume, octave and key shift on the PC keyboard.
 
+For playing live, use a mechanical keyboard with full n-key rollover — see
+[keyboards for live performance](docs/keyboards.md).
+
 ## Documentation
 
 * [Playing](docs/playing.md) — key bindings.
+* [The keyboard layout](docs/layout.md) — the chromatic button accordion
+  system: more than three octaves per keyboard, one shape for every key
+  (also in *Help > Keyboard Layout*).
+* [Keyboards for live performance](docs/keyboards.md) — two hands on two
+  keyboards, n-key rollover, switches, keycaps, a checklist for the show
+  (also in *Help > Keyboard Recommendations*).
 * [Keyboard input and keyboard lock](docs/keyboard-input.md) — focused
   window vs. raw keyboards, locking on Linux, Windows (Interception driver)
   and macOS, permissions.

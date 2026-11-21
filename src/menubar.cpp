@@ -110,9 +110,20 @@ void MenuBar::addHelpMenu()
 {
     QMenu *menuHelp = addMenu("Help");
     
+    QAction *actionLayout = new QAction("Keyboard Layout");
+    actionLayout->setToolTip("How the notes are arranged: the chromatic button accordion system");
+    connect(actionLayout, &QAction::triggered, this, [this]{ emit signalHelpLayout();} );
+    
+    QAction *actionKeyboards = new QAction("Keyboard Recommendations");
+    actionKeyboards->setToolTip("Which computer keyboards work well for live performance");
+    connect(actionKeyboards, &QAction::triggered, this, [this]{ emit signalHelpKeyboards();} );
+    
     QAction *actionAbout = new QAction("About");
     connect(actionAbout, &QAction::triggered, this, [this]{ emit signalHelpAbout();} );
     
+    menuHelp->addAction(actionLayout);
+    menuHelp->addAction(actionKeyboards);
+    menuHelp->addSeparator();
     menuHelp->addAction(actionAbout);
 }
 

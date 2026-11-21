@@ -1,27 +1,27 @@
 #ifndef HELPMESSAGE_H
 #define HELPMESSAGE_H
 
-#include <QObject>
-#include <QWidget>
-
-#include <QObject>
-#include <QWidget>
 #include <QDialog>
+#include <QString>
 
-#include <QVBoxLayout>
+// kept for the files that got them through this header so far
 #include <QFile>
-#include <QTextStream>
-#include <QTextEdit>
 #include <QPushButton>
+#include <QTextEdit>
+#include <QTextStream>
+#include <QVBoxLayout>
 
+/*
+ * Shows a text file from the resources in its own window, not modal (the
+ * keyboards keep playing). Files ending in ".md" are rendered as Markdown,
+ * others as plain text or HTML. Links open in the web browser.
+ * Deletes itself when closed.
+ */
 class HelpMessage : public QDialog
 {
     Q_OBJECT
 public:
-    explicit HelpMessage(QString filename, QDialog *parent = nullptr);
-    
-signals:
-    
+    explicit HelpMessage(QString filename, QString title = "vkeybd-qt - help", QWidget *parent = nullptr);
 };
 
 #endif // HELPMESSAGE_H

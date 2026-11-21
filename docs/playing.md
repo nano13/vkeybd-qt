@@ -7,7 +7,7 @@ the keyboard layout does not matter.
 | Key | Action |
 |---|---|
 | letter, digit and punctuation keys | notes (see the PC keyboard section of the window) |
-| F1 … F12 | switch to tab `Fxx` of the active layer (stops sounding notes first) |
+| F1 … F12 | switch to tab `Fxx` of the active row; held notes keep sounding until released, the next presses play the new tab |
 | Esc + F1 … F12 | switch the active row (layer); or click the row button `1`, `2`, … in front of the row |
 | Menu + F1 … F12 | add the tab to the sounding tabs, or remove it (like a right click on the tab) |
 | Menu + Esc (tap Esc) | back to the current tab alone (no panic: it keeps sounding) |

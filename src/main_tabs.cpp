@@ -405,8 +405,9 @@ void MainTabs::rawKeyPressed(int keycode)
             }
             else
             {
-                MIDISignal(MIDISignalTypes::Panick);
-                
+                // no panic: held notes keep sounding on the previous tab until
+                // their keys are released (the engine remembers where each key
+                // played), only new presses play the new tab -- like the key shift
                 int layer = this->main_tabs_switcher->getLayerActive();
                 this->setCurrentIndex(i + layer*12);
             }

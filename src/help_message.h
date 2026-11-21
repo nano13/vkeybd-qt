@@ -21,7 +21,7 @@ class HelpMessage : public QDialog
 {
     Q_OBJECT
 public:
-    explicit HelpMessage(QString filename, QString title = "vkeybd-qt - help", QWidget *parent = nullptr);
+    explicit HelpMessage(QString filename, QString title = "KeyDeskMIDI - help", QWidget *parent = nullptr);
 };
 
 #endif // HELPMESSAGE_H

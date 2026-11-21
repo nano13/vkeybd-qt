@@ -176,7 +176,7 @@ QWidget* MainWindow::newKeyboardInstance(int id, OutputSystem output)
     //grid->addWidget(button_lock_help, 1, 3);
     if (output == OutputSystem::Network)
     {
-        QLabel *label_udp_client_ip = new QLabel("IP-Address of remote vkeybd-qt instance:");
+        QLabel *label_udp_client_ip = new QLabel("IP-Address of remote KeyDeskMIDI instance:");
         grid->addWidget(label_udp_client_ip, 2, 0);
         
         QLabel *label_udp_client_port = new QLabel("Port:");
@@ -249,7 +249,7 @@ void MainWindow::notifyStatus()
     if (lines.length() == 1)
         this->notify_dbus->showStatus(lines.first(), QString());
     else
-        this->notify_dbus->showStatus("vkeybd-qt", lines.join("\n"));
+        this->notify_dbus->showStatus("KeyDeskMIDI", lines.join("\n"));
 }
 
 void MainWindow::tabsCheckChanged(int keyboard_id, QList<int> list_of_tab_ids)
@@ -444,7 +444,7 @@ void MainWindow::updateWindowInput()
     else
         qApp->removeEventFilter(this);
     
-    // locked: keys reach vkeybd-qt even while another window has the focus
+    // locked: keys reach KeyDeskMIDI even while another window has the focus
     if (window_locked)
         grabKeyboard();
     else

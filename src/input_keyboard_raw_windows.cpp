@@ -162,7 +162,7 @@ bool RawInputHub::ensureRegistered(QString &error)
         WNDCLASSW window_class = {};
         window_class.lpfnWndProc = DefWindowProcW;
         window_class.hInstance = instance;
-        window_class.lpszClassName = L"vkeybd-qt-raw-input";
+        window_class.lpszClassName = L"keydesk-midi-raw-input";
         RegisterClassW(&window_class);
 
         this->window = CreateWindowExW(0, window_class.lpszClassName, L"", 0, 0, 0, 0, 0, HWND_MESSAGE, nullptr, instance, nullptr);
@@ -405,7 +405,7 @@ InterceptionHub *InterceptionHub::create()
     if (!library)
     {
         missing_problem = RawKeyboardProblem::LockNeedsInterception;
-        missing_reason = "interception.dll was not found next to vkeybd-qt.exe or on the PATH.";
+        missing_reason = "interception.dll was not found next to keydesk-midi.exe or on the PATH.";
         return nullptr;
     }
     

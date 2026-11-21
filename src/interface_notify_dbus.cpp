@@ -27,10 +27,10 @@ void InterfaceNotifyDBus::showStatus(const QString &title, const QString &body)
     QVariantMap hints;
     // GNOME: not kept in the notification list, gone when it disappears
     hints["transient"] = true;
-    hints["category"] = QStringLiteral("x-vkeybd-qt.status");
+    hints["category"] = QStringLiteral("x-keydesk-midi.status");
     
     QDBusMessage message = QDBusMessage::createMethodCall(SERVICE, PATH, INTERFACE, "Notify");
-    message << QStringLiteral("vkeybd-qt")   // app name
+    message << QStringLiteral("KeyDeskMIDI")  // app name
             << this->status_id               // replaces_id: update the visible one
             << QStringLiteral("")            // icon
             << title                         // summary

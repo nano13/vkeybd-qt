@@ -344,7 +344,7 @@ bool InterfaceLibremidi::ensureClient()
         return false;
     
     std::unique_ptr<SharedClient> shared = std::make_unique<SharedClient>();
-    shared->client_name = "vkeybd-qt-" + std::to_string(this->id + 1);
+    shared->client_name = "keydesk-midi-" + std::to_string(this->id + 1);
     
 #if defined(__linux__)
     // JACK first, then ALSA; once chosen, all keyboards use the same API

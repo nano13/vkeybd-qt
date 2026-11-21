@@ -1,6 +1,6 @@
 # Keyboards for live performance
 
-vkeybd-qt makes the computer keyboard a playable instrument. On stage, an
+KeyDeskMIDI makes the computer keyboard a playable instrument. On stage, an
 instrument has to be reliable — and whether every note arrives depends on the
 keyboard you play. Laptop and office keyboards are fine for getting started;
 for performing, choose a keyboard as described below.
@@ -9,7 +9,7 @@ for performing, choose a keyboard as described below.
 
 Computer keys are switches: a key is pressed or released, nothing in between.
 Every note sounds at the velocity set for its channel — the same, however the
-key is struck. This gives vkeybd-qt the character of an organ, and not so
+key is struck. This gives KeyDeskMIDI the character of an organ, and not so
 much that of a piano:
 
 * **Registration:** the tabs are your stops. Switch them with the F-keys,
@@ -42,7 +42,7 @@ travel, but they still appear to the system as ordinary on/off keyboards.)
 
 ## Several keyboards, two hands
 
-vkeybd-qt can use several computer keyboards at once, each playing its own
+KeyDeskMIDI can use several computer keyboards at once, each playing its own
 keyboard section with its own tabs and sounds — like the manuals of an organ.
 Play one with the left hand and another with the right: accompaniment on
 one, melody on the other, each with more than three octaves and its own
@@ -78,10 +78,10 @@ Use a keyboard with **full NKRO**.
 * Many mechanical keyboards ship in 6KRO mode, or switch NKRO on and off with
   an Fn combination. Check the manual.
 * Test it: hold as many keys as you can (a big chord plus Space) and watch the
-  PC keyboard display of vkeybd-qt — every held key must light up.
+  PC keyboard display of KeyDeskMIDI — every held key must light up.
 * **Linux:** many NKRO keyboards appear as *two* devices — a standard 6KRO one
   and a separate NKRO one. The extra keys may then arrive on a different
-  `/dev/input/event*` than the one selected in vkeybd-qt. Check with
+  `/dev/input/event*` than the one selected in KeyDeskMIDI. Check with
   `evtest`: hold seven or more keys and see which device reports them.
 
 ## Switches: linear, quiet
@@ -117,7 +117,7 @@ The details are in the documentation: *Keyboard input and keyboard lock*
 ## Checklist before the show
 
 1. NKRO keyboard, NKRO mode on, tested with a big chord plus Space.
-2. Every keyboard plugged in before starting vkeybd-qt (Windows with
+2. Every keyboard plugged in before starting KeyDeskMIDI (Windows with
    Interception: before booting).
 3. Each section set to its own keyboard, **locked**.
 4. Notifications and screen savers of the computer off.

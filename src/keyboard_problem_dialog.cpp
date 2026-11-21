@@ -21,9 +21,9 @@ QString interceptionSteps()
         "<li>Open a command prompt <b>as administrator</b> in its folder <i>command line installer</i> and run<br>"
         "<code>install-interception.exe /install</code></li>"
         "<li><b>Reboot</b> Windows.</li>"
-        "<li>Copy <b>interception.dll</b> from <i>library\\x64</i> (64-bit vkeybd-qt) or <i>library\\x86</i> "
-        "(32-bit) next to <b>vkeybd-qt.exe</b>.</li>"
-        "<li>Start vkeybd-qt again and lock the keyboard.</li>"
+        "<li>Copy <b>interception.dll</b> from <i>library\\x64</i> (64-bit KeyDeskMIDI) or <i>library\\x86</i> "
+        "(32-bit) next to <b>keydesk-midi.exe</b>.</li>"
+        "<li>Start KeyDeskMIDI again and lock the keyboard.</li>"
         "</ol>"
         "<p>Interception is a signed keyboard filter driver by Francisco Lopes: free for non-commercial use, "
         "see the <a href=\"%2\">project page</a> for the licence.<br>"
@@ -49,7 +49,7 @@ void showKeyboardProblemDialog(QWidget *parent, const QString &keyboard, const Q
         case RawKeyboardProblem::LockNeedsInterception:
             title = "Keyboard lock not available";
             headline = "Locking a keyboard on Windows needs the free <b>Interception</b> driver.";
-            details = "<p>Without it, vkeybd-qt can only <i>listen</i> to a keyboard: its keys also reach Windows "
+            details = "<p>Without it, KeyDeskMIDI can only <i>listen</i> to a keyboard: its keys also reach Windows "
                       "and the focused application (shortcuts, the Start menu, ...).</p>" + interceptionSteps();
             button_text = "Open download page";
             button_url = QString::fromLatin1(INTERCEPTION_RELEASES);
@@ -68,13 +68,13 @@ void showKeyboardProblemDialog(QWidget *parent, const QString &keyboard, const Q
         case RawKeyboardProblem::LockBusy:
             title = "Keyboard lock not available";
             headline = "Another program has locked (grabbed) this keyboard already.";
-            details = "<p>Only one program can lock a keyboard. Typical candidates: a second vkeybd-qt instance, "
+            details = "<p>Only one program can lock a keyboard. Typical candidates: a second KeyDeskMIDI instance, "
                       "<code>evtest --grab</code>, key remappers like keyd, kmonad, kanata or input-remapper.</p>"
                       "<p>Close that program, then lock the keyboard again.</p>";
             break;
             
         case RawKeyboardProblem::PermissionDenied:
-            headline = "vkeybd-qt is not allowed to read this keyboard.";
+            headline = "KeyDeskMIDI is not allowed to read this keyboard.";
             details = "<p>Raw keyboards are read from <code>/dev/input/event*</code>, which usually needs membership "
                       "in the group <b>input</b>:</p>"
                       "<p><code>sudo usermod -aG input $USER</code></p>"
@@ -86,14 +86,14 @@ void showKeyboardProblemDialog(QWidget *parent, const QString &keyboard, const Q
             title = "Keyboard lock not available";
             headline = "Locking keyboards is not supported on macOS.";
             details = "<p>macOS only lets programs running as root take exclusive control of a keyboard, "
-                      "so vkeybd-qt can only <i>listen</i>: the keys also reach macOS and the focused application.</p>"
+                      "so KeyDeskMIDI can only <i>listen</i>: the keys also reach macOS and the focused application.</p>"
                       "<p>For a locked live setup, use Linux or Windows (with the Interception driver).</p>";
             break;
             
         case RawKeyboardProblem::InputMonitoring:
-            headline = "vkeybd-qt needs the <b>Input Monitoring</b> permission to read keyboards.";
-            details = "<p>Allow vkeybd-qt in <i>System Settings &gt; Privacy &amp; Security &gt; Input Monitoring</i>, "
-                      "then quit and start vkeybd-qt again.</p>";
+            headline = "KeyDeskMIDI needs the <b>Input Monitoring</b> permission to read keyboards.";
+            details = "<p>Allow KeyDeskMIDI in <i>System Settings &gt; Privacy &amp; Security &gt; Input Monitoring</i>, "
+                      "then quit and start KeyDeskMIDI again.</p>";
             button_text = "Open Input Monitoring settings";
             button_url = QString::fromLatin1(MACOS_INPUT_MONITORING);
             break;

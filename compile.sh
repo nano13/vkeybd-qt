@@ -6,4 +6,4 @@ set -euo pipefail
 root="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
 "$root/compile_linux.sh" "$@"
 mode="${1:-debug}"
-exec "$root/build-$mode/vkeybd-qt"
+exec "$root/build-$mode/keydesk-midi"

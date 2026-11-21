@@ -439,24 +439,48 @@ private slots:
         MidiEngine engine(nullptr);
         engine.setPreset(0, TabPreset());
         TabPreset preset;
-        preset.master_key_shift = 7;            // loaded: also the reset value
+        preset.master_key_shift = 7;
         engine.setPreset(1, preset);
-        engine.setMasterKeyShift(0, 12);        // set by the user: also the reset value
+        engine.setMasterKeyShift(0, 12);
         
-        engine.globalKeyShift(2, true);
-        QCOMPARE(engine.preset(0).master_key_shift, 14);
-        QCOMPARE(engine.preset(1).master_key_shift, 9);
-        
-        engine.globalKeyShift(-5, false);
-        QCOMPARE(engine.preset(0).master_key_shift, -5);
-        QCOMPARE(engine.preset(1).master_key_shift, -5);
-        
-        engine.globalKeyShift(0, true);         // reset
+        // the global key shift is separate: the tabs keep their own value
+        engine.setGlobalKeyShift(2);
+        QCOMPARE(engine.globalKeyShift(), 2);
         QCOMPARE(engine.preset(0).master_key_shift, 12);
         QCOMPARE(engine.preset(1).master_key_shift, 7);
         
-        engine.globalKeyShift(100, false);
-        QCOMPARE(engine.preset(0).master_key_shift, MidiEngine::KEY_SHIFT_LIMIT);
+        engine.setGlobalKeyShift(100);
+        QCOMPARE(engine.globalKeyShift(), MidiEngine::KEY_SHIFT_LIMIT);
+        engine.setGlobalKeyShift(-100);
+        QCOMPARE(engine.globalKeyShift(), -MidiEngine::KEY_SHIFT_LIMIT);
+    }
+    
+    // Regression: sections drifted apart after a reset (Scroll Lock) when a tab's
+    // own key shift was set (octave keys, spin box, preset load) while a global
+    // key shift was active.
+    void globalKeyShiftResetKeepsSectionsInSync()
+    {
+        RecordingInterface audio_a;
+        RecordingInterface audio_b;
+        MidiEngine section_a(&audio_a);
+        MidiEngine section_b(&audio_b);
+        section_a.setPreset(0, TabPreset());
+        section_b.setPreset(0, TabPreset());
+        
+        // global +3 in both sections, then an octave up on section A only
+        section_a.setGlobalKeyShift(3);
+        section_b.setGlobalKeyShift(3);
+        section_a.setMasterKeyShift(0, section_a.preset(0).master_key_shift + 12);
+        
+        // reset the global key shift
+        section_a.setGlobalKeyShift(0);
+        section_b.setGlobalKeyShift(0);
+        
+        section_a.noteOn(0, KEY);
+        section_b.noteOn(0, KEY);
+        // A is exactly one octave above B: the global shift left no trace
+        QCOMPARE(audio_a.events.at(0).value, NOTE + 12);
+        QCOMPARE(audio_b.events.at(0).value, NOTE);
     }
     
     void globalKeyShiftMovesNotes()
@@ -465,7 +489,7 @@ private slots:
         MidiEngine engine(&audio);
         engine.setPreset(0, TabPreset());
         
-        engine.globalKeyShift(1, true);
+        engine.setGlobalKeyShift(1);
         engine.noteOn(0, KEY);
         QCOMPARE(audio.events.at(0).value, NOTE + 1);
     }

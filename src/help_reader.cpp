@@ -31,7 +31,7 @@ void HelpReader::showPage(const QString &page, QWidget *parent)
 HelpReader::HelpReader(QWidget *parent) : QDialog(parent)
 {
     setAttribute(Qt::WA_DeleteOnClose);
-    setWindowTitle("vkeybd-qt help");
+    setWindowTitle("KeyDeskMIDI help");
     setMinimumSize(500, 500);
     resize(700, 760);
     

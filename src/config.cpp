@@ -1,5 +1,82 @@
 #include "config.h"
 
+#include <QDirIterator>
+#include <QFileInfo>
+#include <QStringList>
+#include <QVariant>
+
+namespace
+{
+// copy fallback for when the folder can not simply be renamed
+bool copyTree(const QString &from, const QString &to)
+{
+    QDir target(to);
+    if (!target.mkpath("."))
+        return false;
+    QDirIterator it(from, QDir::AllEntries | QDir::NoDotAndDotDot | QDir::Hidden, QDirIterator::Subdirectories);
+    while (it.hasNext())
+    {
+        const QString source_path = it.next();
+        const QFileInfo info = it.fileInfo();
+        const QString relative = QDir(from).relativeFilePath(source_path);
+        const QString target_path = target.absoluteFilePath(relative);
+        if (info.isDir())
+        {
+            if (!QDir().mkpath(target_path))
+                return false;
+        }
+        else if (!QFile::copy(source_path, target_path))
+        {
+            return false;
+        }
+    }
+    return true;
+}
+}
+
+void Config::migrateLegacyDataDir()
+{
+    const QString new_path = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
+    if (new_path.isEmpty() || QFileInfo::exists(new_path))
+        return;
+    
+    const QString old_path = QFileInfo(new_path).dir().absoluteFilePath("vkeybd-qt");
+    if (!QFileInfo(old_path).isDir())
+        return;
+    
+    QDir().mkpath(QFileInfo(new_path).absolutePath());
+    if (QDir().rename(old_path, new_path))
+    {
+        qInfo() << "Moved the settings folder" << old_path << "to" << new_path;
+    }
+    else if (copyTree(old_path, new_path))
+    {
+        qInfo() << "Copied the settings folder" << old_path << "to" << new_path << "(the old folder was kept)";
+    }
+    else
+    {
+        qWarning() << "Could not move the settings folder" << old_path << "to" << new_path << "- starting with fresh settings";
+        QDir(new_path).removeRecursively();
+        return;
+    }
+    
+    // config.ini stores absolute paths (quicksave file, last save folder)
+    const QString old_prefix = QDir::cleanPath(old_path);
+    const QString new_prefix = QDir::cleanPath(new_path);
+    QSettings settings(new_prefix + "/config.ini", QSettings::IniFormat);
+    const QStringList keys = settings.allKeys();
+    for (const QString &key : keys)
+    {
+        const QVariant value = settings.value(key);
+        if (value.metaType().id() != QMetaType::QString)
+            continue;
+        const QString text = value.toString();
+        if (text == old_prefix || text.startsWith(old_prefix + "/"))
+            settings.setValue(key, new_prefix + text.mid(old_prefix.size()));
+    }
+    settings.sync();
+}
+
 Config::Config(QObject *parent) : QObject(parent)
 {
     this->config_dir = new QDir(QStandardPaths::writableLocation(QStandardPaths::AppDataLocation));

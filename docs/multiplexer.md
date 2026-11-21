@@ -1,9 +1,9 @@
 # MIDI multiplexer: layers and splits for any MIDI keyboard
 
 You do not have to play on a computer keyboard to get something out of
-vkeybd-qt. Every keyboard section has a **MIDI input**: connect a classic
+KeyDeskMIDI. Every keyboard section has a **MIDI input**: connect a classic
 MIDI keyboard, a digital piano, a controller, a sequencer or a DAW track —
-and vkeybd-qt turns that one source into layered and split sounds on up to
+and KeyDeskMIDI turns that one source into layered and split sounds on up to
 16 MIDI channels per preset, on as many synths as you like.
 
 ```
@@ -35,7 +35,7 @@ or plugins, each with its 16 channels.
 ## Controllers
 
 * **Sustain (CC 64), sostenuto (CC 66) and soft (CC 67)** work like the
-  pedals of vkeybd-qt: on all sounding tabs.
+  pedals of KeyDeskMIDI: on all sounding tabs.
 * **Pitch bend** and the **other controllers** are forwarded to the sounding
   tabs.
 * The notes of all 16 incoming MIDI channels are played (omni).
@@ -50,7 +50,7 @@ on the tab they were started on while you switch, so the change is seamless.
 ## Several MIDI sources
 
 Every keyboard section has its own MIDI input (`1-MIDI-in`, `2-MIDI-in`, …)
-and its own tabs. Start vkeybd-qt with as many sections as you have sources
+and its own tabs. Start KeyDeskMIDI with as many sections as you have sources
 (`-n 2`, `-n 3`, …): an upper and a lower manual, a keyboard and a pad
 controller, a live player and a sequencer — each with its own layers and
 splits, and all of them can still be played from the computer keyboard too.

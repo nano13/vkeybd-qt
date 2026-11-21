@@ -15,10 +15,13 @@ int main(int argc, char *argv[])
 {
     QApplication app(argc, argv);
     QApplication::setApplicationVersion("0.5");
-    QApplication::setApplicationName("vkeybd-qt");
+    QApplication::setApplicationName("keydesk-midi");
+    QApplication::setApplicationDisplayName("KeyDeskMIDI");
+    // before anything opens config.ini: move the settings of the old vkeybd-qt name over
+    Config::migrateLegacyDataDir();
 
     QCommandLineParser parser;
-    parser.setApplicationDescription("vkeybd-qt is a powerful and most feature-complete software midi controller");
+    parser.setApplicationDescription("KeyDeskMIDI is a powerful and most feature-complete software midi controller");
     parser.addHelpOption();
     //parser.addVersionOption();
     parser.addPositionalArgument("source", QCoreApplication::translate("main", "Source file to copy."));
@@ -30,7 +33,7 @@ int main(int argc, char *argv[])
         {{"l", "number-of-layers"},
             QCoreApplication::translate("main", "Nubmer of Layers. '1' gives you 12 layers, '2' gives 24 layers"), "number", "-1"},
         {{"o", "output"},
-            QCoreApplication::translate("main", "Which MIDI system to use: \"alsa\", \"jack\", \"libremidi\" or \"network\" (remote control another vkeybd-qt instance). Default: the value in config.ini (\"jack\" initially)"), "string", "config"},
+            QCoreApplication::translate("main", "Which MIDI system to use: \"alsa\", \"jack\", \"libremidi\" or \"network\" (remote control another KeyDeskMIDI instance). Default: the value in config.ini (\"jack\" initially)"), "string", "config"},
         {{"k", "keyboard-config"},
             QCoreApplication::translate("main", "Keyboard Configs and Mappings to use"), "string", "builtin"},
         {{"q", "quicksave-path"},
@@ -42,7 +45,7 @@ int main(int argc, char *argv[])
     // Show the splash before any potentially expensive configuration or MIDI setup.
     // Running the event loop first gives Qt and the window manager time to paint it.
     QSplashScreen splash(QPixmap(":/splash"), Qt::WindowStaysOnTopHint);
-    splash.showMessage("Starting vkeybd-qt");
+    splash.showMessage("Starting KeyDeskMIDI");
     splash.show();
 
     std::unique_ptr<MainWindow> window;

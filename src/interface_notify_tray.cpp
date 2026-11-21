@@ -14,7 +14,7 @@ InterfaceNotifyTray::InterfaceNotifyTray(QObject *parent)
     }
     
     this->tray = new QSystemTrayIcon(QIcon(":icon"), this);
-    this->tray->setToolTip("vkeybd-qt");
+    this->tray->setToolTip("KeyDeskMIDI");
     // messages need a visible tray icon
     this->tray->show();
 }
@@ -25,5 +25,5 @@ void InterfaceNotifyTray::showStatus(const QString &title, const QString &body)
         return;
     
     this->tray->showMessage(title, body, QSystemTrayIcon::NoIcon, TIMEOUT_MS);
-    this->tray->setToolTip("vkeybd-qt\n" + (body.isEmpty() ? title : body));
+    this->tray->setToolTip("KeyDeskMIDI\n" + (body.isEmpty() ? title : body));
 }

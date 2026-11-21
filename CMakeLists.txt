@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.21)
 
-project(vkeybd-qt LANGUAGES CXX)
+project(keydesk-midi LANGUAGES CXX)
 
 # C++20: required by libremidi
 set(CMAKE_CXX_STANDARD 20)

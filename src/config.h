@@ -18,6 +18,12 @@ class Config : public QObject
 public:
     explicit Config(QObject *parent = nullptr);
     
+    // One-time move of the data folder used under the old program name
+    // (e.g. ~/.local/share/vkeybd-qt) to the current one; stored paths that
+    // point into the old folder are rewritten. Does nothing once the new
+    // folder exists. Call after QApplication::setApplicationName().
+    static void migrateLegacyDataDir();
+    
     //void setValue(QString key, QVariant value);
     void loadChannelSettings(QSettings *settings);
     void saveParams(QSettings *settings, int id, QString label, QString channel, QMap<QString,QVariant> params);

@@ -138,7 +138,7 @@ enum KeysRaw : uint8_t
 enum KeyboardSelection : uint8_t
 {
     None,
-    Window,     // keys typed while the vkeybd-qt window has the focus
+    Window,     // keys typed while the KeyDeskMIDI window has the focus
     Detect,
 };
 enum KeyboardMode

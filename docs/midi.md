@@ -2,7 +2,7 @@
 
 ## Keyboard sections, tabs and layers
 
-vkeybd-qt shows one or more **keyboard sections** (`-n`, up to 10). Each
+KeyDeskMIDI shows one or more **keyboard sections** (`-n`, up to 10). Each
 section has its own input (see [keyboard input](keyboard-input.md)), its own
 MIDI ports and its own set of **tabs**.
 
@@ -35,10 +35,10 @@ The output system is chosen with `-o` / `--output`, or by `default/output` in
 
 | Output | Clients and ports |
 |---|---|
-| `alsa` | one ALSA sequencer client `vkeybd-qt` per section, one output port per tab (`1-F01-1`, ...); the MIDI input is a client `vkeybd-qt-in` |
-| `jack` | one JACK client per section (`vkeybd-qt-jack-0`, `-1`, ...), one MIDI output port per tab |
-| `libremidi` | one client per section (`vkeybd-qt-1`, ...), one virtual output port per tab; see below |
-| `network` | no MIDI: the keys are sent via UDP to another vkeybd-qt instance |
+| `alsa` | one ALSA sequencer client `keydesk-midi` per section, one output port per tab (`1-F01-1`, ...); the MIDI input is a client `keydesk-midi-in` |
+| `jack` | one JACK client per section (`keydesk-midi-jack-0`, `-1`, ...), one MIDI output port per tab |
+| `libremidi` | one client per section (`keydesk-midi-1`, ...), one virtual output port per tab; see below |
+| `network` | no MIDI: the keys are sent via UDP to another KeyDeskMIDI instance |
 
 Connect the tab ports to your synthesizers with your patchbay (qjackctl,
 Carla, `aconnect`, ...). Each tab port uses the channels configured in the
@@ -64,7 +64,7 @@ abort). An installed libremidi does not get this fix.
 
 ### Network
 
-With `-o network`, a vkeybd-qt instance does not produce MIDI itself: every
+With `-o network`, a KeyDeskMIDI instance does not produce MIDI itself: every
 key press and release is sent as UDP datagram (`keypress/<code>`,
 `keyrelease/<code>`) to the IP address and port of the network section. The
 receiving instance (with a real MIDI output) listens on its own network
@@ -74,7 +74,7 @@ Section*.
 
 ## MIDI input per section
 
-Using vkeybd-qt only as layer and split engine for a MIDI keyboard: see
+Using KeyDeskMIDI only as layer and split engine for a MIDI keyboard: see
 [MIDI multiplexer](multiplexer.md).
 
 Every section also has a **MIDI input port** (`1-MIDI-in`, `2-MIDI-in`, ...)

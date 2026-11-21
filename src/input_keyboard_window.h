@@ -9,7 +9,7 @@ class QKeyEvent;
 
 /*
  * Keyboard input "Focused window": key events that Qt delivers to the
- * vkeybd-qt window, reported as Linux input key codes (KEY_* of
+ * KeyDeskMIDI window, reported as Linux input key codes (KEY_* of
  * <linux/input.h>, the same codes as the raw evdev input), so the keyboard
  * layout and modifiers do not matter.
  */

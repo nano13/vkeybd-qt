@@ -1,6 +1,6 @@
 # The keyboard layout: chromatic button accordion
 
-By default, vkeybd-qt lays out the notes on the computer keyboard like the
+By default, KeyDeskMIDI lays out the notes on the computer keyboard like the
 buttons of a **chromatic button accordion**. If you have never played one:
 you do not need to. The system is quick to learn, because it is completely
 regular — it is **isomorphic**: every chord and every scale has one fixed
@@ -27,7 +27,7 @@ of the accordion:
   same note under two fingers gives you alternative fingerings, and patterns
   that start in row 3 continue there (see below).
 
-The PC keyboard display of vkeybd-qt shows the note on every key.
+The PC keyboard display of KeyDeskMIDI shows the note on every key.
 
 ## Isomorphic: one pattern for every key
 
@@ -138,7 +138,7 @@ sections) transpose in semitones.
 
 ## Two hands, two keyboards
 
-vkeybd-qt can show several keyboard sections side by side (`-n 2`, `-n 3`,
+KeyDeskMIDI can show several keyboard sections side by side (`-n 2`, `-n 3`,
 …), each with its own physical keyboard, its own tabs and its own sounds —
 like the **manuals of an organ**. Play one keyboard with the left hand and
 another with the right: bass or accompaniment on one, melody or solo

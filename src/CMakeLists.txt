@@ -1,5 +1,5 @@
 # Application sources (mirrors the units formerly built by vkeybd-qt.pro).
-add_executable(vkeybd-qt
+add_executable(keydesk-midi
     button_piano.cpp
     combo_keyboard_select.cpp
     config.cpp
@@ -72,12 +72,12 @@ add_executable(vkeybd-qt
     resources.qrc
 )
 
-# Leave the executable at build-debug/vkeybd-qt or build-release/vkeybd-qt.
-set_target_properties(vkeybd-qt PROPERTIES
+# Leave the executable at build-debug/keydesk-midi or build-release/keydesk-midi.
+set_target_properties(keydesk-midi PROPERTIES
     RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}"
 )
 
-target_compile_definitions(vkeybd-qt PRIVATE
+target_compile_definitions(keydesk-midi PRIVATE
     QT_DISABLE_DEPRECATED_BEFORE=0x060000
 )
 
@@ -85,7 +85,7 @@ find_package(PkgConfig REQUIRED)
 pkg_check_modules(ALSA REQUIRED IMPORTED_TARGET alsa)
 pkg_check_modules(JACK REQUIRED IMPORTED_TARGET jack)
 
-target_link_libraries(vkeybd-qt PRIVATE
+target_link_libraries(keydesk-midi PRIVATE
     Qt6::Core
     Qt6::Gui
     Qt6::Widgets
@@ -98,31 +98,31 @@ target_link_libraries(vkeybd-qt PRIVATE
 
 # desktop notifications via DBus: Linux (other platforms use the system tray)
 if(UNIX AND NOT APPLE)
-    target_sources(vkeybd-qt PRIVATE interface_notify_dbus.cpp interface_notify_dbus.h)
-    target_link_libraries(vkeybd-qt PRIVATE Qt6::DBus)
-    target_compile_definitions(vkeybd-qt PRIVATE VKEYBD_HAS_DBUS)
+    target_sources(keydesk-midi PRIVATE interface_notify_dbus.cpp interface_notify_dbus.h)
+    target_link_libraries(keydesk-midi PRIVATE Qt6::DBus)
+    target_compile_definitions(keydesk-midi PRIVATE VKEYBD_HAS_DBUS)
 endif()
 
 # raw keyboard input: one backend per platform (see input_keyboard_raw.h)
 if(WIN32)
-    target_sources(vkeybd-qt PRIVATE input_keyboard_raw_windows.cpp)
-    target_link_libraries(vkeybd-qt PRIVATE hid)
+    target_sources(keydesk-midi PRIVATE input_keyboard_raw_windows.cpp)
+    target_link_libraries(keydesk-midi PRIVATE hid)
 elseif(APPLE)
-    target_sources(vkeybd-qt PRIVATE input_keyboard_raw_macos.cpp)
-    target_link_libraries(vkeybd-qt PRIVATE "-framework IOKit" "-framework CoreFoundation")
+    target_sources(keydesk-midi PRIVATE input_keyboard_raw_macos.cpp)
+    target_link_libraries(keydesk-midi PRIVATE "-framework IOKit" "-framework CoreFoundation")
 else()
-    target_sources(vkeybd-qt PRIVATE input_keyboard_raw_linux.cpp)
+    target_sources(keydesk-midi PRIVATE input_keyboard_raw_linux.cpp)
 endif()
 
 if(VKEYBD_WITH_LIBREMIDI)
-    target_sources(vkeybd-qt PRIVATE
+    target_sources(keydesk-midi PRIVATE
         interface_libremidi.cpp
         interface_libremidi.h
     )
-    target_compile_definitions(vkeybd-qt PRIVATE VKEYBD_HAS_LIBREMIDI)
+    target_compile_definitions(keydesk-midi PRIVATE VKEYBD_HAS_LIBREMIDI)
     if(TARGET libremidi::libremidi)
-        target_link_libraries(vkeybd-qt PRIVATE libremidi::libremidi)
+        target_link_libraries(keydesk-midi PRIVATE libremidi::libremidi)
     else()
-        target_link_libraries(vkeybd-qt PRIVATE libremidi)
+        target_link_libraries(keydesk-midi PRIVATE libremidi)
     endif()
 endif()

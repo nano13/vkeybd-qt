@@ -1,6 +1,6 @@
 # Keyboard lock on Windows: the Interception driver
 
-On stage, a **locked** keyboard belongs to vkeybd-qt alone: no key reaches
+On stage, a **locked** keyboard belongs to KeyDeskMIDI alone: no key reaches
 Windows or another application — no Start menu, no shortcut, no accidental
 typing into some window. On Windows, this needs the free **Interception**
 driver.
@@ -8,7 +8,7 @@ driver.
 ## Why a driver?
 
 Windows lets applications *listen* to each keyboard separately (Raw Input),
-and that is what vkeybd-qt does without the driver: every keyboard plays its
+and that is what KeyDeskMIDI does without the driver: every keyboard plays its
 own section, also without the window focus. But Windows has no way for an
 application to *keep* the keys of one keyboard to itself. Every key always
 reaches Windows and the focused application as well.
@@ -18,8 +18,8 @@ a signed keyboard and mouse filter driver that closes this gap. With it, an
 application receives the keys of each keyboard first and decides whether
 Windows gets them:
 
-* **Listen:** vkeybd-qt plays the keys and passes them on to Windows.
-* **Lock:** vkeybd-qt plays the keys and keeps them away from Windows.
+* **Listen:** KeyDeskMIDI plays the keys and passes them on to Windows.
+* **Lock:** KeyDeskMIDI plays the keys and keeps them away from Windows.
 
 Keyboards that no section uses are not touched.
 
@@ -30,12 +30,12 @@ Keyboards that no section uses are not touched.
 2. Unpack it, open a command prompt **as administrator** in the folder
    `command line installer` and run `install-interception.exe /install`
 3. **Reboot** Windows.
-4. Copy **interception.dll** next to **vkeybd-qt.exe**: from `library\x64`
-   for a 64-bit vkeybd-qt, from `library\x86` for a 32-bit one.
-5. Start vkeybd-qt and lock a keyboard.
+4. Copy **interception.dll** next to **keydesk-midi.exe**: from `library\x64`
+   for a 64-bit KeyDeskMIDI, from `library\x86` for a 32-bit one.
+5. Start KeyDeskMIDI and lock a keyboard.
 
-vkeybd-qt loads `interception.dll` by itself when it needs it; nothing else
-is needed, and without it, vkeybd-qt simply works without lock.
+KeyDeskMIDI loads `interception.dll` by itself when it needs it; nothing else
+is needed, and without it, KeyDeskMIDI simply works without lock.
 
 ### Is it working?
 
@@ -43,7 +43,7 @@ is needed, and without it, vkeybd-qt simply works without lock.
   longer type into other windows.
 * With the driver, the keyboard list shows the slot number of each keyboard,
   e.g. `@3 VID_046D&PID_C31C`. This also tells identical keyboards apart.
-* Started from a terminal, vkeybd-qt prints
+* Started from a terminal, KeyDeskMIDI prints
   `Interception driver available: keyboards can be locked`.
 
 ### Uninstall
@@ -56,10 +56,10 @@ Run `install-interception.exe /uninstall` as administrator and reboot.
   Every unplug/replug — and every resume from hibernation — uses a new one.
   When they are used up, the keyboard stops working, also in Windows, until
   the next reboot. Do not hot-plug keyboards during the show.
-* **vkeybd-qt keeps working when busy:** the decision to block or pass a key
+* **KeyDeskMIDI keeps working when busy:** the decision to block or pass a key
   is made on a separate thread, so a busy window never lets a locked key
   through, and never holds up the other keyboards.
-* **If vkeybd-qt quits or crashes**, the driver drops its filters and all
+* **If KeyDeskMIDI quits or crashes**, the driver drops its filters and all
   keyboards work normally again.
 
 ## Good to know
@@ -75,14 +75,14 @@ Run `install-interception.exe /uninstall` as administrator and reboot.
 
 ## Troubleshooting
 
-| vkeybd-qt says | Cause | Fix |
+| KeyDeskMIDI says | Cause | Fix |
 |---|---|---|
-| *needs the free Interception driver* | `interception.dll` not found | copy it next to `vkeybd-qt.exe` |
+| *needs the free Interception driver* | `interception.dll` not found | copy it next to `keydesk-midi.exe` |
 | *the Interception driver is not running* | driver not installed, or the reboot after installing is still pending | install it, reboot |
 | *interception.dll … is not the Interception library* | a wrong or damaged DLL | copy it again from Interception.zip |
 | a keyboard stopped working completely | its 10 slots are used up (many replugs) | reboot |
 
-A 64-bit vkeybd-qt cannot load the 32-bit `interception.dll` (and the other
+A 64-bit KeyDeskMIDI cannot load the 32-bit `interception.dll` (and the other
 way round): Windows then reports it as not found. Use the one from the
 matching `library` folder.
 

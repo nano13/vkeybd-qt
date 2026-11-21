@@ -51,7 +51,7 @@ public:
     
     void createMidiInput(QString label) override;
     
-    QString NAME = "vkeybd-qt";
+    QString NAME = "keydesk-midi";
     
 private:
     snd_seq_t *seq = nullptr;     // nullptr if the sequencer could not be opened

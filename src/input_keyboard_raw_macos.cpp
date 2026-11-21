@@ -164,7 +164,7 @@ bool HidHub::ensureOpened(QString &error)
     const IOReturn result = IOHIDManagerOpen(this->manager, kIOHIDOptionsTypeNone);
     if (result != kIOReturnSuccess)
     {
-        error = "cannot open the keyboards: allow vkeybd-qt in System Settings > Privacy & Security > Input Monitoring";
+        error = "cannot open the keyboards: allow KeyDeskMIDI in System Settings > Privacy & Security > Input Monitoring";
         return false;
     }
     this->opened = true;

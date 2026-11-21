@@ -7,7 +7,7 @@ InterfaceJack::InterfaceJack(int id, InterfaceAudio *parent)
 {
     char client_name[64];
     snprintf(client_name, sizeof(client_name),
-             "vkeybd-qt-jack-%d", id);
+             "keydesk-midi-jack-%d", id);
     
     client = jack_client_open(client_name, JackNullOption, nullptr);
     if (!client) {

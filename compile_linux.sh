@@ -20,5 +20,5 @@ build_dir="$root/build-$mode"
 cmake -S "$root" -B "$build_dir" -G Ninja \
     -DCMAKE_BUILD_TYPE="$build_type" \
     -DBUILD_TESTING=ON
-cmake --build "$build_dir" --target vkeybd-qt --parallel
-printf 'Built %s\n' "$build_dir/vkeybd-qt"
+cmake --build "$build_dir" --target keydesk-midi --parallel
+printf 'Built %s\n' "$build_dir/keydesk-midi"

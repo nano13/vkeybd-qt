@@ -1,6 +1,12 @@
-# vkeybd-qt
+# KeyDeskMIDI
 MIDI software controller for the PC keyboard, with a lot of functions —
-made for playing live.
+made for playing live. Formerly known as *vkeybd-qt*.
+
+The name comes from the organ: the *key desk* (in German *Spieltisch*) is the
+console where the manuals, stops, couplers and pedals come together. That is
+what KeyDeskMIDI is for your computer keyboards — several keyboards as
+manuals, tabs as stops that can be combined, the volume keys as swell pedal,
+and MIDI out to as many instruments as you like.
 
 ![EditorView](screenshots/main_window.png)
 
@@ -8,7 +14,7 @@ made for playing live.
 
 ## Not playing on a computer keyboard? Use it as a MIDI multiplexer
 
-vkeybd-qt is just as useful with an ordinary **MIDI keyboard**, a digital
+KeyDeskMIDI is just as useful with an ordinary **MIDI keyboard**, a digital
 piano, a controller or a sequencer: every keyboard section has a MIDI input,
 and the incoming notes play **layers and splits on up to 16 MIDI channels**
 per preset — each channel with its own instrument, key range, transposition
@@ -29,13 +35,13 @@ setup of synths out: see [MIDI multiplexer](docs/multiplexer.md).
   each. Switch with the function keys; check several tabs to play them
   together with one key.
 * **One physical keyboard per section**, and **keyboard lock**: a locked
-  keyboard belongs to vkeybd-qt alone, so no key reaches the operating
+  keyboard belongs to KeyDeskMIDI alone, so no key reaches the operating
   system or another application during a performance.
 * **MIDI input per section**: play the tabs of a section from a MIDI keyboard
   or a sequencer, with all their instruments at once — a MIDI multiplexer
   for layers and splits ([details](docs/multiplexer.md)).
 * **Outputs:** ALSA, JACK, libremidi (cross-platform), or network (remote
-  control another vkeybd-qt instance).
+  control another KeyDeskMIDI instance).
 * Pedals, pitch bend, volume, octave and key shift on the PC keyboard.
 
 For playing live, use a mechanical keyboard with full n-key rollover — see
@@ -75,7 +81,7 @@ prepared for Windows and macOS; the rest of the port is in progress.
 ## Usage
 
 ```bash
-vkeybd-qt [-n <keyboards>] [-l <layers>] [-o alsa|jack|libremidi|network]
+keydesk-midi [-n <keyboards>] [-l <layers>] [-o alsa|jack|libremidi|network]
 ```
 
 | Option | Meaning |
@@ -88,8 +94,14 @@ vkeybd-qt [-n <keyboards>] [-l <layers>] [-o alsa|jack|libremidi|network]
 ### Configuration
 
 `config.ini` and the quicksave files live in the application data directory,
-on Linux `~/.local/share/vkeybd-qt/`. Defaults are written on the first
+on Linux `~/.local/share/keydesk-midi/`. Defaults are written on the first
 start (`number-of-keyboards`, `number-of-layers`, `output`, `notify`, ...).
+
+Coming from *vkeybd-qt*: on the first start, the old folder
+(`~/.local/share/vkeybd-qt/`, and likewise on Windows and macOS) is moved to
+the new place, and the paths stored in `config.ini` are updated. Saved
+patchbay connections need to be made again, because the MIDI clients are now
+called `keydesk-midi...` (see [docs/midi.md](docs/midi.md)).
 
 `notify` chooses the desktop notification that shows the current tab and key
 shift of every section after each change: `dbus` (Linux desktops), `tray`
@@ -111,8 +123,8 @@ sudo apt install cmake ninja-build g++ pkg-config qt6-base-dev qt6-svg-dev \
 Build the application without launching it:
 
 ```bash
-./compile_linux.sh debug       # build-debug/vkeybd-qt (default)
-./compile_linux.sh release     # build-release/vkeybd-qt
+./compile_linux.sh debug       # build-debug/keydesk-midi (default)
+./compile_linux.sh release     # build-release/keydesk-midi
 ```
 
 Build **and run** the application (legacy entry point):

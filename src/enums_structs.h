@@ -178,7 +178,8 @@ struct CCEntry
 enum NotifyBackend
 {
     none,
-    dbus
+    dbus,   // Linux: org.freedesktop.Notifications
+    tray    // system tray messages: Windows, macOS, Linux desktops with a tray
 };
 
 struct NotifyData

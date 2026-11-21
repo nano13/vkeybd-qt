@@ -1,6 +1,10 @@
 #include "main_window.h"
 
 #include "help_reader.h"
+#include "interface_notify_tray.h"
+#ifdef VKEYBD_HAS_DBUS
+#include "interface_notify_dbus.h"
+#endif
 
 #include <QApplication>
 #include <QCloseEvent>
@@ -18,10 +22,16 @@ MainWindow::MainWindow(OutputSystem output, int number_of_keyboards, QWidget *pa
     connect(this->config, &Config::restoreGeneral, this, &MainWindow::restoreGeneral);
     
     NotifyBackend notify = this->config->getNotifyBackend();
+#ifdef VKEYBD_HAS_DBUS
     if (notify == NotifyBackend::dbus)
-        this->notify_dbus = new InterfaceNotifyDBus();
+        this->notify_dbus = new InterfaceNotifyDBus(this);
     else
-        this->notify_dbus = new InterfaceNotify();
+#endif
+    if (notify == NotifyBackend::tray || notify == NotifyBackend::dbus)
+        // "dbus" without DBus support (Windows, macOS): the system tray instead
+        this->notify_dbus = new InterfaceNotifyTray(this);
+    else
+        this->notify_dbus = new InterfaceNotify(this);
     
     this->number_of_keyboards = number_of_keyboards;
     
@@ -142,6 +152,8 @@ QWidget* MainWindow::newKeyboardInstance(int id, OutputSystem output)
     connect(tabs, &MainTabs::currentChanged, this, [this, tabs, id](int index){ currentTabChanged(id, index); });
     //connect(tabs, &MainTabs::keyboardSelectionChanged, this, &MainWindow::keyboardSelectionChanged);
     connect(tabs, &MainTabs::signalKeyShiftChanged, this, &MainWindow::globalKeyShiftValueChanged);
+    // octave keys (Ctrl) change the key shift of this section
+    connect(tabs, &MainTabs::signalStatusChanged, this, &MainWindow::notifyStatus);
     
     this->list_of_maintabs.append(tabs);
     
@@ -197,12 +209,36 @@ void MainWindow::changeCurrentTab(int keyboard_id, int tab_id)
     this->list_of_maintabs.at(keyboard_id)->blockSignals(true);
     this->list_of_maintabs.at(keyboard_id)->setCurrentIndex(tab_id);
     this->list_of_maintabs.at(keyboard_id)->blockSignals(false);
+    
+    notifyStatus();
 }
 void MainWindow::currentTabChanged(int keyboard_id, int tab_id)
 {
-    //this->list_of_maintab_switchers.at(keyboard_id)->blockSignals(true);
     this->list_of_maintab_switchers.at(keyboard_id)->pressButton(tab_id);
-    //this->list_of_maintab_switchers.at(keyboard_id)->blockSignals(false);
+    
+    notifyStatus();
+}
+
+void MainWindow::notifyStatus()
+{
+    // tab and key shift always together, in one notification: separate ones
+    // would queue up behind each other on desktops that keep them on screen
+    QList<QString> lines;
+    for (int i = 0; i < this->list_of_maintabs.length(); i++)
+    {
+        MainTabs *tabs = this->list_of_maintabs.at(i);
+        const int shift = tabs->globalKeyShiftGet();
+        const QString shift_text = (shift > 0) ? "+" + QString::number(shift) : QString::number(shift);
+        QString line = tabs->currentLabel() + "  ·  key shift " + shift_text;
+        if (this->list_of_maintabs.length() > 1)
+            line = QString::number(i + 1) + ":  " + line;
+        lines.append(line);
+    }
+    
+    if (lines.length() == 1)
+        this->notify_dbus->showStatus(lines.first(), QString());
+    else
+        this->notify_dbus->showStatus("vkeybd-qt", lines.join("\n"));
 }
 
 void MainWindow::tabsCheckChanged(int keyboard_id, QList<int> list_of_tab_ids)
@@ -434,12 +470,7 @@ void MainWindow::globalKeyShiftValueChanged(int value, bool is_relative)
         this->list_of_maintabs.at(i)->globalKeyShiftChanged(value, is_relative);
     }
     
-    int keyshift = this->list_of_maintabs.at(0)->globalKeyShiftGet();
-    
-    //InterfaceNotifyDBus::sendNotification("KeyShift " + QString::number(keyshift));
-    
-    
-    this->notify_dbus->sendKeyShiftNotification(keyshift);
+    notifyStatus();
 }
 
 void MainWindow::globalResendMIDISettings()

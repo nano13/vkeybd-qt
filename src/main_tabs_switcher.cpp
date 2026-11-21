@@ -195,7 +195,8 @@ void MainTabsSwitcher::pressButton(int button_id)
     QList<int> tabs = getCheckedTabsList();
     emit signalTabCheckChanged(tabs);
     
-    this->notify_dbus->sendTabChangeNotification(label);
+    // the status notification (tab + key shift) comes from MainWindow
+    Q_UNUSED(label);
 }
 
 QList<QString> MainTabsSwitcher::getLabelsList()

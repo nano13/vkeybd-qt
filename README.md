@@ -78,6 +78,10 @@ vkeybd-qt [-n <keyboards>] [-l <layers>] [-o alsa|jack|libremidi|network]
 on Linux `~/.local/share/vkeybd-qt/`. Defaults are written on the first
 start (`number-of-keyboards`, `number-of-layers`, `output`, `notify`, ...).
 
+`notify` chooses the desktop notification that shows the current tab and key
+shift of every section after each change: `dbus` (Linux desktops), `tray`
+(system tray message: Windows, macOS, desktops with a tray) or `none`.
+
 ## Build (Linux, CMake + Ninja)
 
 Install CMake (3.21+), Ninja, a C++20 compiler, pkg-config, Qt 6 (Core,

@@ -13,7 +13,7 @@ add_executable(vkeybd-qt
     interface_audio.cpp
     interface_jack.cpp
     interface_notify.cpp
-    interface_notify_dbus.cpp
+    interface_notify_tray.cpp
     keyboard_notes.cpp
     keyboard_pc.cpp
     keyboard_piano.cpp
@@ -48,7 +48,7 @@ add_executable(vkeybd-qt
     interface_audio.h
     interface_jack.h
     interface_notify.h
-    interface_notify_dbus.h
+    interface_notify_tray.h
     keyboard_notes.h
     keyboard_pc.h
     keyboard_piano.h
@@ -92,10 +92,16 @@ target_link_libraries(vkeybd-qt PRIVATE
     Qt6::Svg
     Qt6::SvgWidgets
     Qt6::Network
-    Qt6::DBus
     PkgConfig::ALSA
     PkgConfig::JACK
 )
+
+# desktop notifications via DBus: Linux (other platforms use the system tray)
+if(UNIX AND NOT APPLE)
+    target_sources(vkeybd-qt PRIVATE interface_notify_dbus.cpp interface_notify_dbus.h)
+    target_link_libraries(vkeybd-qt PRIVATE Qt6::DBus)
+    target_compile_definitions(vkeybd-qt PRIVATE VKEYBD_HAS_DBUS)
+endif()
 
 # raw keyboard input: one backend per platform (see input_keyboard_raw.h)
 if(WIN32)

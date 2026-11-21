@@ -1,133 +1,60 @@
 #include "interface_notify_dbus.h"
 
-InterfaceNotifyDBus::InterfaceNotifyDBus(InterfaceNotify *parent)
+#include <QDBusConnection>
+#include <QDBusMessage>
+#include <QDBusPendingCall>
+#include <QDBusPendingCallWatcher>
+#include <QDBusPendingReply>
+#include <QStringList>
+#include <QVariantMap>
+
+namespace
+{
+const char *SERVICE = "org.freedesktop.Notifications";
+const char *PATH = "/org/freedesktop/Notifications";
+const char *INTERFACE = "org.freedesktop.Notifications";
+}
+
+InterfaceNotifyDBus::InterfaceNotifyDBus(QObject *parent)
     : InterfaceNotify(parent)
 {
-    QDBusConnection::sessionBus().connect(
-        "org.freedesktop.Notifications",
-        "/org/freedesktop/Notifications",
-        "org.freedesktop.Notifications",
-        "NotificationClosed",
-        this,
-        SLOT(onNotificationClosed(uint,uint))
-        );
+    QDBusConnection::sessionBus().connect(SERVICE, PATH, INTERFACE, "NotificationClosed",
+                                          this, SLOT(onNotificationClosed(uint,uint)));
 }
 
-void InterfaceNotifyDBus::sendNotification(const QString &message)
+void InterfaceNotifyDBus::showStatus(const QString &title, const QString &body)
 {
-    QDBusMessage msg = QDBusMessage::createMethodCall(
-        "org.freedesktop.Notifications",
-        "/org/freedesktop/Notifications",
-        "org.freedesktop.Notifications",
-        "Notify"
-        );
+    QVariantMap hints;
+    // GNOME: not kept in the notification list, gone when it disappears
+    hints["transient"] = true;
+    hints["category"] = QStringLiteral("x-vkeybd-qt.status");
     
-    msg << "vkeybd-qt"        // app name
-        << uint(0)            // replaces ID
-        << ""                 // icon
-        << "Notification"     // title
-        << message            // body
-        << QStringList()      // actions
-        << QVariantMap()      // hints
-        << int(-1);           // timeout
+    QDBusMessage message = QDBusMessage::createMethodCall(SERVICE, PATH, INTERFACE, "Notify");
+    message << QStringLiteral("vkeybd-qt")   // app name
+            << this->status_id               // replaces_id: update the visible one
+            << QStringLiteral("")            // icon
+            << title                         // summary
+            << body                          // body
+            << QStringList()                 // actions
+            << hints
+            << int(TIMEOUT_MS);              // expire timeout (ignored by some servers)
     
-    QDBusConnection::sessionBus().call(msg, QDBus::NoBlock);
-}
-
-int InterfaceNotifyDBus::sendNotification(const NotifyData &data)
-{
-    QDBusMessage msg = QDBusMessage::createMethodCall(
-        "org.freedesktop.Notifications",
-        "/org/freedesktop/Notifications",
-        "org.freedesktop.Notifications",
-        "Notify"
-        );
-    
-    msg << QStringLiteral("vkeybd-qt")              // app name
-        << static_cast<uint32_t>(data.id)           // replaces_id
-        << data.icon                                // icon
-        << data.title                              // summary
-        << data.body                             // body
-        << data.actions                           // actions
-        << data.hints                             // hints
-        << data.timeout;                          // timeout
-    
-    QDBusConnection::sessionBus().call(msg, QDBus::NoBlock);
-    return 0; // Asynchronous DBus call does not provide a notification ID.
-}
-
-void InterfaceNotifyDBus::sendKeyShiftNotification(int keyshift)
-{
-    NotifyData data;
-    data.id = this->keyshift_last_id;     // try to update existing one
-    data.title = "KeyShift";
-    data.body = QString::number(keyshift);
-    data.timeout = -1;
-    
-    QDBusMessage msg = QDBusMessage::createMethodCall(
-        "org.freedesktop.Notifications",
-        "/org/freedesktop/Notifications",
-        "org.freedesktop.Notifications",
-        "Notify"
-        );
-    
-    msg << "vkeybd-qt"
-        << data.id
-        << data.icon
-        << data.title
-        << data.body
-        << data.actions
-        << data.hints
-        << data.timeout;
-    
-    notifyAsync(msg, &this->keyshift_last_id);
-}
-
-void InterfaceNotifyDBus::sendTabChangeNotification(const QString &text)
-{
-    QDBusMessage msg = QDBusMessage::createMethodCall(
-        "org.freedesktop.Notifications",
-        "/org/freedesktop/Notifications",
-        "org.freedesktop.Notifications",
-        "Notify"
-        );
-    
-    msg << "vkeybd-qt"
-        << this->tabchange_last_id
-        << ""                  // icon
-        << "Register Change"        // title
-        << text                // body
-        << QStringList()
-        << QVariantMap()
-        << int(-1);          // timeout
-    
-    notifyAsync(msg, &this->tabchange_last_id);
-}
-
-void InterfaceNotifyDBus::notifyAsync(const QDBusMessage &msg, uint32_t *last_id)
-{
     // not blocking: this runs on every tab switch, also while playing
-    QDBusPendingCall call = QDBusConnection::sessionBus().asyncCall(msg);
+    QDBusPendingCall call = QDBusConnection::sessionBus().asyncCall(message);
     QDBusPendingCallWatcher *watcher = new QDBusPendingCallWatcher(call, this);
-    
-    connect(watcher, &QDBusPendingCallWatcher::finished, this, [last_id](QDBusPendingCallWatcher *finished_watcher){
+    connect(watcher, &QDBusPendingCallWatcher::finished, this, [this](QDBusPendingCallWatcher *finished_watcher){
         QDBusPendingReply<uint> reply = *finished_watcher;
         if (!reply.isError())
-        {
-            *last_id = reply.value();
-        }
+            this->status_id = reply.value();
         finished_watcher->deleteLater();
     });
 }
 
-
 void InterfaceNotifyDBus::onNotificationClosed(uint id, uint reason)
 {
-    if (id == this->keyshift_last_id)
-        this->keyshift_last_id = 0;
+    Q_UNUSED(reason);
     
-    if (id == this->tabchange_last_id)
-        this->tabchange_last_id = 0;
+    // closed or expired: the next status is a new notification
+    if (id == this->status_id)
+        this->status_id = 0;
 }
-
-

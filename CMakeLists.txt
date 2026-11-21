@@ -20,8 +20,10 @@ find_package(Qt6 6.2 REQUIRED COMPONENTS
     Svg
     SvgWidgets
     Network
-    DBus
 )
+if(UNIX AND NOT APPLE)
+    find_package(Qt6 6.2 REQUIRED COMPONENTS DBus)
+endif()
 
 # Optional MIDI backend "libremidi" (-o libremidi). An installed libremidi is
 # used if CMake finds one, otherwise the pinned release is downloaded.

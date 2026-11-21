@@ -6,23 +6,8 @@ InterfaceNotify::InterfaceNotify(QObject *parent)
     
 }
 
-void InterfaceNotify::sendNotification(const QString &message)
+void InterfaceNotify::showStatus(const QString &title, const QString &body)
 {
-    Q_UNUSED(message);
-}
-
-int InterfaceNotify::sendNotification(const NotifyData &data)
-{
-    Q_UNUSED(data);
-    return 0; // No notification ID from the disabled backend.
-}
-
-void InterfaceNotify::sendKeyShiftNotification(int keyshift)
-{
-    Q_UNUSED(keyshift);
-}
-
-void InterfaceNotify::sendTabChangeNotification(const QString &text)
-{
-    Q_UNUSED(text);
+    Q_UNUSED(title);
+    Q_UNUSED(body);
 }

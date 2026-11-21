@@ -25,6 +25,8 @@ Config::Config(QObject *parent) : QObject(parent)
         QString platform = QGuiApplication::platformName();
         if (platform == "xcb" || platform == "wayland")
             this->config->setValue("default/notify", "dbus");
+        else if (platform == "windows" || platform == "cocoa")
+            this->config->setValue("default/notify", "tray");
         else
             this->config->setValue("default/notify", "none");
     }
@@ -134,6 +136,8 @@ NotifyBackend Config::getNotifyBackend()
     
     if (backend == "dbus")
         return NotifyBackend::dbus;
+    else if (backend == "tray")
+        return NotifyBackend::tray;
     else // also backend == none
         return NotifyBackend::none;
 }

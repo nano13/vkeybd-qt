@@ -36,7 +36,7 @@
 #include "enums_structs.h"
 
 #include "interface_notify.h"
-#include "interface_notify_dbus.h"
+#include "interface_notify.h"
 
 class MainWindow : public QMainWindow
 {
@@ -64,6 +64,8 @@ private:
     MainTabsSwitcher *switcher;
     void changeCurrentTab(int keyboard_id, int tab_id);
     void currentTabChanged(int keyboard_id, int tab_id);
+    // one notification with the current tab and key shift of every keyboard section
+    void notifyStatus();
     void tabsCheckChanged(int keyboard_id, QList<int> list_of_tab_ids);
     
     QWidget* newKeyboardInstance(int id, OutputSystem output);

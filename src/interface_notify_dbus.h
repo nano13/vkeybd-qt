@@ -3,39 +3,32 @@
 
 #include <QObject>
 #include <QString>
-#include <QDBusMessage>
-#include <QDBusConnection>
-#include <QDBusPendingCall>
-#include <QDBusPendingCallWatcher>
-#include <QDBusPendingReply>
 
 #include "interface_notify.h"
 
-#include "enums_structs.h"
-
+/*
+ * Notifications via org.freedesktop.Notifications (Linux desktops).
+ * The status notification always replaces the previous one (same id), is
+ * transient (GNOME does not keep it in the notification list) and expires
+ * after a short time where the server allows it.
+ */
 class InterfaceNotifyDBus : public InterfaceNotify
 {
     Q_OBJECT
     
 public:
-    explicit InterfaceNotifyDBus(InterfaceNotify *parent = nullptr);
+    explicit InterfaceNotifyDBus(QObject *parent = nullptr);
     
-    static void sendNotification(const QString &message);
-    int sendNotification(const NotifyData &data);
-    
-    void sendKeyShiftNotification(int keyshift);
-    void sendTabChangeNotification(const QString &text);
+    void showStatus(const QString &title, const QString &body) override;
     
 private slots:
     void onNotificationClosed(uint id, uint reason);
     
 private:
-    // sends asynchronously; the returned notification id is stored in *last_id,
-    // so the next notification of the same kind replaces this one
-    void notifyAsync(const QDBusMessage &msg, uint32_t *last_id);
+    static constexpr int TIMEOUT_MS = 2500;
     
-    uint32_t keyshift_last_id = 0;
-    uint32_t tabchange_last_id = 0;
+    // id of the visible status notification, 0 = none
+    uint status_id = 0;
 };
 
 #endif // INTERFACE_NOTIFY_DBUS_H

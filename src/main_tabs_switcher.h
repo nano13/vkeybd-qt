@@ -43,7 +43,7 @@ public slots:
 #include "config.h"
 
 #include "interface_notify.h"
-#include "interface_notify_dbus.h"
+#include "interface_notify.h"
 
 class MainTabsSwitcher : public QWidget
 {

@@ -387,6 +387,13 @@ void MainTabs::globalKeyShiftChanged(int value, bool is_relative)
     this->midi_engine->globalKeyShift(value, is_relative);
     this->view->reloadFromEngine();
 }
+QString MainTabs::currentLabel() const
+{
+    if (this->current_index < 0 || this->current_index >= this->list_labels.length())
+        return QString();
+    return this->list_labels.at(this->current_index);
+}
+
 int MainTabs::globalKeyShiftGet()
 {
     return this->midi_engine->preset(this->current_index).master_key_shift;
@@ -796,10 +803,12 @@ void MainTabs::MIDISignal(MIDISignalTypes type)
     else if (type == MIDISignalTypes::OctaveDownPressed)
     {
         o->octaveDown();
+        emit signalStatusChanged();
     }
     else if (type == MIDISignalTypes::OctaveUpPressed)
     {
         o->octaveUp();
+        emit signalStatusChanged();
     }
 }
 

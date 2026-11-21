@@ -16,8 +16,11 @@ QPointer<HelpReader> reader;
 
 void HelpReader::showPage(const QString &page, QWidget *parent)
 {
+    // no parent: a window of its own, so the style sheet of the main window
+    // (e.g. its tab bar style) does not apply here
+    Q_UNUSED(parent);
     if (!reader)
-        reader = new HelpReader(parent);
+        reader = new HelpReader(nullptr);
     
     reader->selectPage(page);
     reader->show();

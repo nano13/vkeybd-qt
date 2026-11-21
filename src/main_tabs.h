@@ -63,6 +63,8 @@ public:
 
     void globalKeyShiftChanged(int value, bool is_relative);
     int globalKeyShiftGet();
+    // label of the current tab, e.g. "F03-1"
+    QString currentLabel() const;
     void globalResendMIDISettings();
 
     void listOfCheckTabsChanged(QList<int> list_of_tab_ids);
@@ -142,6 +144,8 @@ private slots:
 signals:
     void currentChanged(int index);
     void signalKeyShiftChanged(int value, bool is_relative);
+    // tab or key shift of this section changed (for the status notification)
+    void signalStatusChanged();
 };
 
 #endif // MAINTABS_H

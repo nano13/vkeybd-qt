@@ -49,6 +49,7 @@ signals:
     
     void signalGlobalKeyShift();
     void signalKeymapEditor();
+    void signalMidiRouting();
     void signalShowSoundingNotes(bool show);
     void signalResendMIDISettings();
     

@@ -136,12 +136,26 @@ void InterfaceAudio::setTremoloChanged(int port, int channel, uint8_t value)
 }
 
 
-void InterfaceAudio::createMidiInput(QString label)
+bool InterfaceAudio::openMidiInput(int input, QString label)
 {
+    Q_UNUSED(input);
     Q_UNUSED(label);
+    return false;
 }
 
-void InterfaceAudio::dispatchMidiMessage(uint8_t status, uint8_t data1, uint8_t data2)
+void InterfaceAudio::closeMidiInput(int input)
+{
+    Q_UNUSED(input);
+}
+
+void InterfaceAudio::renameMidiInput(int input, QString label)
+{
+    // without a native rename: a new port (its connections are lost)
+    closeMidiInput(input);
+    openMidiInput(input, label);
+}
+
+void InterfaceAudio::dispatchMidiMessage(int input, uint8_t status, uint8_t data1, uint8_t data2)
 {
     data1 &= 0x7F;
     data2 &= 0x7F;
@@ -151,18 +165,18 @@ void InterfaceAudio::dispatchMidiMessage(uint8_t status, uint8_t data1, uint8_t 
     case 0x90:
         // note on with velocity 0 is a note off
         if (data2 == 0)
-            emit signalMidiNoteOff(data1);
+            emit signalMidiNoteOff(input, data1);
         else
-            emit signalMidiNoteOn(data1, data2);
+            emit signalMidiNoteOn(input, data1, data2);
         break;
     case 0x80:
-        emit signalMidiNoteOff(data1);
+        emit signalMidiNoteOff(input, data1);
         break;
     case 0xB0:
-        emit signalMidiControlChange(data1, data2);
+        emit signalMidiControlChange(input, data1, data2);
         break;
     case 0xE0:
-        emit signalMidiPitchBend(data1 | (data2 << 7));
+        emit signalMidiPitchBend(input, data1 | (data2 << 7));
         break;
     default:
         // program change, aftertouch, system messages: not used

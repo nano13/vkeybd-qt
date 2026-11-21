@@ -114,6 +114,9 @@ private slots:
     void globalResendMIDISettings();
     // asks for the keyboard section if there is more than one
     void openKeymapEditor();
+    void openMidiRouting();
+    // asks which keyboard section if there is more than one; -1: cancelled
+    int chooseKeyboard(const QString &title, const QString &question);
     // the sounding-notes line of all PC keyboards (View menu, keymap editors); saved in config.ini
     void setShowSoundingNotes(bool show);
     

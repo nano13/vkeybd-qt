@@ -550,11 +550,11 @@ private slots:
         MidiEngine engine(&audio);
         engine.setPreset(0, TabPreset());
         
-        engine.midiNoteOn(0, 60, 100);
+        engine.midiNoteOn(0, 0, 60, 100);
         QCOMPARE(audio.events.length(), 1);
         QCOMPARE(audio.events.at(0).value, 60);
         
-        engine.midiNoteOff(60);
+        engine.midiNoteOff(0, 60);
         QCOMPARE(audio.events.last().type, QString("off"));
         QCOMPARE(engine.heldNoteCount(), 0);
     }
@@ -566,7 +566,7 @@ private slots:
         engine.setPreset(0, TabPreset());
 
         QSignalSpy sources(&engine, &MidiEngine::signalSourceKey);
-        engine.midiNoteOn(0, 60, 100);
+        engine.midiNoteOn(0, 0, 60, 100);
         QCOMPARE(sources.size(), 1);
         QCOMPARE(sources.at(0).at(0).toInt(), 0);
         const int held_source = sources.at(0).at(1).toInt();
@@ -574,7 +574,7 @@ private slots:
         QCOMPARE(MidiEngine::displayNoteForSourceKey(held_source), 12);
         QVERIFY(sources.at(0).at(2).toBool());
 
-        engine.midiNoteOff(60);
+        engine.midiNoteOff(0, 60);
         QCOMPARE(sources.size(), 2);
         QCOMPARE(sources.at(1).at(1).toInt(), held_source);
         QVERIFY(!sources.at(1).at(2).toBool());
@@ -588,13 +588,13 @@ private slots:
         MidiEngine engine(&audio);
         engine.setPreset(0, TabPreset());
         
-        engine.midiNoteOn(0, 60, 100);
+        engine.midiNoteOn(0, 0, 60, 100);
         engine.noteOn(0, KEY);
         engine.noteOff(KEY);                    // releases only the PC note
         QCOMPARE(engine.heldNoteCount(), 1);
         QCOMPARE(audio.events.last().value, NOTE);
         
-        engine.midiNoteOff(60);
+        engine.midiNoteOff(0, 60);
         QCOMPARE(engine.heldNoteCount(), 0);
     }
     
@@ -606,11 +606,11 @@ private slots:
         preset.channels[0].velocity = 96;       // ff: 1.5 x
         engine.setPreset(0, preset);
         
-        engine.midiNoteOn(0, 60, 40);
+        engine.midiNoteOn(0, 0, 60, 40);
         QCOMPARE(audio.events.last().value2, 60);
-        engine.midiNoteOff(60);
+        engine.midiNoteOff(0, 60);
         
-        engine.midiNoteOn(0, 60, 100);
+        engine.midiNoteOn(0, 0, 60, 100);
         QCOMPARE(audio.events.last().value2, 127);
     }
     
@@ -623,7 +623,7 @@ private slots:
         preset.master_key_shift = 2;
         engine.setPreset(0, preset);
         
-        engine.midiNoteOn(0, 60, 64);
+        engine.midiNoteOn(0, 0, 60, 64);
         QCOMPARE(audio.events.length(), 2);
         QCOMPARE(audio.events.at(0).value, 50);
         QCOMPARE(audio.events.at(1).value, 62);
@@ -651,20 +651,22 @@ private slots:
         QSignalSpy spy_cc(&audio, &InterfaceAudio::signalMidiControlChange);
         QSignalSpy spy_bend(&audio, &InterfaceAudio::signalMidiPitchBend);
         
-        audio.dispatchMidiMessage(0x93, 60, 100);   // any channel
-        audio.dispatchMidiMessage(0x90, 60, 0);     // note on with velocity 0
-        audio.dispatchMidiMessage(0x81, 61, 10);
-        audio.dispatchMidiMessage(0xB0, 64, 127);
-        audio.dispatchMidiMessage(0xE0, 0, 64);
-        audio.dispatchMidiMessage(0xC0, 5, 0);      // program change: ignored
+        audio.dispatchMidiMessage(2, 0x93, 60, 100);   // any channel
+        audio.dispatchMidiMessage(2, 0x90, 60, 0);     // note on with velocity 0
+        audio.dispatchMidiMessage(2, 0x81, 61, 10);
+        audio.dispatchMidiMessage(2, 0xB0, 64, 127);
+        audio.dispatchMidiMessage(2, 0xE0, 0, 64);
+        audio.dispatchMidiMessage(2, 0xC0, 5, 0);      // program change: ignored
         
+        // the first argument is always the input port
         QCOMPARE(spy_on.count(), 1);
-        QCOMPARE(spy_on.at(0).at(0).toInt(), 60);
-        QCOMPARE(spy_on.at(0).at(1).toInt(), 100);
+        QCOMPARE(spy_on.at(0).at(0).toInt(), 2);
+        QCOMPARE(spy_on.at(0).at(1).toInt(), 60);
+        QCOMPARE(spy_on.at(0).at(2).toInt(), 100);
         QCOMPARE(spy_off.count(), 2);
         QCOMPARE(spy_cc.count(), 1);
         QCOMPARE(spy_bend.count(), 1);
-        QCOMPARE(spy_bend.at(0).at(0).toInt(), 8192);
+        QCOMPARE(spy_bend.at(0).at(1).toInt(), 8192);
     }
     
     // ---------------- instruments ----------------
@@ -722,6 +724,113 @@ private slots:
         TabPreset preset = examplePreset();
         TabPreset restored = PresetSerializer::fromRestoreData(PresetSerializer::toRestoreData(preset));
         QVERIFY(restored == preset);
+    }
+
+    void midiInputRoutingRoundTrip()
+    {
+        // older files without the key: the section input, when selected
+        QMap<QString, QVariant> main;
+        main["volume"] = 90;
+        QMap<QString, QVariant> data;
+        data["main"] = main;
+        TabPreset old_file = PresetSerializer::fromRestoreData(data);
+        QCOMPARE(old_file.midi_inputs.size(), 1);
+        QVERIFY(old_file.midi_inputs.value(TabPreset::DEFAULT_MIDI_INPUT) == MidiInputMode::WhenSelected);
+
+        TabPreset preset;
+        preset.midi_inputs.clear();
+        preset.midi_inputs.insert(0, MidiInputMode::WhenSelected);
+        preset.midi_inputs.insert(3, MidiInputMode::Always);
+        TabPreset restored = PresetSerializer::fromRestoreData(PresetSerializer::toRestoreData(preset));
+        QVERIFY(restored.midi_inputs == preset.midi_inputs);
+
+        // no input at all stays no input
+        preset.midi_inputs.clear();
+        restored = PresetSerializer::fromRestoreData(PresetSerializer::toRestoreData(preset));
+        QVERIFY(restored.midi_inputs.isEmpty());
+
+        QCOMPARE(PresetSerializer::midiInputsToString({{0, MidiInputMode::WhenSelected}, {2, MidiInputMode::Always}}),
+                 QString("0:selected;2:always"));
+        QCOMPARE(PresetSerializer::midiInputsFromString("x;1:always;-2:selected").size(), 1);
+    }
+
+    void sameNoteOnTwoInputsIsHeldSeparately()
+    {
+        RecordingInterface audio;
+        MidiEngine engine(&audio);
+        engine.setPreset(0, TabPreset());
+
+        engine.midiNoteOn(0, 0, 60, 100);
+        engine.midiNoteOn(0, 1, 60, 100);
+        QCOMPARE(audio.count("on"), 2);
+        engine.midiNoteOff(1, 60);
+        QCOMPARE(audio.count("off"), 1);
+        engine.midiNoteOff(0, 60);
+        QCOMPARE(audio.count("off"), 2);
+    }
+
+    void swellScalesEveryVolumeWithoutChangingPresets()
+    {
+        RecordingInterface audio;
+        MidiEngine engine(&audio);
+        TabPreset preset;
+        preset.channels[0].volume = 100;
+        preset.master_volume = 100;
+        engine.setPreset(0, preset);
+        engine.setPreset(1, preset);
+        audio.events.clear();
+
+        engine.setSwell(64);
+        // both tabs, the activated channel only
+        QCOMPARE(audio.count("volume"), 2);
+        QCOMPARE(audio.events.last().value, 100 * 64 / 127);
+        QCOMPARE(engine.preset(0).channels[0].volume, 100);
+        QCOMPARE(engine.preset(0).master_volume, 100);
+
+        // the DCA comes on top of the swell, not instead of it
+        audio.events.clear();
+        engine.setMasterVolume(0, 50);
+        bool found = false;
+        for (const RecordedEvent &event : audio.events)
+        {
+            if (event.type == "volume" && event.channel == 0)
+            {
+                QCOMPARE(event.value, 100 * 50 * 64 / (100 * 127));
+                found = true;
+            }
+        }
+        QVERIFY(found);
+
+        // unchanged: nothing is sent
+        audio.events.clear();
+        engine.setSwell(64);
+        QCOMPARE(audio.count("volume"), 0);
+    }
+
+    void velocityPedalSetsThePcKeyVelocity()
+    {
+        class VelocityRecorder : public RecordingInterface
+        {
+        public:
+            QList<int> velocities;
+            void keyPressEvent(int port, int channel, uint8_t midicode, uint8_t velocity) override
+            {
+                RecordingInterface::keyPressEvent(port, channel, midicode, velocity);
+                this->velocities.append(velocity);
+            }
+        };
+        VelocityRecorder audio;
+        MidiEngine engine(&audio);
+        TabPreset preset;
+        preset.channels[0].velocity = 64;      // passes the pedal value through
+        engine.setPreset(0, preset);
+
+        engine.noteOn(0, KEY);                 // no pedal: the channel setting
+        engine.noteOff(KEY);
+        engine.noteOn(0, KEY, 30);             // pedal at 30
+        QCOMPARE(audio.velocities.size(), 2);
+        QCOMPARE(audio.velocities.at(0), 64);
+        QCOMPARE(audio.velocities.at(1), 30);
     }
 
     void duplicateCCEntriesDropped()

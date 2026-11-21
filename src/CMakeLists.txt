@@ -33,6 +33,7 @@ add_executable(keydesk-midi
     midi_key_shift_global.cpp
     midi_key_shift_widget.cpp
     midi_mastervolume.cpp
+    midi_routing_dialog.cpp
     midi_pitchwheel.cpp
     midi_sounds_list.cpp
     orgelwerk.cpp
@@ -70,6 +71,7 @@ add_executable(keydesk-midi
     midi_key_shift_global.h
     midi_key_shift_widget.h
     midi_mastervolume.h
+    midi_routing_dialog.h
     midi_pitchwheel.h
     midi_sounds_list.h
     orgelwerk.h

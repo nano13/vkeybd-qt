@@ -6,6 +6,7 @@
 #include <QMap>
 #include <QVariant>
 #include <QSettings>
+#include <QStringList>
 
 #include "preset_model.h"
 
@@ -29,6 +30,10 @@ public:
     
     // one map per channel, same keys as the INI channel groups (e.g. for MIDIChannelsSummary)
     static QList<QMap<QString, QVariant>> toChannelMaps(const TabPreset &preset, bool only_activated);
+
+    // "0:selected;2:always"; "" = no input (";" because QSettings reads commas as lists)
+    static QString midiInputsToString(const QMap<int, MidiInputMode> &inputs);
+    static QMap<int, MidiInputMode> midiInputsFromString(const QString &text);
 
     static void save(QSettings *settings, int keyboard_id, const QString &label, const TabPreset &preset);
     static TabPreset load(QSettings *settings, int keyboard_id, const QString &label);

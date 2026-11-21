@@ -34,22 +34,27 @@ public:
     virtual void setReleaseChanged(int port, int channel, uint8_t value);
     virtual void setTremoloChanged(int port, int channel, uint8_t value);
     
-    // MIDI input of this keyboard instance. Messages of all MIDI channels are
-    // accepted and reported with the signals below.
-    virtual void createMidiInput(QString label);
+    // MIDI input ports of this keyboard section. The caller chooses the ids (stable
+    // across renames); the label is the port name. Messages of all MIDI channels
+    // are accepted and reported with the signals below, with the input id.
+    // The base class (network output, no MIDI) has no inputs.
+    virtual bool openMidiInput(int input, QString label);
+    virtual void closeMidiInput(int input);
+    // keeps the connections where the API can rename ports
+    virtual void renameMidiInput(int input, QString label);
     
     // decodes one channel voice message and emits the matching signal
-    void dispatchMidiMessage(uint8_t status, uint8_t data1, uint8_t data2);
+    void dispatchMidiMessage(int input, uint8_t status, uint8_t data1, uint8_t data2);
     
 protected:
     int id;
     
 signals:
-    void signalMidiNoteOn(int note, int velocity);
-    void signalMidiNoteOff(int note);
-    void signalMidiControlChange(int cc, int value);
+    void signalMidiNoteOn(int input, int note, int velocity);
+    void signalMidiNoteOff(int input, int note);
+    void signalMidiControlChange(int input, int cc, int value);
     // 0..16383, center 8192
-    void signalMidiPitchBend(int value);
+    void signalMidiPitchBend(int input, int value);
 };
 
 #endif // INTERFACEAUDIO_H

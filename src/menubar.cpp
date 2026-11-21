@@ -50,6 +50,10 @@ void MenuBar::addToolsMenu()
     QAction *globalKeyMap = new QAction("Keymap Editor...");
     connect(globalKeyMap, &QAction::triggered, this, &MenuBar::signalKeymapEditor);
     
+    QAction *midiRouting = new QAction("MIDI Routing...");
+    midiRouting->setToolTip("MIDI input ports of a keyboard and which tabs they play");
+    connect(midiRouting, &QAction::triggered, this, &MenuBar::signalMidiRouting);
+    
     
     QAction *globalResendMIDISettings = new QAction("Resend all MIDI Settings");
     connect(globalResendMIDISettings, &QAction::triggered, this, &MenuBar::globalResendMIDISettings);
@@ -64,6 +68,7 @@ void MenuBar::addToolsMenu()
     
     menuTools->addAction(globalResendMIDISettings);
     menuTools->addAction(globalKeyMap);
+    menuTools->addAction(midiRouting);
     menuTools->addAction(globalKeyShift);
 }
 void MenuBar::addViewMenu()

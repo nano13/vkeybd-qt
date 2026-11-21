@@ -61,7 +61,9 @@ public:
     void setReleaseChanged(int port, int channel, uint8_t value) override;
     void setTremoloChanged(int port, int channel, uint8_t value) override;
     
-    void createMidiInput(QString label) override;
+    bool openMidiInput(int input, QString label) override;
+    void closeMidiInput(int input) override;
+    void renameMidiInput(int input, QString label) override;
     
 private:
     jack_client_t *client;
@@ -74,14 +76,22 @@ private:
     
     jack_ringbuffer_t* ringBuffer = nullptr;
     
-    // MIDI input: the real-time callback copies incoming channel messages
-    // (3 bytes each) into input_ring_buffer, the GUI thread drains it by timer.
-    // input_port is published only after input_ring_buffer exists.
-    std::atomic<jack_port_t*> input_port{nullptr};
+    // MIDI inputs: fixed slots read by the real-time callback, which copies
+    // incoming channel messages into input_ring_buffer as 4 bytes (slot + message);
+    // the GUI thread drains it by timer and maps the slot to the input id.
+    // A port is published in its slot only after it is registered; on close it is
+    // taken out of the slot and unregistered once the callback cannot use it anymore.
+    static constexpr int MAX_INPUTS = 32;
+    std::array<std::atomic<jack_port_t*>, MAX_INPUTS> input_slots{};
+    std::array<int, MAX_INPUTS> input_slot_ids;      // GUI thread only; -1 = free
+    std::atomic<uint64_t> cycle_count{0};
     jack_ringbuffer_t *input_ring_buffer = nullptr;
     QTimer *input_timer = nullptr;
     static constexpr size_t MIDI_MESSAGE_SIZE = 3;
-    void readInputPort(jack_nframes_t nframes);
+    static constexpr size_t INPUT_RECORD_SIZE = 4;
+    int inputSlot(int input) const;
+    void waitCycles(int cycles);
+    void readInputPorts(jack_nframes_t nframes);
     void drainMidiInput();
     
     void pushEvent(const MidiEvent &event);

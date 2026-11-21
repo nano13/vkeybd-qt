@@ -52,7 +52,8 @@ void MidiEngine::setChannel(int tab, int channel, const ChannelSettings &setting
     // only what actually changed goes out
     if (old.instrument_msb != settings.instrument_msb || old.instrument_lsb != settings.instrument_lsb)
         sendProgram(tab, channel, settings);
-    if (old.volume != settings.volume)
+    // an activated channel may have missed volume changes (swell) while it was off
+    if (old.volume != settings.volume || (settings.activated && !old.activated))
         sendVolume(tab, channel, settings, master_volume);
     if (old.pan != settings.pan)
         this->interface_audio->setPanChangeEvent(tab, channel, static_cast<uint8_t>(qBound(0, settings.pan, 127)));
@@ -89,6 +90,31 @@ void MidiEngine::setMasterVolume(int tab, int percent)
     {
         sendVolume(tab, c, preset.channels.at(c), percent);
     }
+}
+
+void MidiEngine::setSwell(int value)
+{
+    value = qBound(0, value, 127);
+    if (value == this->swell_value)
+        return;
+    this->swell_value = value;
+    
+    // the activated channels; the others get their volume when they are activated
+    const QList<int> tabs = this->presets.keys();
+    for (const int tab : tabs)
+    {
+        const TabPreset preset = this->presets.value(tab);
+        for (int c = 0; c < TabPreset::NUMBER_OF_CHANNELS; c++)
+        {
+            if (preset.channels.at(c).activated)
+                sendVolume(tab, c, preset.channels.at(c), preset.master_volume);
+        }
+    }
+}
+
+int MidiEngine::swell() const
+{
+    return this->swell_value;
 }
 
 void MidiEngine::setMasterKeyShift(int tab, int value)
@@ -183,24 +209,30 @@ MidiEngine::CompiledTab MidiEngine::compile(const TabPreset &preset)
 int MidiEngine::displayNoteForSourceKey(int source_key)
 {
     if (source_key >= MIDI_INPUT_HELD_KEY_BASE)
-        return source_key - MIDI_INPUT_HELD_KEY_BASE - MIDI_INPUT_REFERENCE_OCTAVE;
+        return (source_key - MIDI_INPUT_HELD_KEY_BASE) % 128 - MIDI_INPUT_REFERENCE_OCTAVE;
     return source_key;
 }
 
-void MidiEngine::noteOn(int tab, int source_key)
+void MidiEngine::noteOn(int tab, int source_key, int velocity)
 {
-    startNotes(tab, source_key, source_key - SOURCE_KEY_OFFSET, -1);
+    startNotes(tab, source_key, source_key - SOURCE_KEY_OFFSET, velocity);
 }
 
-void MidiEngine::midiNoteOn(int tab, int note, int velocity)
+void MidiEngine::midiNoteOn(int tab, int input, int note, int velocity)
 {
     // the default octave checkbox (48) plays the incoming note as it is
-    startNotes(tab, MIDI_INPUT_HELD_KEY_BASE + note, note - MIDI_INPUT_REFERENCE_OCTAVE, velocity);
+    startNotes(tab, MIDI_INPUT_HELD_KEY_BASE + input * 128 + note, note - MIDI_INPUT_REFERENCE_OCTAVE, velocity);
 }
 
-void MidiEngine::midiNoteOff(int note)
+void MidiEngine::midiNoteOff(int input, int note)
 {
-    releaseHeld(MIDI_INPUT_HELD_KEY_BASE + note, -1);
+    releaseHeld(MIDI_INPUT_HELD_KEY_BASE + input * 128 + note, -1);
+}
+
+void MidiEngine::setMidiInputs(int tab, const QMap<int, MidiInputMode> &inputs)
+{
+    ensureTab(tab);
+    this->presets[tab].midi_inputs = inputs;
 }
 
 void MidiEngine::forwardControlChange(int tab, int cc, int value)
@@ -455,7 +487,8 @@ void MidiEngine::sendVolume(int tab, int channel, const ChannelSettings &setting
     if (!this->interface_audio)
         return;
     
-    int volume = settings.volume * master_volume / 100;
+    // channel x tab (DCA) x swell pedal
+    int volume = settings.volume * master_volume * this->swell_value / (100 * 127);
     this->interface_audio->setVolumeChangeEvent(tab, channel, static_cast<uint8_t>(qBound(0, volume, 127)));
 }
 

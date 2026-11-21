@@ -3,6 +3,7 @@
 
 #include <QString>
 #include <QList>
+#include <QMap>
 
 #include <array>
 
@@ -77,6 +78,13 @@ struct CCSetting
     bool operator!=(const CCSetting &other) const { return !(*this == other); }
 };
 
+// how a tab listens to one MIDI input port of its keyboard section
+enum class MidiInputMode
+{
+    WhenSelected = 0,   // only while the tab sounds (current or Menu-selected tab)
+    Always = 1          // always, whatever tab is selected (multiplexer: a fixed instrument per input)
+};
+
 struct TabPreset
 {
     static constexpr int NUMBER_OF_CHANNELS = 16;
@@ -90,11 +98,18 @@ struct TabPreset
     int pitchwheel_tether = 64;
     int pitchwheel_pitch = 8192;
     bool resend_midi_auto = false;
+    // MIDI input port id of the keyboard section -> mode; empty: no MIDI input plays this tab
+    QMap<int, MidiInputMode> midi_inputs;
+
+    // the first input port of every keyboard section; always exists
+    static constexpr int DEFAULT_MIDI_INPUT = 0;
 
     TabPreset()
     {
         // same default as the GUI: channel 1 is active
         this->channels[0].activated = true;
+        // as before multiple inputs existed: the section's input plays the sounding tabs
+        this->midi_inputs.insert(DEFAULT_MIDI_INPUT, MidiInputMode::WhenSelected);
     }
 
     bool operator==(const TabPreset &other) const
@@ -106,7 +121,8 @@ struct TabPreset
             && this->octave_mask == other.octave_mask
             && this->pitchwheel_tether == other.pitchwheel_tether
             && this->pitchwheel_pitch == other.pitchwheel_pitch
-            && this->resend_midi_auto == other.resend_midi_auto;
+            && this->resend_midi_auto == other.resend_midi_auto
+            && this->midi_inputs == other.midi_inputs;
     }
     bool operator!=(const TabPreset &other) const { return !(*this == other); }
 };

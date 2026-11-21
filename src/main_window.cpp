@@ -61,6 +61,7 @@ MainWindow::MainWindow(OutputSystem output, int number_of_keyboards, QWidget *pa
         connect(menu, &MenuBar::signalGlobalKeyShift, this, &MainWindow::showGlobalKeyShift);
         connect(menu, &MenuBar::signalResendMIDISettings, this, &MainWindow::globalResendMIDISettings);
         connect(menu, &MenuBar::signalKeymapEditor, this, &MainWindow::openKeymapEditor);
+        connect(menu, &MenuBar::signalMidiRouting, this, &MainWindow::openMidiRouting);
         connect(menu, &MenuBar::signalShowSoundingNotes, this, &MainWindow::setShowSoundingNotes);
         menu->setSoundingNotesChecked(this->config->getPCKeyboardSoundingNotes());
         this->menu_bar = menu;
@@ -518,24 +519,35 @@ void MainWindow::helpAbout()
     about->show();
 }
 
-void MainWindow::openKeymapEditor()
+int MainWindow::chooseKeyboard(const QString &title, const QString &question)
 {
     if (this->list_of_maintabs.isEmpty())
-        return;
+        return -1;
+    if (this->list_of_maintabs.length() == 1)
+        return 0;
     
-    int keyboard_id = 0;
-    if (this->list_of_maintabs.length() > 1)
-    {
-        QStringList keyboards;
-        for (int i = 0; i < this->list_of_maintabs.length(); i++)
-            keyboards.append(QString("Keyboard %1").arg(i + 1));
-        bool ok = false;
-        const QString choice = QInputDialog::getItem(this, "Keymap Editor", "Edit the keymap of:", keyboards, 0, false, &ok);
-        if (!ok)
-            return;
-        keyboard_id = keyboards.indexOf(choice);
-    }
-    this->list_of_maintabs.at(keyboard_id)->openKeymapEditor();
+    QStringList keyboards;
+    for (int i = 0; i < this->list_of_maintabs.length(); i++)
+        keyboards.append(QString("Keyboard %1").arg(i + 1));
+    bool ok = false;
+    const QString choice = QInputDialog::getItem(this, title, question, keyboards, 0, false, &ok);
+    if (!ok)
+        return -1;
+    return keyboards.indexOf(choice);
+}
+
+void MainWindow::openKeymapEditor()
+{
+    const int keyboard_id = chooseKeyboard("Keymap Editor", "Edit the keymap of:");
+    if (keyboard_id >= 0)
+        this->list_of_maintabs.at(keyboard_id)->openKeymapEditor();
+}
+
+void MainWindow::openMidiRouting()
+{
+    const int keyboard_id = chooseKeyboard("MIDI Routing", "Edit the MIDI routing of:");
+    if (keyboard_id >= 0)
+        this->list_of_maintabs.at(keyboard_id)->openMidiRouting();
 }
 
 void MainWindow::setShowSoundingNotes(bool show)

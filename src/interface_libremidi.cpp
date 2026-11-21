@@ -331,7 +331,7 @@ InterfaceLibremidi::~InterfaceLibremidi()
     // ports first (they unregister from the shared client), then the client
     if (this->input_timer)
         this->input_timer->stop();
-    this->input.reset();
+    this->inputs.clear();
     this->outputs.clear();
     this->shared.reset();
 }
@@ -344,7 +344,8 @@ bool InterfaceLibremidi::ensureClient()
         return false;
     
     std::unique_ptr<SharedClient> shared = std::make_unique<SharedClient>();
-    shared->client_name = "keydesk-midi-" + std::to_string(this->id + 1);
+    // "keydesk" for the first keyboard section, "keydesk-2", ... for the others
+    shared->client_name = (this->id == 0) ? std::string("keydesk") : "keydesk-" + std::to_string(this->id + 1);
     
 #if defined(__linux__)
     // JACK first, then ALSA; once chosen, all keyboards use the same API
@@ -435,13 +436,14 @@ void InterfaceLibremidi::createNewPort(QString label)
     this->outputs.push_back(std::move(output));
 }
 
-void InterfaceLibremidi::createMidiInput(QString label)
+bool InterfaceLibremidi::openMidiInput(int input, QString label)
 {
-    if (this->input || this->failed || !ensureClient())
-        return;
+    if (this->inputs.count(input) || this->failed || !ensureClient())
+        return false;
     
-    this->input_queue = std::make_unique<InputQueue>();
-    InputQueue *queue = this->input_queue.get();
+    Input entry;
+    entry.queue = std::make_unique<InputQueue>();
+    InputQueue *queue = entry.queue.get();
     
     libremidi::input_configuration configuration;
     configuration.on_message = [queue](const libremidi::message &message) {
@@ -457,33 +459,66 @@ void InterfaceLibremidi::createMidiInput(QString label)
     
     try
     {
-        this->input = std::make_unique<libremidi::midi_in>(configuration, this->shared->inputConfiguration());
-        stdx::error error = this->input->open_virtual_port(label.toStdString());
+        entry.midi_in = std::make_unique<libremidi::midi_in>(configuration, this->shared->inputConfiguration());
+        stdx::error error = entry.midi_in->open_virtual_port(label.toStdString());
         if (error != stdx::error{})
         {
             qWarning() << "libremidi:" << apiName(this->shared->api) << "cannot open virtual input port" << label << ":" << errorText(error);
-            this->input.reset();
+            entry.midi_in.reset();
         }
     }
     catch (const std::exception &exception)
     {
         qWarning() << "libremidi:" << apiName(this->shared->api) << "cannot open virtual input port" << label << ":" << exception.what();
-        this->input.reset();
+        entry.midi_in.reset();
     }
     
-    if (!this->input)
-        return;
+    if (!entry.midi_in)
+        return false;
     
-    this->input_timer = new QTimer(this);
-    connect(this->input_timer, &QTimer::timeout, this, &InterfaceLibremidi::drainMidiInput);
-    this->input_timer->start(2);
+    this->inputs.emplace(input, std::move(entry));
+    
+    if (!this->input_timer)
+    {
+        this->input_timer = new QTimer(this);
+        connect(this->input_timer, &QTimer::timeout, this, &InterfaceLibremidi::drainMidiInput);
+        this->input_timer->start(2);
+    }
+    return true;
+}
+
+void InterfaceLibremidi::closeMidiInput(int input)
+{
+    std::map<int, Input>::iterator it = this->inputs.find(input);
+    if (it == this->inputs.end())
+        return;
+    // closing waits for the input's callback (JACK: see JackShared::remove), then
+    // the rest of its queue is delivered
+    it->second.midi_in.reset();
+    uint32_t value = 0;
+    while (it->second.queue->pop(value))
+        dispatchMidiMessage(input, static_cast<uint8_t>(value & 0xFF), static_cast<uint8_t>((value >> 8) & 0xFF), static_cast<uint8_t>((value >> 16) & 0xFF));
+    this->inputs.erase(it);
+}
+
+void InterfaceLibremidi::renameMidiInput(int input, QString label)
+{
+    std::map<int, Input>::iterator it = this->inputs.find(input);
+    if (it == this->inputs.end())
+        return;
+    // keeps the connections where the API can rename (e.g. ALSA); otherwise a new port
+    if (it->second.midi_in->set_port_name(label.toStdString()) != stdx::error{})
+        InterfaceAudio::renameMidiInput(input, label);
 }
 
 void InterfaceLibremidi::drainMidiInput()
 {
-    uint32_t value = 0;
-    while (this->input_queue->pop(value))
-        dispatchMidiMessage(static_cast<uint8_t>(value & 0xFF), static_cast<uint8_t>((value >> 8) & 0xFF), static_cast<uint8_t>((value >> 16) & 0xFF));
+    for (std::map<int, Input>::iterator it = this->inputs.begin(); it != this->inputs.end(); ++it)
+    {
+        uint32_t value = 0;
+        while (it->second.queue->pop(value))
+            dispatchMidiMessage(it->first, static_cast<uint8_t>(value & 0xFF), static_cast<uint8_t>((value >> 8) & 0xFF), static_cast<uint8_t>((value >> 16) & 0xFF));
+    }
 }
 
 void InterfaceLibremidi::send(int port, uint8_t status, uint8_t data1, uint8_t data2)

@@ -36,6 +36,7 @@ public slots:
 #include <QGridLayout>
 #include <QPushButton>
 #include <QList>
+#include <QSet>
 #include <QStyle>
 
 #include <QDebug>
@@ -61,6 +62,9 @@ public:
     
     void setLayerActive(int layer);
     int getLayerActive();
+    
+    // tabs a MIDI input plays "always": marked (property "fixedinput"), whatever is selected
+    void setFixedInputTabs(const QSet<int> &tabs);
     
 private:
     int keyboard_id;

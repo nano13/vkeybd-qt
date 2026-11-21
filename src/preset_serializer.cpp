@@ -254,6 +254,9 @@ void PresetSerializer::mainFromMap(const QMap<QString, QVariant> &map, TabPreset
     preset.pitchwheel_pitch = intValue(map, "pitchwheel_pitch", preset.pitchwheel_pitch);
     if (map.contains("resend_midi_auto"))
         preset.resend_midi_auto = map.value("resend_midi_auto").toBool();
+    // missing in older files: keep the default (the section input, when selected)
+    if (map.contains("midi_inputs"))
+        preset.midi_inputs = midiInputsFromString(map.value("midi_inputs").toString());
 }
 
 QMap<QString, QVariant> PresetSerializer::mainToMap(const TabPreset &preset)
@@ -266,8 +269,33 @@ QMap<QString, QVariant> PresetSerializer::mainToMap(const TabPreset &preset)
     map["pitchwheel_tether"] = preset.pitchwheel_tether;
     map["pitchwheel_pitch"] = preset.pitchwheel_pitch;
     map["resend_midi_auto"] = preset.resend_midi_auto;
+    map["midi_inputs"] = midiInputsToString(preset.midi_inputs);
 
     return map;
+}
+
+QString PresetSerializer::midiInputsToString(const QMap<int, MidiInputMode> &inputs)
+{
+    QStringList parts;
+    for (QMap<int, MidiInputMode>::const_iterator it = inputs.cbegin(); it != inputs.cend(); ++it)
+        parts.append(QString::number(it.key()) + (it.value() == MidiInputMode::Always ? ":always" : ":selected"));
+    return parts.join(";");
+}
+
+QMap<int, MidiInputMode> PresetSerializer::midiInputsFromString(const QString &text)
+{
+    QMap<int, MidiInputMode> inputs;
+    const QStringList parts = text.split(";", Qt::SkipEmptyParts);
+    for (const QString &part : parts)
+    {
+        const QStringList fields = part.trimmed().split(":");
+        bool ok = false;
+        const int input = fields.value(0).toInt(&ok);
+        if (!ok || input < 0)
+            continue;
+        inputs.insert(input, fields.value(1) == "always" ? MidiInputMode::Always : MidiInputMode::WhenSelected);
+    }
+    return inputs;
 }
 
 int PresetSerializer::intValue(const QMap<QString, QVariant> &map, const QString &key, int fallback)

@@ -117,6 +117,26 @@ void MainTabsSwitcher::updateSoundingMarks()
     }
 }
 
+void MainTabsSwitcher::setFixedInputTabs(const QSet<int> &tabs)
+{
+    for (int i = 0; i < this->list_of_buttons.length(); i++)
+    {
+        QRightClickButton *button = this->list_of_buttons.at(i);
+        const bool fixed = tabs.contains(i);
+        if (button->property("fixedinput").toBool() == fixed)
+            continue;
+        
+        button->setProperty("fixedinput", fixed);
+        button->setToolTip(fixed ? button->toolTip().section("\n\nAlways played by a MIDI input", 0, 0)
+                                     + "\n\nAlways played by a MIDI input (Tools > MIDI Routing)"
+                                 : button->toolTip().section("\n\nAlways played by a MIDI input", 0, 0));
+        // property selectors in the style sheet need a repolish
+        button->style()->unpolish(button);
+        button->style()->polish(button);
+        button->update();
+    }
+}
+
 void MainTabsSwitcher::updateRowButtons()
 {
     for (int row = 0; row < this->list_of_row_buttons.length(); row++)

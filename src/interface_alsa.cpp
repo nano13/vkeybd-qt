@@ -254,34 +254,23 @@ void InterfaceAlsa::sendEvent(bool drain)
     }
 }
 
-void InterfaceAlsa::createMidiInput(QString label)
+bool InterfaceAlsa::openInputClient()
 {
     if (this->seq_in)
-        return;
+        return true;
     
     int error = snd_seq_open(&this->seq_in, "default", SND_SEQ_OPEN_INPUT, SND_SEQ_NONBLOCK);
     if (error < 0)
     {
         qWarning() << "Cannot open the ALSA sequencer for MIDI input:" << snd_strerror(error);
         this->seq_in = nullptr;
-        return;
+        return false;
     }
     snd_seq_set_client_name(this->seq_in, (this->NAME + "-in").toLatin1());
     
-    int port = snd_seq_create_simple_port(this->seq_in, label.toLatin1(),
-        SND_SEQ_PORT_CAP_WRITE | SND_SEQ_PORT_CAP_SUBS_WRITE,
-        SND_SEQ_PORT_TYPE_MIDI_GENERIC | SND_SEQ_PORT_TYPE_APPLICATION);
-    if (port < 0)
-    {
-        qWarning() << "Cannot create ALSA MIDI input port" << label << ":" << snd_strerror(port);
-        snd_seq_close(this->seq_in);
-        this->seq_in = nullptr;
-        return;
-    }
-    
     int count = snd_seq_poll_descriptors_count(this->seq_in, POLLIN);
     if (count <= 0)
-        return;
+        return true;
     
     QList<struct pollfd> descriptors(count);
     snd_seq_poll_descriptors(this->seq_in, descriptors.data(), count, POLLIN);
@@ -291,6 +280,47 @@ void InterfaceAlsa::createMidiInput(QString label)
         connect(notifier, &QSocketNotifier::activated, this, &InterfaceAlsa::readMidiInput);
         this->input_notifiers.append(notifier);
     }
+    return true;
+}
+
+bool InterfaceAlsa::openMidiInput(int input, QString label)
+{
+    if (this->input_ports.contains(input) || !openInputClient())
+        return false;
+    
+    int port = snd_seq_create_simple_port(this->seq_in, label.toUtf8(),
+        SND_SEQ_PORT_CAP_WRITE | SND_SEQ_PORT_CAP_SUBS_WRITE,
+        SND_SEQ_PORT_TYPE_MIDI_GENERIC | SND_SEQ_PORT_TYPE_APPLICATION);
+    if (port < 0)
+    {
+        qWarning() << "Cannot create ALSA MIDI input port" << label << ":" << snd_strerror(port);
+        return false;
+    }
+    this->input_ports.insert(input, port);
+    return true;
+}
+
+void InterfaceAlsa::closeMidiInput(int input)
+{
+    if (!this->seq_in || !this->input_ports.contains(input))
+        return;
+    snd_seq_delete_simple_port(this->seq_in, this->input_ports.take(input));
+}
+
+void InterfaceAlsa::renameMidiInput(int input, QString label)
+{
+    if (!this->seq_in || !this->input_ports.contains(input))
+        return;
+    
+    // keeps the subscriptions (connections) of the port
+    snd_seq_port_info_t *info = nullptr;
+    snd_seq_port_info_alloca(&info);
+    if (snd_seq_get_port_info(this->seq_in, this->input_ports.value(input), info) < 0)
+        return;
+    snd_seq_port_info_set_name(info, label.toUtf8().constData());
+    int error = snd_seq_set_port_info(this->seq_in, this->input_ports.value(input), info);
+    if (error < 0)
+        qWarning() << "Cannot rename ALSA MIDI input port to" << label << ":" << snd_strerror(error);
 }
 
 void InterfaceAlsa::readMidiInput()
@@ -311,22 +341,27 @@ void InterfaceAlsa::readMidiInput()
         if (result < 0 || !event)
             break;
         
+        // which input port the event was sent to
+        const int input = this->input_ports.key(event->dest.port, -1);
+        if (input < 0)
+            continue;
+        
         switch (event->type)
         {
         case SND_SEQ_EVENT_NOTEON:
-            dispatchMidiMessage(0x90, event->data.note.note, event->data.note.velocity);
+            dispatchMidiMessage(input, 0x90, event->data.note.note, event->data.note.velocity);
             break;
         case SND_SEQ_EVENT_NOTEOFF:
-            dispatchMidiMessage(0x80, event->data.note.note, event->data.note.velocity);
+            dispatchMidiMessage(input, 0x80, event->data.note.note, event->data.note.velocity);
             break;
         case SND_SEQ_EVENT_CONTROLLER:
-            dispatchMidiMessage(0xB0, event->data.control.param, event->data.control.value);
+            dispatchMidiMessage(input, 0xB0, event->data.control.param, event->data.control.value);
             break;
         case SND_SEQ_EVENT_PITCHBEND:
         {
             // ALSA: -8192..8191, MIDI: 0..16383
             int value = qBound(0, event->data.control.value + 8192, 16383);
-            dispatchMidiMessage(0xE0, value & 0x7F, (value >> 7) & 0x7F);
+            dispatchMidiMessage(input, 0xE0, value & 0x7F, (value >> 7) & 0x7F);
             break;
         }
         default:

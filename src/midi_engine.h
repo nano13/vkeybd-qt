@@ -36,7 +36,8 @@ public:
     // MIDI input, see midiNoteOn()
     static constexpr int MIDI_INPUT_REFERENCE_OCTAVE = 48;
     static constexpr int MIDI_INPUT_NEUTRAL_VELOCITY = 64;
-    // held notes of the MIDI input are kept apart from the PC keys (8..48)
+    // held notes of the MIDI inputs are kept apart from the PC keys (8..48),
+    // and from each other: BASE + input * 128 + note
     static constexpr int MIDI_INPUT_HELD_KEY_BASE = 1000;
     // Converts an internal held source key to the PC keyboard's unshifted note.
     // E.g. incoming MIDI note 60 corresponds to PC keyboard note 12.
@@ -56,6 +57,12 @@ public:
     // DCA in percent, re-sends the volume of all channels
     void setMasterVolume(int tab, int percent);
     
+    // swell pedal of this keyboard section: 0..127 (127 = full), a gain on top of
+    // every channel and tab volume of the section; never stored in a preset.
+    // Re-sends the volume of the activated channels of all tabs.
+    void setSwell(int value);
+    int swell() const;
+    
     // the key shift of one tab (its own setting, saved with the tab)
     void setMasterKeyShift(int tab, int value);
     // Global key shift (Print / Pause / Scroll Lock): added on top of the key
@@ -74,15 +81,22 @@ public:
     // (sorted, without duplicates). The same routing as noteOn(), for displays.
     QList<int> soundingNotes(int tab, int source_key) const;
     
-    void noteOn(int tab, int source_key);
+    // velocity < 0: each channel's velocity setting; otherwise the played velocity
+    // (velocity pedal), scaled by the channel setting like MIDI input
+    void noteOn(int tab, int source_key, int velocity = -1);
     void noteOff(int source_key);
     
     // MIDI input: notes are routed like PC keys (key ranges, shifts, octave checkboxes;
     // the default octave 48 plays the note as it is). They are held separately from
     // the PC keys. The velocity is scaled by the channel's velocity setting relative
     // to mf (64), so the default setting passes it through unchanged.
-    void midiNoteOn(int tab, int note, int velocity);
-    void midiNoteOff(int note);
+    // input: the input port id of the keyboard section (the same note on two inputs
+    // is held separately)
+    void midiNoteOn(int tab, int input, int note, int velocity);
+    void midiNoteOff(int input, int note);
+    
+    // which MIDI input ports play the tab (part of the preset, no MIDI is sent)
+    void setMidiInputs(int tab, const QMap<int, MidiInputMode> &inputs);
     // sends a CC to all activated channels of a tab
     void forwardControlChange(int tab, int cc, int value);
     void pitchBend(int tab, int value);
@@ -157,6 +171,7 @@ private:
     void releaseHeld(int source_key, int only_tab);
 
     void sendProgram(int tab, int channel, const ChannelSettings &settings);
+    int swell_value = 127;
     void sendVolume(int tab, int channel, const ChannelSettings &settings, int master_volume);
 
     InterfaceAudio *interface_audio;

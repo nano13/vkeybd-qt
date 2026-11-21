@@ -4,6 +4,7 @@
 #include <QObject>
 #include <QDebug>
 #include <QSocketNotifier>
+#include <QHash>
 #include <QList>
 
 #include "interface_audio.h"
@@ -49,7 +50,9 @@ public:
     void setReleaseChanged(int port, int channel, uint8_t value) override;
     void setTremoloChanged(int port, int channel, uint8_t value) override;
     
-    void createMidiInput(QString label) override;
+    bool openMidiInput(int input, QString label) override;
+    void closeMidiInput(int input) override;
+    void renameMidiInput(int input, QString label) override;
     
     QString NAME = "keydesk-midi";
     
@@ -61,8 +64,11 @@ private:
     
     // MIDI input: an own sequencer handle, opened non-blocking and read in the
     // GUI thread whenever its poll descriptors become readable
+    // (one client "<name>-in", one port per input of the keyboard section)
     snd_seq_t *seq_in = nullptr;
     QList<QSocketNotifier*> input_notifiers;
+    QHash<int, int> input_ports;    // input id -> ALSA port number
+    bool openInputClient();
     void readMidiInput();
     
 signals:

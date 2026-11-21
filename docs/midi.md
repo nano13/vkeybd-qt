@@ -35,9 +35,9 @@ The output system is chosen with `-o` / `--output`, or by `default/output` in
 
 | Output | Clients and ports |
 |---|---|
-| `alsa` | one ALSA sequencer client `keydesk-midi` per section, one output port per tab (`1-F01-1`, ...); the MIDI input is a client `keydesk-midi-in` |
-| `jack` | one JACK client per section (`keydesk-midi-jack-0`, `-1`, ...), one MIDI output port per tab |
-| `libremidi` | one client per section (`keydesk-midi-1`, ...), one virtual output port per tab; see below |
+| `alsa` | one ALSA sequencer client `keydesk-midi` per section, one output port per tab (`1-F01-1`, ...); the MIDI inputs are ports of a client `keydesk-midi-in` |
+| `jack` | one JACK client per section (`keydesk`, `keydesk-2`, ...), one MIDI output port per tab and the MIDI input ports |
+| `libremidi` | one client per section (`keydesk`, `keydesk-2`, ...), one virtual output port per tab; see below |
 | `network` | no MIDI: the keys are sent via UDP to another KeyDeskMIDI instance |
 
 Connect the tab ports to your synthesizers with your patchbay (qjackctl,
@@ -82,6 +82,10 @@ with ALSA, JACK and libremidi. Connect a MIDI keyboard or a sequencer to it,
 and the section plays the incoming notes through all its sounding tabs —
 with their instruments, key shifts, channels and velocities. One MIDI
 keyboard can so play several presets at once, just like the PC keyboard.
+
+More input ports per section, and which port plays which tab (when selected
+or always): *Tools > MIDI Routing...*, see
+[MIDI multiplexer](multiplexer.md#midi-routing).
 
 * Notes of all 16 incoming channels are accepted.
 * The incoming velocity is scaled by the velocity of each tab channel.

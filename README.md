@@ -39,7 +39,12 @@ setup of synths out: see [MIDI multiplexer](docs/multiplexer.md).
   system or another application during a performance.
 * **MIDI input per section**: play the tabs of a section from a MIDI keyboard
   or a sequencer, with all their instruments at once — a MIDI multiplexer
-  for layers and splits ([details](docs/multiplexer.md)).
+  for layers and splits ([details](docs/multiplexer.md)). Several input
+  ports per section, and per tab which port plays it, when selected or
+  always (*Tools > MIDI Routing...*).
+* **Foot pedals** on a MIDI input: a swell pedal for the volume of a whole
+  keyboard, or a velocity pedal for touch dynamics on the PC keyboard
+  ([details](docs/multiplexer.md#pedals-on-the-input-ports)).
 * **Outputs:** ALSA, JACK, libremidi (cross-platform), or network (remote
   control another KeyDeskMIDI instance).
 * Pedals, pitch bend, volume, octave and key shift on the PC keyboard.

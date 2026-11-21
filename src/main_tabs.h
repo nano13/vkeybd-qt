@@ -39,6 +39,7 @@
 
 #include "keymap.h"
 #include "keymap_editor.h"
+#include "midi_routing_dialog.h"
 
 /*
  * One keyboard instance: its MIDI engine, its tabs (presets, one MIDI port each)
@@ -81,6 +82,8 @@ public:
     
     // the keymap editor of this keyboard (one window, raised if open already)
     void openKeymapEditor();
+    // the MIDI input ports of this keyboard and which tabs they play
+    void openMidiRouting();
     // the sounding-notes line of the PC keyboard (a global setting, see MainWindow)
     void setShowSoundingNotes(bool show);
 
@@ -138,10 +141,11 @@ private:
     void routeMIDIEvent(int value, MIDIMode mode);
     
     // the MIDI input of this keyboard (omni)
-    void midiInputNoteOn(int note, int velocity);
-    void midiInputNoteOff(int note);
-    void midiInputControlChange(int cc, int value);
-    void midiInputPitchBend(int value);
+    // input: the id of the input port (see midi_input_ports)
+    void midiInputNoteOn(int input, int note, int velocity);
+    void midiInputNoteOff(int input, int note);
+    void midiInputControlChange(int input, int cc, int value);
+    void midiInputPitchBend(int input, int value);
 
     bool is_escape_pressed = false;
     bool is_menu_pressed = false;
@@ -165,6 +169,30 @@ private:
     
     // while the editor window is active, the keys of this keyboard select keys there
     QPointer<KeymapEditor> keymap_editor;
+    
+    // MIDI input ports of this section (stored with the keyboard state; the first
+    // one always exists). Which tabs a port plays is part of each tab's preset.
+    QList<MidiInputPort> midi_input_ports;
+    QPointer<MidiRoutingDialog> midi_routing_dialog;
+    QString defaultMidiInputName() const;
+    void openMidiInputPorts();
+    // the tabs an input plays right now: "always" tabs, and "when selected" tabs that sound
+    QList<int> tabsForInput(int input) const;
+    QString tabTitle(int tab) const;
+    void midiRoutingApplied(const QList<MidiInputPort> &ports, const QList<QMap<int, MidiInputMode>> &routes);
+    
+    // pedals on the input ports (controller functions)
+    // velocity pedal: the velocity of the PC keys; -1: none (the channel settings)
+    int pc_velocity = -1;
+    // swell pedal: collected and applied at most every SWELL_INTERVAL_MS, as a
+    // pedal sends many values and every value re-sends the volumes of the section
+    static constexpr int SWELL_INTERVAL_MS = 15;
+    int pending_swell = -1;
+    void applySwell();
+    // returns true if the controller has a function on this input (and was used)
+    bool controlFunction(int input, int cc, int value);
+    // tabs played "always" by an input get a mark in the tab switcher
+    void updateFixedInputMarks();
     QSet<int> keys_to_editor;
 
 private slots:

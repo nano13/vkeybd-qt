@@ -2,6 +2,7 @@
 
 #include <QFile>
 #include <QJsonDocument>
+#include <QJsonArray>
 #include <QJsonObject>
 #include <QSaveFile>
 
@@ -56,8 +57,7 @@ MainTabs::MainTabs(QList<QString> labels, int id, Config *config, MainTabsSwitch
     
     initializeTabs();
     
-    // MIDI input of this keyboard: played on the same tabs as the PC keyboard
-    this->interface_audio->createMidiInput(QString::number(this->id + 1) + "-MIDI-in");
+    // MIDI inputs of this keyboard (the ports are opened with the keyboard state below)
     connect(this->interface_audio, &InterfaceAudio::signalMidiNoteOn, this, &MainTabs::midiInputNoteOn);
     connect(this->interface_audio, &InterfaceAudio::signalMidiNoteOff, this, &MainTabs::midiInputNoteOff);
     connect(this->interface_audio, &InterfaceAudio::signalMidiControlChange, this, &MainTabs::midiInputControlChange);
@@ -69,6 +69,10 @@ MainTabs::MainTabs(QList<QString> labels, int id, Config *config, MainTabsSwitch
     // keymap and keyboard form of this section
     loadKeyboardState();
     applyKeyboardState();
+    openMidiInputPorts();
+    // loading tabs may change which ones are played "always"
+    connect(this->midi_engine, &MidiEngine::signalPresetReplaced, this, &MainTabs::updateFixedInputMarks);
+    updateFixedInputMarks();
     connect(this->view->pcKeyboard(), &KeyboardPC::keyboardFormDetected, this, [this](KeyboardForm form){
         this->detected_form = KeyboardLayout::formName(form);
         saveKeyboardState();
@@ -261,38 +265,61 @@ void MainTabs::routeMIDIEvent(int value, MIDIMode mode)
     for (int tab : tabs)
     {
         if (mode == MIDIMode::Press)
-            this->midi_engine->noteOn(tab, value);
+            this->midi_engine->noteOn(tab, value, this->pc_velocity);
         else if (mode == MIDIMode::PitchBend)
             this->midi_engine->pitchBend(tab, value);
     }
 }
 
-void MainTabs::midiInputNoteOn(int note, int velocity)
+QList<int> MainTabs::tabsForInput(int input) const
+{
+    const QList<int> sounding = soundingTabs();
+    QList<int> tabs;
+    for (int tab = 0; tab < this->list_labels.length(); tab++)
+    {
+        const QMap<int, MidiInputMode> inputs = this->midi_engine->preset(tab).midi_inputs;
+        if (!inputs.contains(input))
+            continue;
+        if (inputs.value(input) == MidiInputMode::Always || sounding.contains(tab))
+            tabs.append(tab);
+    }
+    return tabs;
+}
+
+void MainTabs::midiInputNoteOn(int input, int note, int velocity)
 {
     if (this->keymap_editor && this->keymap_editor->isLearning())
     {
         this->keymap_editor->learnMidiNote(note);
         return;
     }
-    QList<int> tabs = soundingTabs();
+    const QList<int> tabs = tabsForInput(input);
     for (int tab : tabs)
     {
-        this->midi_engine->midiNoteOn(tab, note, velocity);
+        this->midi_engine->midiNoteOn(tab, input, note, velocity);
     }
 }
-void MainTabs::midiInputNoteOff(int note)
+void MainTabs::midiInputNoteOff(int input, int note)
 {
-    // releases exactly what was sent for this note, on whatever tabs
-    this->midi_engine->midiNoteOff(note);
+    // releases exactly what was sent for this note of this input, on whatever tabs
+    this->midi_engine->midiNoteOff(input, note);
 }
-void MainTabs::midiInputControlChange(int cc, int value)
+void MainTabs::midiInputControlChange(int input, int cc, int value)
 {
-    // the pedals go to all sounding tabs, like the ones on the PC keyboard
+    if (this->midi_routing_dialog && this->midi_routing_dialog->isLearning())
+    {
+        this->midi_routing_dialog->learnControl(input, cc);
+        return;
+    }
+    if (controlFunction(input, cc, value))
+        return;
+    
+    // the pedals go to the tabs of the input, like the ones on the PC keyboard
     const int SUSTAIN = 64;
     const int SOSTENUTO = 66;
     const int SOFT = 67;
     
-    QList<int> tabs = soundingTabs();
+    const QList<int> tabs = tabsForInput(input);
     for (int tab : tabs)
     {
         if (cc == SUSTAIN)
@@ -305,9 +332,9 @@ void MainTabs::midiInputControlChange(int cc, int value)
             this->midi_engine->forwardControlChange(tab, cc, value);
     }
 }
-void MainTabs::midiInputPitchBend(int value)
+void MainTabs::midiInputPitchBend(int input, int value)
 {
-    QList<int> tabs = soundingTabs();
+    const QList<int> tabs = tabsForInput(input);
     for (int tab : tabs)
     {
         this->midi_engine->pitchBend(tab, value);
@@ -866,6 +893,30 @@ void MainTabs::loadKeyboardState()
     
     Keymap loaded;
     QString error;
+    // MIDI input ports; the first one (id 0) always exists
+    this->midi_input_ports.clear();
+    const QJsonArray ports = json.value("midi_inputs").toArray();
+    for (const QJsonValue &value : ports)
+    {
+        MidiInputPort port;
+        port.id = value.toObject().value("id").toInt(-1);
+        port.name = value.toObject().value("name").toString().trimmed();
+        const QJsonObject controls = value.toObject().value("controls").toObject();
+        for (QJsonObject::const_iterator it = controls.constBegin(); it != controls.constEnd(); ++it)
+        {
+            bool ok = false;
+            const int cc = it.key().toInt(&ok);
+            ControlFunction function = ControlFunction::Velocity;
+            if (ok && cc >= 0 && cc <= 127 && MidiInputPort::functionFromName(it.value().toString(), &function))
+                port.controls.insert(cc, function);
+        }
+        bool duplicate = false;
+        for (const MidiInputPort &other : this->midi_input_ports)
+            duplicate = duplicate || other.id == port.id || other.name == port.name;
+        if (port.id >= 0 && !port.name.isEmpty() && !duplicate)
+            this->midi_input_ports.append(port);
+    }
+    
     if (json.contains("keymap"))
     {
         if (Keymap::fromJson(json.value("keymap").toObject(), &loaded, &error))
@@ -882,6 +933,20 @@ void MainTabs::saveKeyboardState()
     if (!this->detected_form.isEmpty())
         json.insert("detected", this->detected_form);
     json.insert("keymap", this->keymap.toJson());
+    QJsonArray ports;
+    for (const MidiInputPort &port : this->midi_input_ports)
+    {
+        QJsonObject object;
+        object.insert("id", port.id);
+        object.insert("name", port.name);
+        QJsonObject controls;
+        for (QMap<int, ControlFunction>::const_iterator it = port.controls.cbegin(); it != port.controls.cend(); ++it)
+            controls.insert(QString::number(it.key()), MidiInputPort::functionName(it.value()));
+        if (!controls.isEmpty())
+            object.insert("controls", controls);
+        ports.append(object);
+    }
+    json.insert("midi_inputs", ports);
     
     QSaveFile file(keyboardStatePath());
     if (!file.open(QIODevice::WriteOnly))
@@ -943,4 +1008,171 @@ void MainTabs::setShowSoundingNotes(bool show)
     this->view->setShowSoundingNotes(show);
     if (this->keymap_editor)
         this->keymap_editor->setShowSoundingNotesChecked(show);
+}
+
+// ---------------------------------------------------------------------------
+// MIDI inputs
+
+QString MainTabs::defaultMidiInputName() const
+{
+    // the name of the one input before there were several (keeps patchbay connections)
+    return QString::number(this->id + 1) + "-MIDI-in";
+}
+
+void MainTabs::openMidiInputPorts()
+{
+    bool has_default = false;
+    for (const MidiInputPort &port : this->midi_input_ports)
+        has_default = has_default || port.id == TabPreset::DEFAULT_MIDI_INPUT;
+    if (!has_default)
+    {
+        MidiInputPort port;
+        port.id = TabPreset::DEFAULT_MIDI_INPUT;
+        port.name = defaultMidiInputName();
+        this->midi_input_ports.prepend(port);
+    }
+    
+    for (const MidiInputPort &port : this->midi_input_ports)
+        this->interface_audio->openMidiInput(port.id, port.name);
+}
+
+QString MainTabs::tabTitle(int tab) const
+{
+    // the label and the instrument of the first activated channel
+    const TabPreset preset = this->midi_engine->preset(tab);
+    for (const ChannelSettings &channel : preset.channels)
+    {
+        if (channel.activated)
+            return this->list_labels.at(tab) + "  " + channel.instrument_name;
+    }
+    return this->list_labels.at(tab);
+}
+
+void MainTabs::openMidiRouting()
+{
+    if (this->midi_routing_dialog)
+    {
+        this->midi_routing_dialog->show();
+        this->midi_routing_dialog->raise();
+        this->midi_routing_dialog->activateWindow();
+        return;
+    }
+    
+    QStringList titles;
+    QList<QMap<int, MidiInputMode>> routes;
+    for (int tab = 0; tab < this->list_labels.length(); tab++)
+    {
+        titles.append(tabTitle(tab));
+        routes.append(this->midi_engine->preset(tab).midi_inputs);
+    }
+    
+    this->midi_routing_dialog = new MidiRoutingDialog(this->id, this->midi_input_ports, titles, routes, window());
+    connect(this->midi_routing_dialog, &MidiRoutingDialog::applied, this, &MainTabs::midiRoutingApplied);
+    this->midi_routing_dialog->show();
+}
+
+void MainTabs::midiRoutingApplied(const QList<MidiInputPort> &ports, const QList<QMap<int, MidiInputMode>> &routes)
+{
+    // ports: close the removed ones (after releasing their notes), rename, open the new ones
+    for (const MidiInputPort &old_port : this->midi_input_ports)
+    {
+        bool kept = false;
+        for (const MidiInputPort &port : ports)
+            kept = kept || port.id == old_port.id;
+        if (kept)
+            continue;
+        for (int note = 0; note < 128; note++)
+            this->midi_engine->midiNoteOff(old_port.id, note);
+        this->interface_audio->closeMidiInput(old_port.id);
+    }
+    for (const MidiInputPort &port : ports)
+    {
+        bool existed = false;
+        for (const MidiInputPort &old_port : this->midi_input_ports)
+        {
+            if (old_port.id != port.id)
+                continue;
+            existed = true;
+            if (old_port.name != port.name)
+                this->interface_audio->renameMidiInput(port.id, port.name);
+        }
+        if (!existed)
+            this->interface_audio->openMidiInput(port.id, port.name);
+    }
+    this->midi_input_ports = ports;
+    saveKeyboardState();
+    
+    // a pedal function that is gone: back to normal
+    bool has_velocity = false;
+    bool has_swell = false;
+    for (const MidiInputPort &port : this->midi_input_ports)
+    {
+        for (const ControlFunction function : port.controls)
+        {
+            has_velocity = has_velocity || function == ControlFunction::Velocity;
+            has_swell = has_swell || function == ControlFunction::Swell;
+        }
+    }
+    if (!has_velocity)
+        this->pc_velocity = -1;
+    if (!has_swell)
+    {
+        this->pending_swell = -1;
+        this->midi_engine->setSwell(127);
+    }
+    
+    // routing: part of the tab presets (saved with the session)
+    for (int tab = 0; tab < routes.size() && tab < this->list_labels.length(); tab++)
+    {
+        if (this->midi_engine->preset(tab).midi_inputs != routes.at(tab))
+            this->midi_engine->setMidiInputs(tab, routes.at(tab));
+    }
+    updateFixedInputMarks();
+}
+
+bool MainTabs::controlFunction(int input, int cc, int value)
+{
+    for (const MidiInputPort &port : this->midi_input_ports)
+    {
+        if (port.id != input || !port.controls.contains(cc))
+            continue;
+        
+        switch (port.controls.value(cc))
+        {
+            case ControlFunction::Velocity:
+                // the next PC notes; a pedal fully up still plays (velocity 1)
+                this->pc_velocity = qBound(1, value, 127);
+                break;
+            case ControlFunction::Swell:
+                if (this->pending_swell < 0)
+                    QTimer::singleShot(SWELL_INTERVAL_MS, this, &MainTabs::applySwell);
+                this->pending_swell = value;
+                break;
+        }
+        return true;
+    }
+    return false;
+}
+
+void MainTabs::applySwell()
+{
+    if (this->pending_swell < 0)
+        return;
+    this->midi_engine->setSwell(this->pending_swell);
+    this->pending_swell = -1;
+}
+
+void MainTabs::updateFixedInputMarks()
+{
+    QSet<int> tabs;
+    for (int tab = 0; tab < this->list_labels.length(); tab++)
+    {
+        const QMap<int, MidiInputMode> inputs = this->midi_engine->preset(tab).midi_inputs;
+        for (const MidiInputMode mode : inputs)
+        {
+            if (mode == MidiInputMode::Always)
+                tabs.insert(tab);
+        }
+    }
+    this->main_tabs_switcher->setFixedInputTabs(tabs);
 }

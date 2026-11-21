@@ -32,8 +32,17 @@ Sounds that do not depend on the strength of the attack — organs, pads,
 strings, brass and choir ensembles, synth leads — fit this naturally. Sampled
 pianos play at one constant dynamic level.
 
-In the future, a foot pedal (expression pedal) per keyboard section may take
-over the volume, so both hands stay free for the notes.
+A **foot pedal** (an expression pedal on a MIDI interface or a controller
+with a pedal input) can take over the dynamics, so both hands stay free for
+the notes: connect it to an input port of the keyboard section and give its
+controller a function in *Tools > MIDI Routing...* —
+
+* **swell**: the volume of the whole keyboard, like the swell pedal of an
+  organ (continuous, also on notes that already sound),
+* **velocity**: the velocity of the notes played on the PC keyboard — touch
+  dynamics with the foot, set before each attack.
+
+See [MIDI multiplexer](multiplexer.md#pedals-on-the-input-ports).
 
 For passages that need touch dynamics, connect a velocity-sensitive MIDI
 keyboard to the MIDI input of a keyboard section: it plays the same tabs,

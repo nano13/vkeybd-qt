@@ -94,7 +94,8 @@ QPushButton#button_stop:pressed {
 QPushButton#pc_white {
     color: black;
     background-color: white;
-    font-size: 6pt;
+    font-size: 10pt;
+    font-weight: bold;
     border-style: outset;
     border-width: 1px;
     border-color: black;
@@ -103,7 +104,8 @@ QPushButton#pc_white {
 QPushButton#pc_black {
     color: white;
     background-color: #02737f;
-    font-size: 6pt;
+    font-size: 8pt;
+    font-weight: bold;
     border-style: outset;
     border-width: 1px;
     border-color: black;
@@ -112,7 +114,7 @@ QPushButton#pc_black {
 QPushButton#pc_grey {
     color: black;
     background-color: grey;
-    font-size: 6pt;
+    font-size: 8pt;
     border-style: outset;
     border-width: 1px;
     border-color: black;
@@ -121,7 +123,7 @@ QPushButton#pc_grey {
 QPushButton#pc_gold {
     color: #000000;
     background-color: #af9577;
-    font-size: 6pt;
+    font-size: 8pt;
     border-style: outset;
     border-width: 1px;
     border-color: black;
@@ -130,7 +132,7 @@ QPushButton#pc_gold {
 QPushButton#pc_blue {
     /*background-color: #3c73ed;*/
     background-color: #5cc9fb;
-    font-size: 6pt;
+    font-size: 8pt;
     border-style: outset;
     border-width: 1px;
     border-color: black;
@@ -167,6 +169,11 @@ QPushButton#main_tab_switcher_button_a:checked,
 QPushButton#main_tab_switcher_button_b:checked {
     color: black;
     background-color: qradialgradient(cx: 0.5, cy: 0.5, radius: 1.5, fx: 0.75, fy: 0.75, stop: 0 #f3ffff, stop: 0.2 #94faff, stop: 0.4 #6592d7);
+}
+/* tabs a MIDI input plays "always" (Tools > MIDI Routing): an orange line at the bottom */
+QPushButton#main_tab_switcher_button_a[fixedinput="true"],
+QPushButton#main_tab_switcher_button_b[fixedinput="true"] {
+    border-bottom: 2px solid #ff9a1f;
 }
 /* tabs sounding along with the current tab (right click, Menu + F-key): a dim version of the current one */
 QPushButton#main_tab_switcher_button_a[sounding="true"],

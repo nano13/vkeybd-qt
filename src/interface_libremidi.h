@@ -4,6 +4,7 @@
 #include <QObject>
 #include <QString>
 
+#include <map>
 #include <memory>
 #include <vector>
 
@@ -23,7 +24,7 @@ class midi_out;
  * On Linux the API is chosen once for the whole application, in this order:
  * JACK (also covers PipeWire through pipewire-jack), then ALSA sequencer.
  * Every keyboard gets ONE client of that API (like the native JACK and ALSA
- * backends): one output port per tab plus the keyboard's MIDI input port.
+ * backends): one output port per tab plus the keyboard's MIDI input ports.
  * On other platforms libremidi's default API is used (CoreMIDI on macOS, ...),
  * with one libremidi object per port.
  *
@@ -55,7 +56,9 @@ public:
     void setReleaseChanged(int port, int channel, uint8_t value) override;
     void setTremoloChanged(int port, int channel, uint8_t value) override;
 
-    void createMidiInput(QString label) override;
+    bool openMidiInput(int input, QString label) override;
+    void closeMidiInput(int input) override;
+    void renameMidiInput(int input, QString label) override;
 
     // defined in the .cpp file
     struct SharedClient;
@@ -72,10 +75,14 @@ private:
     std::unique_ptr<SharedClient> shared;
     // index = port = tab id; a slot is kept even if opening failed
     std::vector<Output> outputs;
-    std::unique_ptr<libremidi::midi_in> input;
-
-    // incoming bytes: written on the libremidi thread, read on the GUI thread
-    std::unique_ptr<InputQueue> input_queue;
+    // one queue per input: each midi_in may have its own thread (single producer)
+    struct Input
+    {
+        std::unique_ptr<InputQueue> queue;
+        std::unique_ptr<libremidi::midi_in> midi_in;
+    };
+    // input id -> input; std::map keeps the queues where they are
+    std::map<int, Input> inputs;
     QTimer *input_timer = nullptr;
 
     // set when the client could not be created or a port failed: nothing more is attempted

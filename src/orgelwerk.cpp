@@ -51,11 +51,11 @@ void Orgelwerk::drawGUI()
 
     this->group_keys->setMaximumHeight(60);
 
-    QLabel *label_key_shift_master = new QLabel("Key Shift");
+    this->label_key_shift_master = new QLabel("Key Shift");
 
     layout_keys->addWidget(this->keys);
     QGridLayout *layout_pitch_volume = new QGridLayout;
-    layout_pitch_volume->addWidget(label_key_shift_master, 0, 0);
+    layout_pitch_volume->addWidget(this->label_key_shift_master, 0, 0);
     layout_pitch_volume->addWidget(this->key_shift_master, 1, 0);
     layout_pitch_volume->addWidget(this->volume->label_volume, 0, 1);
     layout_pitch_volume->addWidget(this->volume->slider_volume, 1, 1);
@@ -335,7 +335,9 @@ void Orgelwerk::reloadFromEngine()
 
     this->loading = true;
 
-    this->key_shift_master->setValueFromGlobal(preset.master_key_shift);
+    // what sounds: the tab's own key shift plus the global one (Print / Pause)
+    this->key_shift_master->setValueFromGlobal(preset.master_key_shift + this->engine->globalKeyShift());
+    updateKeyShiftLabel();
     this->volume->setValueSilently(preset.master_volume);
     this->keys->restoreBitmaskOfKeys(preset.octave_mask);
 
@@ -373,7 +375,8 @@ QMap<QString,QVariant> Orgelwerk::getParams()
 {
     QMap<QString,QVariant> result;
 
-    result["key_shift"] = this->key_shift_master->value();
+    // the widget shows tab + global; the tab keeps only its own part
+    result["key_shift"] = this->key_shift_master->value() - this->engine->globalKeyShift();
     result["volume"] = this->volume->getValue();
     result["keys"] = this->keys->getBitmaskOfKeys();
 
@@ -395,9 +398,9 @@ void Orgelwerk::keyShiftChanged(int value)
     if (this->loading || this->tab_id < 0)
         return;
 
-    // set by the user: also the value a relative global reset returns to
+    // the widget shows tab + global key shift; the tab keeps its own part
     const int previous = this->engine->preset(this->tab_id).master_key_shift;
-    this->engine->setMasterKeyShift(this->tab_id, value);
+    this->engine->setMasterKeyShift(this->tab_id, value - this->engine->globalKeyShift());
     
     // only the octave hotkeys (Ctrl) move the other sounding tabs along;
     // the buttons and the spin box of this view belong to the bound tab alone
@@ -612,4 +615,32 @@ bool Orgelwerk::eventFilter(QObject *obj, QEvent *ev)
     }
 
     return false;
+}
+
+void Orgelwerk::refreshKeyShift()
+{
+    if (this->tab_id < 0)
+        return;
+    const bool was_loading = this->loading;
+    this->loading = true;
+    this->key_shift_master->setValueFromGlobal(this->engine->preset(this->tab_id).master_key_shift
+                                               + this->engine->globalKeyShift());
+    this->loading = was_loading;
+    updateKeyShiftLabel();
+}
+
+void Orgelwerk::updateKeyShiftLabel()
+{
+    const int global = this->engine->globalKeyShift();
+    if (global == 0)
+    {
+        this->label_key_shift_master->setText("Key Shift");
+        this->label_key_shift_master->setToolTip(QString());
+        return;
+    }
+    const QString signed_global = (global > 0 ? "+" : "") + QString::number(global);
+    this->label_key_shift_master->setText("Key Shift (global " + signed_global + ")");
+    this->label_key_shift_master->setToolTip("Shown is what sounds: the key shift of this tab plus the global key "
+                                             "shift (Print / Pause, reset with Scroll Lock). Changes here only "
+                                             "change the key shift of this tab.");
 }

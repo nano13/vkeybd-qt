@@ -55,6 +55,8 @@ public:
     // the set of sounding tabs has changed (MainTabs: multiselect)
     void soundingTabsChanged();
     // config.ini: pc-keyboard-sounding-notes
+    // the global key shift (Print / Pause) changed: the key shift shown is tab + global
+    void refreshKeyShift();
     void setShowSoundingNotes(bool show);
     // shows the bound tab's volume after it was changed elsewhere (group DCA)
     void refreshVolume();
@@ -108,6 +110,7 @@ private:
     // tab as offset. Unclamped values, so a change that hits the limit on one
     // tab returns exactly to where it was.
     QHash<int, int> follow_key_shift;
+    void updateKeyShiftLabel();
     void followKeyShift(int delta);
     // true while an octave hotkey changes the key shift (not the buttons of the view)
     bool key_shift_from_hotkey = false;
@@ -145,6 +148,7 @@ private:
 
     MIDIKeySelector *keys;
     MIDIKeyShiftWidget *key_shift_master;
+    QLabel *label_key_shift_master;
     MIDIChannelsSummary *midi_channels_summary;
     KeyboardNotes *notes = nullptr;
     KeyboardPiano *piano = nullptr;

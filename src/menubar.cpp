@@ -125,9 +125,14 @@ void MenuBar::addHelpMenu()
     actionInterception->setToolTip("The Interception driver: installation and what to know before a performance");
     connect(actionInterception, &QAction::triggered, this, [this]{ emit signalHelpInterception();} );
     
+    QAction *actionMultiplexer = new QAction("MIDI Multiplexer");
+    actionMultiplexer->setToolTip("Layers and splits for a MIDI keyboard, controller or sequencer");
+    connect(actionMultiplexer, &QAction::triggered, this, [this]{ emit signalHelpMultiplexer();} );
+    
     menuHelp->addAction(actionLayout);
     menuHelp->addAction(actionKeyboards);
     menuHelp->addAction(actionInterception);
+    menuHelp->addAction(actionMultiplexer);
     menuHelp->addSeparator();
     menuHelp->addAction(actionAbout);
 }

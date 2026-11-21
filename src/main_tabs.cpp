@@ -382,10 +382,10 @@ void MainTabs::deviceNotAvailable(QString message)
     qDebug() << "main_tabs: deviceNotAvailable";
 }
 
-void MainTabs::globalKeyShiftChanged(int value, bool is_relative)
+void MainTabs::setGlobalKeyShift(int value)
 {
-    this->midi_engine->globalKeyShift(value, is_relative);
-    this->view->reloadFromEngine();
+    // the tabs keep their own key shift: nothing to reload in the view
+    this->midi_engine->setGlobalKeyShift(value);
 }
 QString MainTabs::currentLabel() const
 {

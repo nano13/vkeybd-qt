@@ -85,6 +85,9 @@ private:
 protected:
     bool eventFilter(QObject *obj, QEvent *ev) override;
 
+    // one value for all sections (Print / Pause / Scroll Lock, Tools > Global Key Shift)
+    int global_key_shift = 0;
+    
 private slots:
     void saveParamsQuick();
     void loadParamsQuick();

@@ -50,6 +50,7 @@ signals:
     void signalHelpKeyboards();
     void signalHelpLayout();
     void signalHelpInterception();
+    void signalHelpMultiplexer();
 
 private slots:
     void quickSave();

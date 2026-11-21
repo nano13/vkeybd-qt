@@ -6,6 +6,16 @@ made for playing live.
 
 ![EditorView](screenshots/midi_channels.png)
 
+## Not playing on a computer keyboard? Use it as a MIDI multiplexer
+
+vkeybd-qt is just as useful with an ordinary **MIDI keyboard**, a digital
+piano, a controller or a sequencer: every keyboard section has a MIDI input,
+and the incoming notes play **layers and splits on up to 16 MIDI channels**
+per preset — each channel with its own instrument, key range, transposition
+and velocity, each preset on its own output port. Switch and combine presets
+while you play, without cutting held notes. One MIDI source in, a whole
+setup of synths out: see [MIDI multiplexer](docs/multiplexer.md).
+
 ## What it does
 
 * **Several keyboard sections** side by side (`-n`), each with its own input,
@@ -22,7 +32,8 @@ made for playing live.
   keyboard belongs to vkeybd-qt alone, so no key reaches the operating
   system or another application during a performance.
 * **MIDI input per section**: play the tabs of a section from a MIDI keyboard
-  or a sequencer, with all their instruments at once.
+  or a sequencer, with all their instruments at once — a MIDI multiplexer
+  for layers and splits ([details](docs/multiplexer.md)).
 * **Outputs:** ALSA, JACK, libremidi (cross-platform), or network (remote
   control another vkeybd-qt instance).
 * Pedals, pitch bend, volume, octave and key shift on the PC keyboard.
@@ -32,6 +43,8 @@ For playing live, use a mechanical keyboard with full n-key rollover — see
 
 ## Documentation
 
+* [MIDI multiplexer](docs/multiplexer.md) — layers and splits for any MIDI
+  keyboard, controller or sequencer (also in *Help > MIDI Multiplexer*).
 * [Playing](docs/playing.md) — key bindings.
 * [The keyboard layout](docs/layout.md) — the chromatic button accordion
   system: isomorphic, with the chord patterns; more than three octaves per

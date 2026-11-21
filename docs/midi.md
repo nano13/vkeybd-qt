@@ -74,6 +74,9 @@ Section*.
 
 ## MIDI input per section
 
+Using vkeybd-qt only as layer and split engine for a MIDI keyboard: see
+[MIDI multiplexer](multiplexer.md).
+
 Every section also has a **MIDI input port** (`1-MIDI-in`, `2-MIDI-in`, ...)
 with ALSA, JACK and libremidi. Connect a MIDI keyboard or a sequencer to it,
 and the section plays the incoming notes through all its sounding tabs —

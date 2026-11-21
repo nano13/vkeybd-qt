@@ -39,6 +39,7 @@ HelpReader::HelpReader(QWidget *parent) : QDialog(parent)
         {"layout.md", "Keyboard Layout"},
         {"keyboards.md", "Keyboard Recommendations"},
         {"interception.md", "Windows Lock Driver"},
+        {"multiplexer.md", "MIDI Multiplexer"},
     };
     
     this->tabs = new QTabWidget;

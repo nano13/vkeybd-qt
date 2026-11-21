@@ -13,7 +13,6 @@ MidiEngine::MidiEngine(InterfaceAudio *interface_audio, QObject *parent)
 void MidiEngine::setPreset(int tab, const TabPreset &preset)
 {
     this->presets.insert(tab, preset);
-    this->master_key_shift_start.insert(tab, preset.master_key_shift);
     recompile(tab);
     
     emit signalPresetReplaced(tab);
@@ -98,28 +97,19 @@ void MidiEngine::setMasterKeyShift(int tab, int value)
     
     value = qBound(-KEY_SHIFT_LIMIT, value, KEY_SHIFT_LIMIT);
     this->presets[tab].master_key_shift = value;
-    this->master_key_shift_start.insert(tab, value);
     
     recompile(tab);
 }
 
-void MidiEngine::globalKeyShift(int value, bool is_relative)
+void MidiEngine::setGlobalKeyShift(int value)
 {
-    QList<int> tab_ids = this->presets.keys();
-    for (int tab : tab_ids)
-    {
-        int key_shift = this->presets.value(tab).master_key_shift;
-        
-        if (!is_relative)
-            key_shift = value;
-        else if (value == 0)
-            key_shift = this->master_key_shift_start.value(tab, key_shift);
-        else
-            key_shift += value;
-        
-        this->presets[tab].master_key_shift = qBound(-KEY_SHIFT_LIMIT, key_shift, KEY_SHIFT_LIMIT);
-        recompile(tab);
-    }
+    // applies to the next notes; held notes keep sounding as they were started
+    this->global_key_shift = qBound(-KEY_SHIFT_LIMIT, value, KEY_SHIFT_LIMIT);
+}
+
+int MidiEngine::globalKeyShift() const
+{
+    return this->global_key_shift;
 }
 
 QList<int> MidiEngine::tabs() const
@@ -241,7 +231,7 @@ void MidiEngine::startNotes(int tab, int held_key, int keycode, int velocity)
             if (m_code < route.key_min || m_code > route.key_max)
                 continue;
             
-            const int note = m_code + route.key_shift + compiled_tab.master_key_shift;
+            const int note = m_code + route.key_shift + compiled_tab.master_key_shift + this->global_key_shift;
             if (note < 0 || note > 127)
                 continue;
             

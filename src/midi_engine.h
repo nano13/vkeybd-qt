@@ -56,12 +56,14 @@ public:
     // DCA in percent, re-sends the volume of all channels
     void setMasterVolume(int tab, int percent);
     
-    // set by the user: also becomes the value a relative global reset returns to
+    // the key shift of one tab (its own setting, saved with the tab)
     void setMasterKeyShift(int tab, int value);
-    // global key shift for all tabs:
-    //  absolute: every tab gets value
-    //  relative: value is added; value 0 resets every tab to its last user-set key shift
-    void globalKeyShift(int value, bool is_relative);
+    // Global key shift (Print / Pause / Scroll Lock): added on top of the key
+    // shift of every tab, never written into the tabs. MainWindow sets the
+    // same absolute value in the engines of all keyboard sections, so they
+    // cannot drift apart. Clamped to +-KEY_SHIFT_LIMIT.
+    void setGlobalKeyShift(int value);
+    int globalKeyShift() const;
     QList<int> tabs() const;
 
     bool hasPreset(int tab) const;
@@ -145,7 +147,7 @@ private:
 
     QHash<int, TabPreset> presets;
     QHash<int, CompiledTab> compiled;
-    QHash<int, int> master_key_shift_start;     // runtime only, not saved
+    int global_key_shift = 0;                   // runtime only, not saved
 
     QHash<int, QList<SentNote>> held_notes;     // source key -> notes actually sent
     QHash<int, QList<int>> held_source_tabs;    // source key -> tabs that saw the press (for the displays)

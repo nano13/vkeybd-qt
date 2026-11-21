@@ -11,6 +11,8 @@
 
 class ButtonPiano : public QPushButton
 {
+    // needed for findChild<ButtonPiano*>() (tests), and qobject_cast
+    Q_OBJECT
 public:
     ButtonPiano(QWidget *parent);
     

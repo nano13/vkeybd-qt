@@ -65,6 +65,7 @@ MainWindow::MainWindow(OutputSystem output, int number_of_keyboards, QWidget *pa
         connect(menu, &MenuBar::signalHelpLayout, this, [this]{ HelpReader::showPage("layout.md", this); });
         connect(menu, &MenuBar::signalHelpKeyboards, this, [this]{ HelpReader::showPage("keyboards.md", this); });
         connect(menu, &MenuBar::signalHelpInterception, this, [this]{ HelpReader::showPage("interception.md", this); });
+        connect(menu, &MenuBar::signalHelpMultiplexer, this, [this]{ HelpReader::showPage("multiplexer.md", this); });
         setMenuBar(menu);
     }
     
@@ -219,6 +220,14 @@ void MainWindow::currentTabChanged(int keyboard_id, int tab_id)
     notifyStatus();
 }
 
+namespace
+{
+QString signedText(int value)
+{
+    return (value > 0) ? "+" + QString::number(value) : QString::number(value);
+}
+}
+
 void MainWindow::notifyStatus()
 {
     // tab and key shift always together, in one notification: separate ones
@@ -227,9 +236,11 @@ void MainWindow::notifyStatus()
     for (int i = 0; i < this->list_of_maintabs.length(); i++)
     {
         MainTabs *tabs = this->list_of_maintabs.at(i);
-        const int shift = tabs->globalKeyShiftGet();
-        const QString shift_text = (shift > 0) ? "+" + QString::number(shift) : QString::number(shift);
-        QString line = tabs->currentLabel() + "  ·  key shift " + shift_text;
+        // what sounds: the tab's own key shift plus the global one
+        const int shift = tabs->globalKeyShiftGet() + this->global_key_shift;
+        QString line = tabs->currentLabel() + "  ·  key shift " + signedText(shift);
+        if (this->global_key_shift != 0)
+            line += " (global " + signedText(this->global_key_shift) + ")";
         if (this->list_of_maintabs.length() > 1)
             line = QString::number(i + 1) + ":  " + line;
         lines.append(line);
@@ -465,9 +476,19 @@ void MainWindow::showGlobalKeyShift()
 }
 void MainWindow::globalKeyShiftValueChanged(int value, bool is_relative)
 {
+    // one global value, set absolutely in every section: the sections cannot
+    // drift apart, and the reset (Scroll Lock: relative 0) is exact
+    if (!is_relative)
+        this->global_key_shift = value;
+    else if (value == 0)
+        this->global_key_shift = 0;
+    else
+        this->global_key_shift += value;
+    this->global_key_shift = qBound(-MidiEngine::KEY_SHIFT_LIMIT, this->global_key_shift, MidiEngine::KEY_SHIFT_LIMIT);
+    
     for (int i=0; i < this->list_of_maintabs.length(); i++)
     {
-        this->list_of_maintabs.at(i)->globalKeyShiftChanged(value, is_relative);
+        this->list_of_maintabs.at(i)->setGlobalKeyShift(this->global_key_shift);
     }
     
     notifyStatus();

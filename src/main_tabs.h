@@ -61,7 +61,9 @@ public:
     void rawKeyReleased(int keycode);
     void MIDISignal(MIDISignalTypes type);
 
-    void globalKeyShiftChanged(int value, bool is_relative);
+    // the global key shift, the same absolute value for all sections (MainWindow)
+    void setGlobalKeyShift(int value);
+    // the key shift of the current tab (without the global key shift)
     int globalKeyShiftGet();
     // label of the current tab, e.g. "F03-1"
     QString currentLabel() const;

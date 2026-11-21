@@ -23,8 +23,8 @@ the keyboard layout does not matter.
 | End / Home | pitch bend down / up, stays |
 | Down / Up | volume down / up while held; springs back to the volume from before when released |
 | Page Down / Page Up | volume down / up, stays |
-| Print / Pause | global key shift −1 / +1 (all sections) |
-| Scroll Lock | global key shift back to the start value |
+| Print / Pause | global key shift −1 / +1: all sections together, on top of each tab's own key shift |
+| Scroll Lock | global key shift back to 0 (the tabs keep their own key shift) |
 
 The hotkeys for octave shift, pitch bend, volume and the pedals act on the
 current tab **and all checked tabs** (right click on a tab) — everything that

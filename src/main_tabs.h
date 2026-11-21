@@ -115,6 +115,9 @@ private:
 
     bool is_escape_pressed = false;
     bool is_menu_pressed = false;
+    // Esc was pressed while Menu was held: Menu + Esc (reset) unless Esc + F-key switched the row
+    bool escape_with_menu = false;
+    bool escape_used_for_row = false;
     bool is_space_pressed = false;
 
 private slots:

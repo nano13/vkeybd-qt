@@ -393,7 +393,9 @@ void MainTabs::rawKeyPressed(int keycode)
         {
             if (this->is_escape_pressed)
             {
+                // Esc + F-key: row switch (also while Menu is held for multiselect)
                 this->main_tabs_switcher->setLayerActive(i);
+                this->escape_used_for_row = true;
             }
             else if (this->is_menu_pressed)
             {
@@ -428,13 +430,12 @@ void MainTabs::rawKeyPressed(int keycode)
     if (keycode == KeysRaw::Escape)
     {
         this->is_escape_pressed = true;
+        this->escape_used_for_row = false;
+        this->escape_with_menu = this->is_menu_pressed;
         
-        if (this->is_menu_pressed)
-        {
-            // Menu + Esc: only the current tab sounds again (no panic: it keeps playing)
-            this->main_tabs_switcher->pressButton(this->currentIndex());
-        }
-        else
+        // with Menu held: no panic, and the reset to the current tab waits for
+        // the release of Esc, as Esc + F-key may still switch the row
+        if (!this->escape_with_menu)
         {
             MIDISignal(MIDISignalTypes::Panick);
             MIDISignal(MIDISignalTypes::StopAll);
@@ -547,6 +548,12 @@ void MainTabs::rawKeyReleased(int keycode)
     if (keycode == KeysRaw::Escape)
     {
         this->is_escape_pressed = false;
+        
+        // Menu + Esc tapped (no F-key in between): only the current tab sounds again
+        // (no panic: it keeps playing)
+        if (this->escape_with_menu && !this->escape_used_for_row)
+            this->main_tabs_switcher->pressButton(this->currentIndex());
+        this->escape_with_menu = false;
     }
     else if (keycode == KeysRaw::Menu)
     {

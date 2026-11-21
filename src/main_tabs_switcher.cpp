@@ -49,6 +49,7 @@ MainTabsSwitcher::MainTabsSwitcher(int keyboard_id, Config *config, InterfaceNot
         row_tooltip += "\n\nSeveral tabs at once:\n"
                        "Menu + F1 … F12: add/remove a tab of the active row (= right click)\n"
                        "Menu + Esc: back to the current tab alone\n"
+                       "Keep Menu held to collect tabs across rows: Esc + F<row>, then F-keys\n"
                        "Bright: current tab — dim: sounding along";
         row_button->setToolTip(row_tooltip);
         this->list_of_row_buttons.append(row_button);

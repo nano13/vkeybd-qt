@@ -10,7 +10,8 @@ the keyboard layout does not matter.
 | F1 … F12 | switch to tab `Fxx` of the active layer (stops sounding notes first) |
 | Esc + F1 … F12 | switch the active row (layer); or click the row button `1`, `2`, … in front of the row |
 | Menu + F1 … F12 | add the tab to the sounding tabs, or remove it (like a right click on the tab) |
-| Menu + Esc | back to the current tab alone (no panic: it keeps sounding) |
+| Menu + Esc (tap Esc) | back to the current tab alone (no panic: it keeps sounding) |
+| Menu held: Esc + F1 … F12, then F-keys | collect tabs across rows: switch the row and add/remove its tabs without letting go of Menu |
 | Esc | panic: all notes off and all sound off, on all tabs of the section |
 | Delete | all sound off on all tabs of the section |
 | Insert | resend all MIDI settings of the tab |

@@ -395,6 +395,12 @@ void MainTabs::rawKeyPressed(int keycode)
             {
                 this->main_tabs_switcher->setLayerActive(i);
             }
+            else if (this->is_menu_pressed)
+            {
+                // like a right click: play this tab additionally, or not anymore
+                int layer = this->main_tabs_switcher->getLayerActive();
+                this->main_tabs_switcher->toggleTabChecked(i + layer*12);
+            }
             else
             {
                 MIDISignal(MIDISignalTypes::Panick);
@@ -436,7 +442,8 @@ void MainTabs::rawKeyPressed(int keycode)
     }
     else if (keycode == KeysRaw::Menu)
     {
-        MIDISignal(MIDISignalTypes::ShowMenu);
+        // modifier: Menu + F-key adds/removes a tab to the sounding tabs
+        this->is_menu_pressed = true;
     }
     else if (keycode == KeysRaw::Space)
     {
@@ -531,6 +538,10 @@ void MainTabs::rawKeyReleased(int keycode)
     if (keycode == KeysRaw::Escape)
     {
         this->is_escape_pressed = false;
+    }
+    else if (keycode == KeysRaw::Menu)
+    {
+        this->is_menu_pressed = false;
     }
     else if (keycode == KeysRaw::Space)
     {

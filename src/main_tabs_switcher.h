@@ -53,6 +53,8 @@ public:
     
     // called if tab was changed by hotkey to keep this widget synchronised
     void pressButton(int button_id);
+    // like a right click: adds the tab to the sounding tabs or removes it (Menu + F-key)
+    void toggleTabChecked(int tab_id);
     QList<QString> getLabelsList();
     
     QList<int> getCheckedTabsList();
@@ -67,6 +69,9 @@ private:
     
     QList<QRightClickButton*> list_of_buttons;
     QList<QString> list_labels;
+    // one per row (layer), in front of its tabs: shows and selects the active row
+    QList<QPushButton*> list_of_row_buttons;
+    void updateRowButtons();
     
     void leftClicked(QRightClickButton *button, int tab_id);
     void rightClicked(QRightClickButton *button, int tab_id);

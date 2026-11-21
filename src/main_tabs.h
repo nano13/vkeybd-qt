@@ -114,6 +114,7 @@ private:
     void midiInputPitchBend(int value);
 
     bool is_escape_pressed = false;
+    bool is_menu_pressed = false;
     bool is_space_pressed = false;
 
 private slots:

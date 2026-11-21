@@ -12,8 +12,11 @@ on. Tabs are named after the function keys and the layer: `F01-1` … `F12-1`
 is layer 1, `F01-2` … `F12-2` layer 2, and so on (`-l` sets the number of
 layers).
 
+* The **row buttons** `1`, `2`, … in front of the rows show the active row
+  (white) and select it; the shortcut is Esc + F1, Esc + F2, … The
+  function keys F1 … F12 switch to the tabs of the active row.
 * **Left click** on a tab (or its function key) makes it the current tab.
-* **Right click** checks or unchecks a tab. All checked tabs sound
+* **Right click** (or **Menu + F-key**) checks or unchecks a tab. All checked tabs sound
   together with the current one, so one key can play several presets at
   once. The last checked tab cannot be unchecked.
 * Octave shift, pitch bend, volume and the pedals apply to the current tab

@@ -34,6 +34,23 @@ MainTabsSwitcher::MainTabsSwitcher(int keyboard_id, Config *config, InterfaceNot
     this->layers_number = this->config->getNumberOfLayers();
     for (int x=0; x < this->layers_number; x++)
     {
+        // row button: the visible (and clickable) form of Esc + F<row>
+        QPushButton *row_button = new QPushButton(QString::number(x+1));
+        row_button->setObjectName("main_tab_switcher_row");
+        row_button->setCheckable(true);
+        row_button->setFixedSize(18, 18);
+        row_button->setFocusPolicy(Qt::NoFocus);
+        QString row_tooltip = QString("Row %1 — shortcut: Esc + F%1\n"
+                                      "Hold Esc and press F%1 to make this row active;\n"
+                                      "F1 … F12 then switch to the tabs of this row.")
+                .arg(x+1);
+        if (this->layers_number > 1)
+            row_tooltip += QString("\n\nAll rows: Esc + F1 … Esc + F%1").arg(qMin(this->layers_number, 12));
+        row_button->setToolTip(row_tooltip);
+        this->list_of_row_buttons.append(row_button);
+        this->grid->addWidget(row_button, x, 0);
+        connect(row_button, &QPushButton::clicked, this, [this, x]{ setLayerActive(x); });
+        
         for (int y=0; y < 12; y++)
         {
             tab_id++;
@@ -44,22 +61,43 @@ MainTabsSwitcher::MainTabsSwitcher(int keyboard_id, Config *config, InterfaceNot
                     QString::number(x+1);
             
             QRightClickButton *button = new QRightClickButton(label);
-            button->setMaximumSize(33, 18);
+            // minimum width, fixed height; the columns stretch evenly, so the
+            // buttons fill exactly the width of the section below
+            button->setMinimumWidth(33);
+            button->setFixedHeight(18);
+            button->setFocusPolicy(Qt::NoFocus);
             button->setCheckable(true);
+            button->setToolTip(QString("Tab %1\n"
+                                       "Left click: play this tab\n"
+                                       "Right click: play it additionally (several tabs at once)\n"
+                                       "Shortcuts: F%2 selects, Menu + F%2 adds/removes it,\n"
+                                       "while row %3 is active (row: Esc + F%3)")
+                               .arg(label).arg(y+1).arg(x+1));
             this->list_of_buttons.append(button);
             this->list_labels.append(label);
             
             this->colorizeTabs(button, x, y);
             
-            this->grid->addWidget(button, x, y);
+            this->grid->addWidget(button, x, y + 1);
             
             connect(button, &QRightClickButton::clicked, this, [this, button, tab_id]{ leftClicked(button, tab_id); });
             connect(button, &QRightClickButton::rightClicked, this, [this, button, tab_id]{ rightClicked(button, tab_id); });
         }
     }
     
+    // the tab columns share the width; the row button column keeps its size
+    for (int column = 1; column <= 12; column++)
+        this->grid->setColumnStretch(column, 1);
+    
     // to activate first tab on startup
     this->list_of_buttons.first()->setChecked(true);
+    updateRowButtons();
+}
+
+void MainTabsSwitcher::updateRowButtons()
+{
+    for (int row = 0; row < this->list_of_row_buttons.length(); row++)
+        this->list_of_row_buttons.at(row)->setChecked(row == this->layer_active);
 }
 
 void MainTabsSwitcher::leftClicked(QRightClickButton *button, int tab_id)
@@ -108,6 +146,13 @@ void MainTabsSwitcher::rightClicked(QRightClickButton *button, int tab_id)
     emit signalTabCheckChanged(tabs);
 }
 
+void MainTabsSwitcher::toggleTabChecked(int tab_id)
+{
+    if (tab_id < 0 || tab_id >= this->list_of_buttons.length())
+        return;
+    rightClicked(this->list_of_buttons.at(tab_id), tab_id);
+}
+
 void MainTabsSwitcher::pressButton(int button_id)
 {
     for (int i=0; i < this->list_of_buttons.length(); i++)
@@ -149,9 +194,13 @@ void MainTabsSwitcher::setLayerActive(int layer)
     // layers_number counts from 1 because it comes from config.
     // letting the human put in 0 for one layer of keyboards would be a bit strange ...
     // however layer counts from 0
-    if (layer < this->layers_number)
+    // also when the active row is clicked again: a row button never unchecks itself
+    updateRowButtons();
+    
+    if (layer >= 0 && layer < this->layers_number)
     {
         this->layer_active = layer;
+        updateRowButtons();
         
         // change colors of selected layer
         int tab_id = -1;

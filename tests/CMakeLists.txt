@@ -43,3 +43,14 @@ target_include_directories(tst_keyboard_layout PRIVATE ${PROJECT_SOURCE_DIR}/src
 target_link_libraries(tst_keyboard_layout PRIVATE Qt6::Core Qt6::Gui Qt6::Widgets Qt6::Test)
 add_test(NAME keyboard_layout COMMAND tst_keyboard_layout)
 set_tests_properties(keyboard_layout PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen")
+
+# Down / Up spring back to the volume from before, not to 100 %.
+add_executable(tst_master_volume
+    tst_master_volume.cpp
+    ${PROJECT_SOURCE_DIR}/src/midi_mastervolume.cpp
+    ${PROJECT_SOURCE_DIR}/src/midi_mastervolume.h
+)
+target_include_directories(tst_master_volume PRIVATE ${PROJECT_SOURCE_DIR}/src)
+target_link_libraries(tst_master_volume PRIVATE Qt6::Core Qt6::Gui Qt6::Widgets Qt6::Test)
+add_test(NAME master_volume COMMAND tst_master_volume)
+set_tests_properties(master_volume PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen")

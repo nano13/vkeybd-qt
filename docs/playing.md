@@ -21,7 +21,7 @@ the keyboard layout does not matter.
 | left / right Ctrl | octave down / up |
 | Left / Right | pitch bend down / up while held |
 | End / Home | pitch bend down / up, stays |
-| Down / Up | volume down / up while held |
+| Down / Up | volume down / up while held; springs back to the volume from before when released |
 | Page Down / Page Up | volume down / up, stays |
 | Print / Pause | global key shift −1 / +1 (all sections) |
 | Scroll Lock | global key shift back to the start value |

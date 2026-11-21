@@ -58,30 +58,33 @@ void MIDIMasterVolume::updateSliderLabel(int value)
 void MIDIMasterVolume::volumeKeyPressed(int key)
 {
     this->tether = static_cast<qreal>(this->slider_tether->value()) / 200;
-    this->volume = this->slider_volume->value();
-    this->sign_positive = (this->volume >= NEUTRAL);
+    
+    // continue from the exact (fractional) position while a change is still
+    // running, otherwise from what the slider shows (it may have been dragged)
+    if (!this->timer->isActive())
+        this->volume = this->slider_volume->value();
     
     int direction = 0;
-    if (key == KeysRaw::Down)
+    if (key == KeysRaw::Down || key == KeysRaw::Up)
     {
-        direction = -1;
+        direction = (key == KeysRaw::Down) ? -1 : 1;
+        
+        // a new temporary change: it returns to the value set before it
+        if (!this->temporary)
+            this->rest = this->slider_volume->value();
+        this->temporary = true;
         this->reset_slider = true;
     }
-    else if (key == KeysRaw::Up)
+    else if (key == KeysRaw::PageDown || key == KeysRaw::PageUp)
     {
-        direction = 1;
-        this->reset_slider = true;
-    }
-    else if (key == KeysRaw::PageDown)
-    {
-        direction = -1;
+        direction = (key == KeysRaw::PageDown) ? -1 : 1;
+        
+        // a permanent change: where it ends is the new value to return to
+        this->temporary = false;
         this->reset_slider = false;
     }
-    else if (key == KeysRaw::PageUp)
-    {
-        direction = 1;
-        this->reset_slider = false;
-    }
+    
+    this->sign_positive = (this->volume >= this->rest);
     
     this->direction = direction;
     if (this->direction < 0)
@@ -95,6 +98,8 @@ void MIDIMasterVolume::volumeKeyReleased()
 {
     // the timer keeps running to let the slider spring back (if reset_slider)
     this->direction = 0;
+    // the side of the rest value we spring back from (the overshoot check in tick())
+    this->sign_positive = (this->volume >= this->rest);
 }
 
 void MIDIMasterVolume::tick()
@@ -103,22 +108,24 @@ void MIDIMasterVolume::tick()
     
     if (this->direction == 0)
     {
-        if (this->volume == NEUTRAL || !this->reset_slider)
+        if (this->volume == this->rest || !this->reset_slider)
         {
+            this->temporary = false;
             this->timer->stop();
             return;
         }
         
-        // spring back towards 100 %
-        if (this->volume < NEUTRAL)
+        // spring back towards the value before the temporary change
+        if (this->volume < this->rest)
             this->volume += this->tether;
         else
             this->volume -= this->tether;
         
-        // if we shoot over 100 % we stop exactly there
-        if ((this->sign_positive && this->volume < NEUTRAL) || (!this->sign_positive && this->volume > NEUTRAL))
+        // if we shoot over it we stop exactly there
+        if ((this->sign_positive && this->volume < this->rest) || (!this->sign_positive && this->volume > this->rest))
         {
-            this->volume = NEUTRAL;
+            this->volume = this->rest;
+            this->temporary = false;
             this->timer->stop();
         }
     }
@@ -149,6 +156,9 @@ void MIDIMasterVolume::setValueSilently(int value)
     this->timer->stop();
     this->direction = 0;
     this->volume = value;
+    // e.g. another tab or preset: its value is the one to return to
+    this->rest = value;
+    this->temporary = false;
     
     {
         const QSignalBlocker blocker(this->slider_volume);

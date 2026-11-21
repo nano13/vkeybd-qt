@@ -10,7 +10,9 @@
 
 /*
  * Master volume (DCA, percent), movable by keys:
- *  Down / Up:          change while pressed, springs back to 100 % ("tether") when released
+ *  Down / Up:          change while pressed, springs back ("tether") when released
+ *                      to the value it had before -- the last value set with
+ *                      PageDown / PageUp, the slider or a preset
  *  PageDown / PageUp:  change while pressed, stays where it is when released
  *
  * Runs on a timer in the GUI thread (formerly one worker thread per tab).
@@ -42,8 +44,14 @@ private:
     qreal volume = NEUTRAL;
     qreal tether = .1;
     int direction = 0;          // -1, 0, 1
-    bool sign_positive = true;  // side of 100 % we are on
-    bool reset_slider = true;   // spring back to 100 % when the key is released
+    bool sign_positive = true;  // side of the rest value we are on
+    bool reset_slider = true;   // spring back to the rest value when the key is released
+    
+    // the value Down / Up spring back to: the value before the temporary change
+    qreal rest = NEUTRAL;
+    // a temporary change (Down / Up) is under way, until it has sprung back:
+    // pressing Down / Up again meanwhile keeps the original rest value
+    bool temporary = false;
     
     void tick();
     void moveVolumeSlider(int value);

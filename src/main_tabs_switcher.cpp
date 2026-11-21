@@ -45,7 +45,11 @@ MainTabsSwitcher::MainTabsSwitcher(int keyboard_id, Config *config, InterfaceNot
                                       "F1 … F12 then switch to the tabs of this row.")
                 .arg(x+1);
         if (this->layers_number > 1)
-            row_tooltip += QString("\n\nAll rows: Esc + F1 … Esc + F%1").arg(qMin(this->layers_number, 12));
+            row_tooltip += QString("\nAll rows: Esc + F1 … Esc + F%1").arg(qMin(this->layers_number, 12));
+        row_tooltip += "\n\nSeveral tabs at once:\n"
+                       "Menu + F1 … F12: add/remove a tab of the active row (= right click)\n"
+                       "Menu + Esc: back to the current tab alone\n"
+                       "Bright: current tab — dim: sounding along";
         row_button->setToolTip(row_tooltip);
         this->list_of_row_buttons.append(row_button);
         this->grid->addWidget(row_button, x, 0);
@@ -92,6 +96,24 @@ MainTabsSwitcher::MainTabsSwitcher(int keyboard_id, Config *config, InterfaceNot
     // to activate first tab on startup
     this->list_of_buttons.first()->setChecked(true);
     updateRowButtons();
+    updateSoundingMarks();
+}
+
+void MainTabsSwitcher::updateSoundingMarks()
+{
+    for (int i = 0; i < this->list_of_buttons.length(); i++)
+    {
+        QRightClickButton *button = this->list_of_buttons.at(i);
+        const bool sounding = button->isChecked() && i != this->current_tab;
+        if (button->property("sounding").toBool() == sounding)
+            continue;
+        
+        // property selectors in the style sheet need a repolish
+        button->setProperty("sounding", sounding);
+        button->style()->unpolish(button);
+        button->style()->polish(button);
+        button->update();
+    }
 }
 
 void MainTabsSwitcher::updateRowButtons()
@@ -102,6 +124,7 @@ void MainTabsSwitcher::updateRowButtons()
 
 void MainTabsSwitcher::leftClicked(QRightClickButton *button, int tab_id)
 {
+    this->current_tab = tab_id;
     emit signalTabSwitched(this->keyboard_id, tab_id);
     
     QList<int> tabs_checked;
@@ -121,6 +144,7 @@ void MainTabsSwitcher::leftClicked(QRightClickButton *button, int tab_id)
     }
     
     button->setChecked(true);
+    updateSoundingMarks();
     
     emit signalTabCheckChanged(tabs_checked);
 }
@@ -142,6 +166,8 @@ void MainTabsSwitcher::rightClicked(QRightClickButton *button, int tab_id)
         button->setChecked(true);
     }
     
+    updateSoundingMarks();
+    
     QList<int> tabs = getCheckedTabsList();
     emit signalTabCheckChanged(tabs);
 }
@@ -161,6 +187,8 @@ void MainTabsSwitcher::pressButton(int button_id)
     }
     
     this->list_of_buttons.at(button_id)->setChecked(true);
+    this->current_tab = button_id;
+    updateSoundingMarks();
     QString label = this->list_of_buttons.at(button_id)->text();
     
     QList<int> tabs = getCheckedTabsList();
@@ -229,7 +257,13 @@ int MainTabsSwitcher::getLayerActive()
 void MainTabsSwitcher::activateLeftmostTab()
 {
     QList<int> checked_tabs = getCheckedTabsList();
+    
+    // the current tab is still checked: nothing to switch
+    if (checked_tabs.contains(this->current_tab))
+        return;
+    
     int tab_id = checked_tabs.first();
+    this->current_tab = tab_id;
     
     emit signalTabSwitched(this->keyboard_id, tab_id);
 }

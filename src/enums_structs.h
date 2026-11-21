@@ -98,6 +98,7 @@ enum KeysRaw : uint8_t
     Menu = 127,
     
     Alt = 56,
+    AltGr = 100,    // right Alt
     Space = 57,
     Up = 103,
     Down = 108,

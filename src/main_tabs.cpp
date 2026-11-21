@@ -429,8 +429,16 @@ void MainTabs::rawKeyPressed(int keycode)
     {
         this->is_escape_pressed = true;
         
-        MIDISignal(MIDISignalTypes::Panick);
-        MIDISignal(MIDISignalTypes::StopAll);
+        if (this->is_menu_pressed)
+        {
+            // Menu + Esc: only the current tab sounds again (no panic: it keeps playing)
+            this->main_tabs_switcher->pressButton(this->currentIndex());
+        }
+        else
+        {
+            MIDISignal(MIDISignalTypes::Panick);
+            MIDISignal(MIDISignalTypes::StopAll);
+        }
     }
     else if (keycode == KeysRaw::Delete)
     {
@@ -442,8 +450,9 @@ void MainTabs::rawKeyPressed(int keycode)
     }
     else if (keycode == KeysRaw::Menu)
     {
-        // modifier: Menu + F-key adds/removes a tab to the sounding tabs
+        // modifier: Menu + F-key adds/removes a tab, Menu + Esc resets to the current tab
         this->is_menu_pressed = true;
+        this->view->keyDownRaw(keycode);
     }
     else if (keycode == KeysRaw::Space)
     {
@@ -451,7 +460,7 @@ void MainTabs::rawKeyPressed(int keycode)
         
         MIDISignal(MIDISignalTypes::SustainPressed);
     }
-    else if (keycode == KeysRaw::Alt)
+    else if (keycode == KeysRaw::Alt || keycode == KeysRaw::AltGr)
     {
         MIDISignal(MIDISignalTypes::SostenutoPressed);
     }
@@ -549,7 +558,7 @@ void MainTabs::rawKeyReleased(int keycode)
         
         MIDISignal(MIDISignalTypes::SustainReleased);
     }
-    else if (keycode == KeysRaw::Alt)
+    else if (keycode == KeysRaw::Alt || keycode == KeysRaw::AltGr)
     {
         MIDISignal(MIDISignalTypes::SostenutoReleased);
     }
@@ -618,11 +627,13 @@ void MainTabs::MIDISignal(MIDISignalTypes type)
     {
         o->keySostenuto(true);
         o->keyDownRaw(KeysRaw::Alt);
+        o->keyDownRaw(KeysRaw::AltGr);
     }
     else if (type == MIDISignalTypes::SostenutoReleased)
     {
         o->keySostenuto(false);
         o->keyUpRaw(KeysRaw::Alt);
+        o->keyUpRaw(KeysRaw::AltGr);
     }
     else if (type == MIDISignalTypes::SoftPressed)
     {

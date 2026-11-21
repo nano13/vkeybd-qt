@@ -151,7 +151,7 @@ QList<QList<QString>> KeyboardPC::getButtonLabels()
             {"A", "C", "Eb|D#", "Gb|F#", "A", "C", "Eb|D#", "Gb|F#", "A", "C", "Eb|D#", "Gb|F#", "A", "C"},
             {"Bb|A#", "Db|C#", "E", "G", "Bb|A#", "Db|C#", "E", "G", "Bb|A#", "Db|C#", "E", "G", "Bb|A#"},
             {"Ab|G#", "B", "D", "F", "Ab|G#", "B", "D", "F", "Ab|G#", "B", "D" ,"F", "Ab|G#"},
-            {"<<", "soft", "soste|nuto", "sustain", "soste|nuto", "soft", "", ">>"}};
+            {"<<", "soft", "soste|nuto", "sustain", "soste|nuto", "soft", "+tab", ">>"}};
     return list;
 }
 
@@ -162,7 +162,7 @@ QList<QList<int>> KeyboardPC::getButtonKeycodesRaw()
             {15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28},
             {58, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 43},
             {42, 86, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54},
-            {KeysRaw::Control_L, 125, 56, 57, 100, -1, -1, KeysRaw::Control_R}};
+            {KeysRaw::Control_L, KeysRaw::Super_L, KeysRaw::Alt, KeysRaw::Space, KeysRaw::AltGr, KeysRaw::Super_R, KeysRaw::Menu, KeysRaw::Control_R}};
     return list;
 }
 

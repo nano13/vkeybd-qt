@@ -168,6 +168,12 @@ QPushButton#main_tab_switcher_button_b:checked {
     color: black;
     background-color: qradialgradient(cx: 0.5, cy: 0.5, radius: 1.5, fx: 0.75, fy: 0.75, stop: 0 #f3ffff, stop: 0.2 #94faff, stop: 0.4 #6592d7);
 }
+/* tabs sounding along with the current tab (right click, Menu + F-key): a dim version of the current one */
+QPushButton#main_tab_switcher_button_a[sounding="true"],
+QPushButton#main_tab_switcher_button_b[sounding="true"] {
+    color: #94faff;
+    background-color: #24495e;
+}
 /* row buttons (Esc + F<row>): black, the active row inverted (white) */
 QPushButton#main_tab_switcher_row {
     color: #ffffff;

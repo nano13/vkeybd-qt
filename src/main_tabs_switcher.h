@@ -73,6 +73,11 @@ private:
     QList<QPushButton*> list_of_row_buttons;
     void updateRowButtons();
     
+    // the tab the view shows and F-key edits refer to; the other checked
+    // tabs only sound along and get a weaker mark (property "sounding")
+    int current_tab = 0;
+    void updateSoundingMarks();
+    
     void leftClicked(QRightClickButton *button, int tab_id);
     void rightClicked(QRightClickButton *button, int tab_id);
     

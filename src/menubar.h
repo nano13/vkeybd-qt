@@ -18,6 +18,9 @@ class MenuBar : public QMenuBar
 public:
     explicit MenuBar(QMenuBar *parent = nullptr);
     
+    // the global sounding-notes line of the PC keyboards, without emitting
+    void setSoundingNotesChecked(bool checked);
+    
 private:
     void addFileMenu();
     void addToolsMenu();
@@ -33,6 +36,7 @@ private:
     QAction *showNotes;
     QAction *showPCKeyboard;
     QAction *showPianoKeyboard;
+    QAction *showSoundingNotes;
     
 signals:
     void signalSaveQuick();
@@ -44,6 +48,8 @@ signals:
     void signalShowActionChanged(GUIElements elements, bool is_checked);
     
     void signalGlobalKeyShift();
+    void signalKeymapEditor();
+    void signalShowSoundingNotes(bool show);
     void signalResendMIDISettings();
     
     void signalHelpAbout();

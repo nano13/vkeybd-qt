@@ -52,6 +52,10 @@ public:
     // this view (volume slider, key shift buttons) only to the bound tab.
     // The volume hotkeys drive MainTabs' group DCA instead.
     void setSoundingTabs(std::function<QList<int>()> provider);
+    // the set of sounding tabs has changed (MainTabs: multiselect)
+    void soundingTabsChanged();
+    // config.ini: pc-keyboard-sounding-notes
+    void setShowSoundingNotes(bool show);
     // shows the bound tab's volume after it was changed elsewhere (group DCA)
     void refreshVolume();
     // shows the engine's current settings of the bound tab (e.g. after a global key shift)
@@ -71,6 +75,9 @@ public:
     void octaveUp();
 
     void showHideGUIElements(GUIElements elements, bool show);
+    
+    // the PC keyboard display (keymap, keyboard form)
+    KeyboardPC *pcKeyboard() const;
 
     QPushButton *button_panic = new QPushButton;
     QPushButton *button_stop_all = new QPushButton;
@@ -111,6 +118,12 @@ private:
     QSet<int> sostenuto_tabs;
     QSet<int> soft_tabs;
     QList<int> pedalTabs(bool pressed, QSet<int> &held) const;
+
+    // the PC keyboard shows what each key sounds as on the sounding tabs;
+    // changes are collected and shown once per event loop pass
+    bool sounding_notes_pending = false;
+    void scheduleSoundingNotes();
+    void updateSoundingNotes();
 
     // Track each source separately so physical keys and MIDI input can overlap.
     QHash<int, int> displayed_source_notes;

@@ -37,6 +37,7 @@ HelpReader::HelpReader(QWidget *parent) : QDialog(parent)
     
     this->pages = {
         {"layout.md", "Keyboard Layout"},
+        {"keymaps.md", "Keymaps"},
         {"keyboards.md", "Keyboard Recommendations"},
         {"interception.md", "Windows Lock Driver"},
         {"multiplexer.md", "MIDI Multiplexer"},

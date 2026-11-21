@@ -82,9 +82,14 @@ int linuxKeyCode(uint32_t usage)
     if (usage < 0x68)
         return table[usage];
 
-    // modifiers
+    // modifiers, and the Japanese (JIS) keys
     switch (usage)
     {
+        case 0x87: return 89;  // International1: KEY_RO
+        case 0x88: return 93;  // International2: KEY_KATAKANAHIRAGANA
+        case 0x89: return 124; // International3: KEY_YEN
+        case 0x8A: return 92;  // International4: KEY_HENKAN
+        case 0x8B: return 94;  // International5: KEY_MUHENKAN
         case 0xE0: return 29;  // KEY_LEFTCTRL
         case 0xE1: return 42;  // KEY_LEFTSHIFT
         case 0xE2: return 56;  // KEY_LEFTALT

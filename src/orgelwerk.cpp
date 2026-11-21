@@ -1,5 +1,9 @@
 #include "orgelwerk.h"
 
+#include <QTimer>
+
+#include <algorithm>
+
 Orgelwerk::Orgelwerk(int keyboard_id, MidiEngine *engine, QWidget *parent) : QWidget(parent)
 {
     this->keyboard_id = keyboard_id;
@@ -12,6 +16,7 @@ Orgelwerk::Orgelwerk(int keyboard_id, MidiEngine *engine, QWidget *parent) : QWi
     connect(this->engine, &MidiEngine::signalNoteOff, this, &Orgelwerk::engineNoteOff);
     connect(this->engine, &MidiEngine::signalSourceKey, this, &Orgelwerk::engineSourceKey);
     connect(this->engine, &MidiEngine::signalPresetReplaced, this, &Orgelwerk::enginePresetReplaced);
+    connect(this->engine, &MidiEngine::signalRoutingChanged, this, &Orgelwerk::scheduleSoundingNotes);
 
     // every change of the settings shown here goes straight to the engine
     connect(this->keys, &MIDIKeySelector::signalSelectionChanged, this, &Orgelwerk::pushMain);
@@ -115,11 +120,16 @@ void Orgelwerk::drawPianoKeyboard(int grid_row)
 void Orgelwerk::drawPCKeyboard(int grid_row)
 {
     this->pc = new KeyboardPC;
-    this->pc->setToolTip("Shows what keys are pressed");
+    this->pc->setToolTip("Shows what keys are pressed. The small line on a key: what it sounds as now "
+                         "(octave numbers, or note names when transposed; C4 = middle C)");
     connect(this->pc, &KeyboardPC::MIDIPress, this, [this](int midicode){ emit signalMIDIEvent(midicode, MIDIMode::Press); });
     connect(this->pc, &KeyboardPC::MIDIRelease, this, [this](int midicode){ emit signalMIDIEvent(midicode, MIDIMode::Release); });
     connect(this->pc, &KeyboardPC::octaveDown, this, &Orgelwerk::octaveDown);
     connect(this->pc, &KeyboardPC::octaveUp, this, &Orgelwerk::octaveUp);
+    connect(this->pc, &KeyboardPC::sustain, this, &Orgelwerk::keySustain);
+    connect(this->pc, &KeyboardPC::sostenuto, this, &Orgelwerk::keySostenuto);
+    connect(this->pc, &KeyboardPC::soft, this, &Orgelwerk::keySoft);
+    connect(this->pc, &KeyboardPC::midiMappingChanged, this, &Orgelwerk::scheduleSoundingNotes);
 
     // The key-press display expands to the full width of this keyboard column.
     this->grid->addWidget(this->pc, grid_row, 0, 1, 2);
@@ -172,6 +182,7 @@ void Orgelwerk::bindTab(int tab)
 
     resetNoteDisplays();
     reloadFromEngine();
+    scheduleSoundingNotes();
 }
 
 int Orgelwerk::boundTab() const
@@ -182,6 +193,58 @@ int Orgelwerk::boundTab() const
 void Orgelwerk::setSoundingTabs(std::function<QList<int>()> provider)
 {
     this->sounding_tabs = provider;
+    scheduleSoundingNotes();
+}
+
+void Orgelwerk::soundingTabsChanged()
+{
+    scheduleSoundingNotes();
+}
+
+KeyboardPC *Orgelwerk::pcKeyboard() const
+{
+    return this->pc;
+}
+
+void Orgelwerk::setShowSoundingNotes(bool show)
+{
+    this->pc->setShowSoundingNotes(show);
+}
+
+void Orgelwerk::scheduleSoundingNotes()
+{
+    // loading a session recompiles every tab: show the result once
+    if (this->sounding_notes_pending)
+        return;
+    this->sounding_notes_pending = true;
+    QTimer::singleShot(0, this, &Orgelwerk::updateSoundingNotes);
+}
+
+void Orgelwerk::updateSoundingNotes()
+{
+    this->sounding_notes_pending = false;
+    if (!this->pc)
+        return;
+    
+    const QList<int> tabs = soundingTabs();
+    QHash<int, QList<int>> sounding;
+    const QList<int> keys = this->pc->midiNotes();
+    for (const int key : keys)
+    {
+        QList<int> notes;
+        for (const int tab : tabs)
+        {
+            const QList<int> tab_notes = this->engine->soundingNotes(tab, key);
+            for (const int note : tab_notes)
+            {
+                if (!notes.contains(note))
+                    notes.append(note);
+            }
+        }
+        std::sort(notes.begin(), notes.end());
+        sounding.insert(key, notes);
+    }
+    this->pc->setSoundingNotes(sounding);
 }
 
 QList<int> Orgelwerk::soundingTabs() const

@@ -43,6 +43,9 @@ setup of synths out: see [MIDI multiplexer](docs/multiplexer.md).
 * **Outputs:** ALSA, JACK, libremidi (cross-platform), or network (remote
   control another KeyDeskMIDI instance).
 * Pedals, pitch bend, volume, octave and key shift on the PC keyboard.
+* **Keymap editor:** other patterns (accordion B-system, Jankó, Wicki-Hayden,
+  piano) or every key set by hand; ISO, ANSI and JIS keyboards, detected
+  automatically ([details](docs/keymaps.md)).
 
 For playing live, use a mechanical keyboard with full n-key rollover — see
 [keyboards for live performance](docs/keyboards.md).
@@ -55,6 +58,9 @@ For playing live, use a mechanical keyboard with full n-key rollover — see
 * [The keyboard layout](docs/layout.md) — the chromatic button accordion
   system: isomorphic, with the chord patterns; more than three octaves per
   keyboard (also in *Help > Keyboard Layout*).
+* [Keymaps and keyboard forms](docs/keymaps.md) — the keymap editor,
+  patterns, keys set by hand, ISO/ANSI/JIS, keymap files (also in
+  *Help > Keymaps*).
 * [Keyboards for live performance](docs/keyboards.md) — two hands on two
   keyboards, n-key rollover, switches, keycaps, a checklist for the show
   (also in *Help > Keyboard Recommendations*).
@@ -106,6 +112,12 @@ called `keydesk-midi...` (see [docs/midi.md](docs/midi.md)).
 `notify` chooses the desktop notification that shows the current tab and key
 shift of every section after each change: `dbus` (Linux desktops), `tray`
 (system tray message: Windows, macOS, desktops with a tray) or `none`.
+
+`pc-keyboard-sounding-notes` (`true`/`false`, default `true`) shows on every
+key of the PC keyboard display, in small print, what it sounds as right now
+(see [docs/layout.md](docs/layout.md)); `false` gives a more compact keyboard.
+Also switched in *View > Show Sounding Notes on the PC Keyboards* and in the
+keymap editor.
 
 ## Build (Linux, CMake + Ninja)
 

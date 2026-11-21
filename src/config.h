@@ -47,10 +47,17 @@ public:
     
     NotifyBackend getNotifyBackend();
     
+    // the small line on the PC keyboard keys with the notes that sound
+    bool getPCKeyboardSoundingNotes();
+    void setPCKeyboardSoundingNotes(bool show);
+    
     QString getOutputSystem();
     void setOutputSystem(QString output);
     
     QString getKeyboardConfig();
+    
+    // the folder of config.ini (keyboard states, keymaps)
+    QString dataDir() const;
     void setKeyboardConfig(QString file);
     
 private:

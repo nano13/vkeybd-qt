@@ -27,7 +27,23 @@ of the accordion:
   same note under two fingers gives you alternative fingerings, and patterns
   that start in row 3 continue there (see below).
 
-The PC keyboard display of KeyDeskMIDI shows the note on every key.
+The PC keyboard display of KeyDeskMIDI shows the note on every key. Below
+it, in small print, is what the key **sounds as right now** — on all tabs
+that sound together, with their octave boxes, key shifts and channels:
+
+* `2 3`: the key's own note in octaves 2 and 3 (C4 is middle C).
+* `C# 3 4`: transposed by a non-octave amount — C♯ in octaves 3 and 4.
+* `G#2 D#3`: different notes, e.g. one channel a fifth up.
+* `1…4`: too long for the key; the tooltip of the key shows all notes.
+* nothing: no activated channel covers the key (outside every key range).
+
+The line needs taller keys. If you prefer a compact keyboard, switch it off
+with *View > Show Sounding Notes on the PC Keyboards* (or in the keymap
+editor; saved as `pc-keyboard-sounding-notes` in `config.ini`); the tooltips
+of the keys still list what they sound.
+
+Other arrangements — other patterns, or keys set by hand — are made in the
+keymap editor: see [Keymaps](keymaps.md).
 
 ## Isomorphic: one pattern for every key
 

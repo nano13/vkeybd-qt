@@ -23,6 +23,7 @@
     <qresource prefix="/docs">
         <file alias="keyboards.md">../docs/keyboards.md</file>
         <file alias="layout.md">../docs/layout.md</file>
+        <file alias="keymaps.md">../docs/keymaps.md</file>
         <file alias="interception.md">../docs/interception.md</file>
         <file alias="multiplexer.md">../docs/multiplexer.md</file>
     </qresource>

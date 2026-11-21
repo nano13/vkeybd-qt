@@ -47,7 +47,8 @@ void MenuBar::addToolsMenu()
     QAction *globalKeyShift = new QAction("Global Key Shift");
     connect(globalKeyShift, &QAction::triggered, this, &MenuBar::globalKeyShift);
     
-    QAction *globalKeyMap = new QAction("Global Key Map");
+    QAction *globalKeyMap = new QAction("Keymap Editor...");
+    connect(globalKeyMap, &QAction::triggered, this, &MenuBar::signalKeymapEditor);
     
     
     QAction *globalResendMIDISettings = new QAction("Resend all MIDI Settings");
@@ -105,6 +106,21 @@ void MenuBar::addViewMenu()
     menuView->addAction(showNotes);
     menuView->addAction(showPCKeyboard);
     menuView->addAction(showPianoKeyboard);
+    
+    // for all keyboards; MainWindow sets the saved state (setSoundingNotesChecked)
+    this->showSoundingNotes = new QAction("Show Sounding Notes on the PC Keyboards");
+    this->showSoundingNotes->setCheckable(true);
+    this->showSoundingNotes->setChecked(true);
+    this->showSoundingNotes->setToolTip("A small line on every key: the octaves (or notes) it sounds as right now");
+    connect(this->showSoundingNotes, &QAction::toggled, this, &MenuBar::signalShowSoundingNotes);
+    menuView->addSeparator();
+    menuView->addAction(this->showSoundingNotes);
+}
+
+void MenuBar::setSoundingNotesChecked(bool checked)
+{
+    const QSignalBlocker blocker(this->showSoundingNotes);
+    this->showSoundingNotes->setChecked(checked);
 }
 void MenuBar::addHelpMenu()
 {

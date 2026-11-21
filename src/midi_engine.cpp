@@ -104,7 +104,11 @@ void MidiEngine::setMasterKeyShift(int tab, int value)
 void MidiEngine::setGlobalKeyShift(int value)
 {
     // applies to the next notes; held notes keep sounding as they were started
-    this->global_key_shift = qBound(-KEY_SHIFT_LIMIT, value, KEY_SHIFT_LIMIT);
+    value = qBound(-KEY_SHIFT_LIMIT, value, KEY_SHIFT_LIMIT);
+    if (value == this->global_key_shift)
+        return;
+    this->global_key_shift = value;
+    emit signalRoutingChanged();
 }
 
 int MidiEngine::globalKeyShift() const
@@ -131,6 +135,7 @@ void MidiEngine::ensureTab(int tab)
 void MidiEngine::recompile(int tab)
 {
     this->compiled.insert(tab, compile(this->presets.value(tab)));
+    emit signalRoutingChanged();
 }
 
 bool MidiEngine::hasPreset(int tab) const
@@ -210,18 +215,13 @@ void MidiEngine::forwardControlChange(int tab, int cc, int value)
     }
 }
 
-void MidiEngine::startNotes(int tab, int held_key, int keycode, int velocity)
+QList<MidiEngine::RoutedNote> MidiEngine::routeKey(int tab, int keycode) const
 {
+    QList<RoutedNote> result;
     if (!this->compiled.contains(tab))
-        return;
-    
-    // a second press without release (e.g. lost key-up while the window had no focus):
-    // release what this tab still holds for this key before re-triggering
-    releaseHeld(held_key, tab);
+        return result;
     
     const CompiledTab compiled_tab = this->compiled.value(tab);
-    
-    QList<SentNote> sent_notes;
     for (int octave_offset : compiled_tab.octave_offsets)
     {
         const int m_code = keycode + octave_offset;
@@ -235,22 +235,57 @@ void MidiEngine::startNotes(int tab, int held_key, int keycode, int velocity)
             if (note < 0 || note > 127)
                 continue;
             
-            SentNote sent;
-            sent.tab = tab;
-            sent.channel = route.channel;
-            sent.note = note;
-            if (velocity < 0)
-            {
-                // PC keyboard: the channel's velocity setting
-                sent.velocity = route.velocity;
-            }
-            else
-            {
-                // MIDI input: played velocity, scaled by the channel setting relative to mf (64)
-                sent.velocity = qBound(1, velocity * route.velocity / MIDI_INPUT_NEUTRAL_VELOCITY, 127);
-            }
-            sent_notes.append(sent);
+            RoutedNote routed;
+            routed.channel = route.channel;
+            routed.note = note;
+            routed.velocity = route.velocity;
+            result.append(routed);
         }
+    }
+    return result;
+}
+
+QList<int> MidiEngine::soundingNotes(int tab, int source_key) const
+{
+    QList<int> notes;
+    const QList<RoutedNote> routed = routeKey(tab, source_key - SOURCE_KEY_OFFSET);
+    for (const RoutedNote &r : routed)
+    {
+        if (!notes.contains(r.note))
+            notes.append(r.note);
+    }
+    std::sort(notes.begin(), notes.end());
+    return notes;
+}
+
+void MidiEngine::startNotes(int tab, int held_key, int keycode, int velocity)
+{
+    if (!this->compiled.contains(tab))
+        return;
+    
+    // a second press without release (e.g. lost key-up while the window had no focus):
+    // release what this tab still holds for this key before re-triggering
+    releaseHeld(held_key, tab);
+    
+    QList<SentNote> sent_notes;
+    const QList<RoutedNote> routed = routeKey(tab, keycode);
+    for (const RoutedNote &r : routed)
+    {
+        SentNote sent;
+        sent.tab = tab;
+        sent.channel = r.channel;
+        sent.note = r.note;
+        if (velocity < 0)
+        {
+            // PC keyboard: the channel's velocity setting
+            sent.velocity = r.velocity;
+        }
+        else
+        {
+            // MIDI input: played velocity, scaled by the channel setting relative to mf (64)
+            sent.velocity = qBound(1, velocity * r.velocity / MIDI_INPUT_NEUTRAL_VELOCITY, 127);
+        }
+        sent_notes.append(sent);
     }
     
     // update the bookkeeping first, then talk to the outside world

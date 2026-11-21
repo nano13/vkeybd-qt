@@ -4,6 +4,8 @@
 #include <QSettings>
 #include <QFile>
 
+#include <algorithm>
+
 #include "midi_engine.h"
 #include "preset_serializer.h"
 #include "midi_sounds_list.h"
@@ -234,6 +236,52 @@ private slots:
         QCOMPARE(audio.events.length(), 4);
         engine.noteOff(KEY);
         QCOMPARE(audio.events.length(), 8);
+    }
+
+    void soundingNotesMatchWhatIsSent()
+    {
+        RecordingInterface audio;
+        MidiEngine engine(&audio);
+
+        TabPreset preset;
+        preset.octave_mask = "00011000";
+        preset.channels[1].activated = true;
+        preset.channels[1].key_shift = 7;
+        engine.setPreset(0, preset);
+        engine.setGlobalKeyShift(2);
+
+        const QList<int> sounding = engine.soundingNotes(0, KEY);
+        engine.noteOn(0, KEY);
+        QList<int> sent;
+        for (const RecordedEvent &event : audio.events)
+        {
+            if (event.type == "on" && !sent.contains(event.value))
+                sent.append(event.value);
+        }
+        std::sort(sent.begin(), sent.end());
+        QCOMPARE(sounding, sent);
+        QCOMPARE(sounding.size(), 4);
+        // nothing is sent by asking
+        engine.noteOff(KEY);
+        const int events = audio.events.length();
+        engine.soundingNotes(0, KEY);
+        QCOMPARE(audio.events.length(), events);
+        // unknown tab: nothing sounds
+        QVERIFY(engine.soundingNotes(5, KEY).isEmpty());
+    }
+
+    void routingChangesAreSignalled()
+    {
+        MidiEngine engine(nullptr);
+        engine.setPreset(0, TabPreset());
+        QSignalSpy changed(&engine, &MidiEngine::signalRoutingChanged);
+        engine.setMasterKeyShift(0, 3);
+        QCOMPARE(changed.size(), 1);
+        engine.setGlobalKeyShift(2);
+        QCOMPARE(changed.size(), 2);
+        // unchanged: no signal
+        engine.setGlobalKeyShift(2);
+        QCOMPARE(changed.size(), 2);
     }
 
     void retriggerReleasesFirst()

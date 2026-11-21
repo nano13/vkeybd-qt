@@ -14,10 +14,13 @@ add_executable(keydesk-midi
     interface_jack.cpp
     interface_notify.cpp
     interface_notify_tray.cpp
+    keyboard_layout.cpp
     keyboard_notes.cpp
     keyboard_pc.cpp
     keyboard_piano.cpp
     keyboard_problem_dialog.cpp
+    keymap.cpp
+    keymap_editor.cpp
     main.cpp
     main_tabs.cpp
     main_tabs_switcher.cpp
@@ -49,10 +52,13 @@ add_executable(keydesk-midi
     interface_jack.h
     interface_notify.h
     interface_notify_tray.h
+    keyboard_layout.h
     keyboard_notes.h
     keyboard_pc.h
     keyboard_piano.h
     keyboard_problem_dialog.h
+    keymap.h
+    keymap_editor.h
     main_tabs.h
     main_tabs_switcher.h
     main_window.h
@@ -109,7 +115,8 @@ if(WIN32)
     target_link_libraries(keydesk-midi PRIVATE hid)
 elseif(APPLE)
     target_sources(keydesk-midi PRIVATE input_keyboard_raw_macos.cpp)
-    target_link_libraries(keydesk-midi PRIVATE "-framework IOKit" "-framework CoreFoundation")
+    # Carbon: the physical keyboard type (ANSI/ISO/JIS) in keyboard_layout.cpp
+    target_link_libraries(keydesk-midi PRIVATE "-framework IOKit" "-framework CoreFoundation" "-framework Carbon")
 else()
     target_sources(keydesk-midi PRIVATE input_keyboard_raw_linux.cpp)
 endif()

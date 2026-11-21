@@ -53,6 +53,7 @@ private:
     QList<MainTabsSwitcher*> list_of_maintab_switchers;
     QList<MainTabs*> list_of_maintabs;
     Config *config;
+    MenuBar *menu_bar = nullptr;
     int number_of_keyboards;
     
     QList<QLineEdit*> list_of_line_udp_ips;
@@ -111,6 +112,10 @@ private slots:
     void globalKeyShiftValueChanged(int value, bool is_relative);
     
     void globalResendMIDISettings();
+    // asks for the keyboard section if there is more than one
+    void openKeymapEditor();
+    // the sounding-notes line of all PC keyboards (View menu, keymap editors); saved in config.ini
+    void setShowSoundingNotes(bool show);
     
     void helpAbout();
 };

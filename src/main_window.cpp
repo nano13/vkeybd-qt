@@ -7,6 +7,7 @@
 #endif
 
 #include <QApplication>
+#include <QInputDialog>
 #include <QCloseEvent>
 
 MainWindow::MainWindow(OutputSystem output, int number_of_keyboards, QWidget *parent)
@@ -59,6 +60,10 @@ MainWindow::MainWindow(OutputSystem output, int number_of_keyboards, QWidget *pa
         connect(menu, &MenuBar::signalShowActionChanged, this, &MainWindow::showActionChanged);
         connect(menu, &MenuBar::signalGlobalKeyShift, this, &MainWindow::showGlobalKeyShift);
         connect(menu, &MenuBar::signalResendMIDISettings, this, &MainWindow::globalResendMIDISettings);
+        connect(menu, &MenuBar::signalKeymapEditor, this, &MainWindow::openKeymapEditor);
+        connect(menu, &MenuBar::signalShowSoundingNotes, this, &MainWindow::setShowSoundingNotes);
+        menu->setSoundingNotesChecked(this->config->getPCKeyboardSoundingNotes());
+        this->menu_bar = menu;
         
         connect(menu, &MenuBar::signalHelpAbout, this, &MainWindow::helpAbout);
         // one help reader with a tab per page
@@ -155,6 +160,8 @@ QWidget* MainWindow::newKeyboardInstance(int id, OutputSystem output)
     connect(tabs, &MainTabs::signalKeyShiftChanged, this, &MainWindow::globalKeyShiftValueChanged);
     // octave keys (Ctrl) change the key shift of this section
     connect(tabs, &MainTabs::signalStatusChanged, this, &MainWindow::notifyStatus);
+    // the checkbox in a keymap editor switches the line on all keyboards
+    connect(tabs, &MainTabs::signalShowSoundingNotes, this, &MainWindow::setShowSoundingNotes);
     
     this->list_of_maintabs.append(tabs);
     
@@ -509,4 +516,33 @@ void MainWindow::helpAbout()
     about->setAttribute(Qt::WA_DeleteOnClose);
     about->setMinimumSize(600, 600);
     about->show();
+}
+
+void MainWindow::openKeymapEditor()
+{
+    if (this->list_of_maintabs.isEmpty())
+        return;
+    
+    int keyboard_id = 0;
+    if (this->list_of_maintabs.length() > 1)
+    {
+        QStringList keyboards;
+        for (int i = 0; i < this->list_of_maintabs.length(); i++)
+            keyboards.append(QString("Keyboard %1").arg(i + 1));
+        bool ok = false;
+        const QString choice = QInputDialog::getItem(this, "Keymap Editor", "Edit the keymap of:", keyboards, 0, false, &ok);
+        if (!ok)
+            return;
+        keyboard_id = keyboards.indexOf(choice);
+    }
+    this->list_of_maintabs.at(keyboard_id)->openKeymapEditor();
+}
+
+void MainWindow::setShowSoundingNotes(bool show)
+{
+    this->config->setPCKeyboardSoundingNotes(show);
+    for (MainTabs *tabs : this->list_of_maintabs)
+        tabs->setShowSoundingNotes(show);
+    if (this->menu_bar)
+        this->menu_bar->setSoundingNotesChecked(show);
 }

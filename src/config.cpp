@@ -107,6 +107,10 @@ Config::Config(QObject *parent) : QObject(parent)
         else
             this->config->setValue("default/notify", "none");
     }
+    
+    // added later: written into existing config files too, so it can be found there
+    if (!this->config->contains("default/pc-keyboard-sounding-notes"))
+        this->config->setValue("default/pc-keyboard-sounding-notes", true);
 }
 
 QSettings *Config::openAutoloadFile()
@@ -205,6 +209,21 @@ int Config::getNumberOfLayers()
 void Config::setNumberOfLayers(int number)
 {
     this->config->setValue("default/number-of-layers", number);
+}
+
+QString Config::dataDir() const
+{
+    return this->config_dir->absolutePath();
+}
+
+bool Config::getPCKeyboardSoundingNotes()
+{
+    return this->config->value("default/pc-keyboard-sounding-notes", true).toBool();
+}
+
+void Config::setPCKeyboardSoundingNotes(bool show)
+{
+    this->config->setValue("default/pc-keyboard-sounding-notes", show);
 }
 
 NotifyBackend Config::getNotifyBackend()

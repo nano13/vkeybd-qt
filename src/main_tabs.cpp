@@ -1,5 +1,10 @@
 #include "main_tabs.h"
 
+#include <QFile>
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QSaveFile>
+
 #include <QTimer>
 #include <QScrollBar>
 
@@ -60,6 +65,14 @@ MainTabs::MainTabs(QList<QString> labels, int id, Config *config, MainTabsSwitch
     
     // the one view of this keyboard
     this->view = new Orgelwerk(this->id, this->midi_engine, this);
+    this->view->setShowSoundingNotes(this->config->getPCKeyboardSoundingNotes());
+    // keymap and keyboard form of this section
+    loadKeyboardState();
+    applyKeyboardState();
+    connect(this->view->pcKeyboard(), &KeyboardPC::keyboardFormDetected, this, [this](KeyboardForm form){
+        this->detected_form = KeyboardLayout::formName(form);
+        saveKeyboardState();
+    });
     // octave shift, volume and pedals apply to the current and all checked tabs
     this->view->setSoundingTabs([this]() { return soundingTabs(); });
     connect(this->view, &Orgelwerk::signalMIDIEvent, this, &MainTabs::routeMIDIEvent);
@@ -155,6 +168,7 @@ void MainTabs::listOfCheckTabsChanged(QList<int> list_of_tab_ids)
 {
     this->list_of_checked_tabs = list_of_tab_ids;
     updateGroupDCA();
+    this->view->soundingTabsChanged();
 }
 
 void MainTabs::updateGroupDCA()
@@ -255,6 +269,11 @@ void MainTabs::routeMIDIEvent(int value, MIDIMode mode)
 
 void MainTabs::midiInputNoteOn(int note, int velocity)
 {
+    if (this->keymap_editor && this->keymap_editor->isLearning())
+    {
+        this->keymap_editor->learnMidiNote(note);
+        return;
+    }
     QList<int> tabs = soundingTabs();
     for (int tab : tabs)
     {
@@ -478,6 +497,13 @@ void MainTabs::channelEditorClosed()
 
 void MainTabs::rawKeyPressed(int keycode)
 {
+    // the keymap editor is being used: the key selects a key there, nothing plays
+    if (this->keymap_editor && this->keymap_editor->isActiveWindow())
+    {
+        this->keys_to_editor.insert(keycode);
+        this->keymap_editor->physicalKeyPressed(keycode);
+        return;
+    }
     
     QString udp_message = "keypress/"+QString::number(keycode);
     
@@ -637,6 +663,8 @@ void MainTabs::rawKeyPressed(int keycode)
 }
 void MainTabs::rawKeyReleased(int keycode)
 {
+    if (this->keys_to_editor.remove(keycode))
+        return;
     
     QString udp_message = "keyrelease/"+QString::number(keycode);
     
@@ -813,3 +841,106 @@ void MainTabs::MIDISignal(MIDISignalTypes type)
 }
 
 
+
+// ---------------------------------------------------------------------------
+// keymap and keyboard form
+
+QString MainTabs::keyboardStatePath() const
+{
+    return this->config->dataDir() + QString("/keyboard-%1.json").arg(this->id + 1);
+}
+
+void MainTabs::loadKeyboardState()
+{
+    QFile file(keyboardStatePath());
+    if (!file.open(QIODevice::ReadOnly))
+        return;   // first start: default keymap, automatic form
+    
+    const QJsonObject json = QJsonDocument::fromJson(file.readAll()).object();
+    KeyboardForm form = KeyboardForm::ISO;
+    const QString setting = json.value("form").toString();
+    if (setting == "auto" || KeyboardLayout::formFromName(setting, &form))
+        this->keyboard_form_setting = setting;
+    if (KeyboardLayout::formFromName(json.value("detected").toString(), &form))
+        this->detected_form = json.value("detected").toString();
+    
+    Keymap loaded;
+    QString error;
+    if (json.contains("keymap"))
+    {
+        if (Keymap::fromJson(json.value("keymap").toObject(), &loaded, &error))
+            this->keymap = loaded;
+        else
+            qWarning() << "Ignoring the keymap in" << keyboardStatePath() << ":" << error;
+    }
+}
+
+void MainTabs::saveKeyboardState()
+{
+    QJsonObject json;
+    json.insert("form", this->keyboard_form_setting);
+    if (!this->detected_form.isEmpty())
+        json.insert("detected", this->detected_form);
+    json.insert("keymap", this->keymap.toJson());
+    
+    QSaveFile file(keyboardStatePath());
+    if (!file.open(QIODevice::WriteOnly))
+    {
+        qWarning() << "Cannot write" << keyboardStatePath() << ":" << file.errorString();
+        return;
+    }
+    file.write(QJsonDocument(json).toJson(QJsonDocument::Indented));
+    if (!file.commit())
+        qWarning() << "Cannot write" << keyboardStatePath() << ":" << file.errorString();
+}
+
+KeyboardForm MainTabs::autoKeyboardForm() const
+{
+    KeyboardForm form = KeyboardForm::ISO;
+    if (KeyboardLayout::formFromName(this->detected_form, &form))
+        return form;
+    return KeyboardLayout::guessSystemForm();
+}
+
+void MainTabs::applyKeyboardState()
+{
+    KeyboardPC *pc = this->view->pcKeyboard();
+    KeyboardForm form = autoKeyboardForm();
+    const bool automatic = !KeyboardLayout::formFromName(this->keyboard_form_setting, &form);
+    pc->setAutoForm(automatic);
+    pc->setKeyboardForm(form);
+    pc->setKeymap(this->keymap);
+}
+
+void MainTabs::keymapApplied(const Keymap &keymap, const QString &form_setting)
+{
+    this->keymap = keymap;
+    this->keyboard_form_setting = form_setting;
+    saveKeyboardState();
+    applyKeyboardState();
+}
+
+void MainTabs::openKeymapEditor()
+{
+    if (this->keymap_editor)
+    {
+        this->keymap_editor->show();
+        this->keymap_editor->raise();
+        this->keymap_editor->activateWindow();
+        return;
+    }
+    
+    this->keymap_editor = new KeymapEditor(this->id, this->keymap, this->keyboard_form_setting,
+                                           autoKeyboardForm(), this->config->dataDir() + "/keymaps", window());
+    this->keymap_editor->setShowSoundingNotesChecked(this->view->pcKeyboard()->showSoundingNotes());
+    connect(this->keymap_editor, &KeymapEditor::applied, this, &MainTabs::keymapApplied);
+    connect(this->keymap_editor, &KeymapEditor::showSoundingNotesToggled, this, &MainTabs::signalShowSoundingNotes);
+    this->keymap_editor->show();
+}
+
+void MainTabs::setShowSoundingNotes(bool show)
+{
+    this->view->setShowSoundingNotes(show);
+    if (this->keymap_editor)
+        this->keymap_editor->setShowSoundingNotesChecked(show);
+}

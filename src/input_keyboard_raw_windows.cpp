@@ -109,6 +109,17 @@ int scanCodeToLinux(unsigned int code, bool e0)
         }
     }
     
+    // Japanese (JIS) keys, as in the Linux atkbd driver
+    switch (code)
+    {
+        case 0x70: return 93;  // KEY_KATAKANAHIRAGANA
+        case 0x73: return 89;  // KEY_RO
+        case 0x79: return 92;  // KEY_HENKAN
+        case 0x7B: return 94;  // KEY_MUHENKAN
+        case 0x7D: return 124; // KEY_YEN
+        default:   break;
+    }
+    
     if (code == 0 || code > 0x58)
         return -1;
     return static_cast<int>(code);

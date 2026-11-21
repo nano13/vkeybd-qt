@@ -1,9 +1,14 @@
 #include <QSignalSpy>
 #include <QtTest>
+#include <QFontMetrics>
 
 #include "button_piano.h"
 #include "keyboard_pc.h"
 #include "keyboard_piano.h"
+#include "keymap.h"
+#include "keyboard_layout.h"
+
+#include <QTemporaryDir>
 
 class TestKeyboardLayout : public QObject
 {
@@ -187,6 +192,273 @@ private slots:
         QVERIFY(!bottom->isDown());
         QCOMPARE(pressed.size(), 0);
         QCOMPARE(released.size(), 0);
+    }
+
+    void labelsAndColorsFollowTheMapping()
+    {
+        KeyboardPC pc;
+        const QList<PcKeyButton*> keys = pc.findChildren<PcKeyButton*>();
+        // both spellings on the black keys, also on the "=" key (MIDI 44)
+        QCOMPARE(keys.at(0)->text(), QString("Ab\nG#"));
+        QCOMPARE(keys.at(12)->text(), QString("Ab\nG#"));
+        QCOMPARE(keys.at(14 + 1)->text(), QString("C"));
+        QCOMPARE(keys.at(0)->objectName(), QString("pc_black"));
+        QCOMPARE(keys.at(14 + 1)->objectName(), QString("pc_white"));
+
+        QList<QList<int>> mapping = pc.midiMapping();
+        mapping[0][0] = 12;
+        QVERIFY(pc.setMidiMapping(mapping));
+        QCOMPARE(keys.at(0)->text(), QString("C"));
+        QCOMPARE(keys.at(0)->objectName(), QString("pc_white"));
+
+        // function keys have no note
+        mapping[4][3] = 60;
+        QVERIFY(!pc.setMidiMapping(mapping));
+    }
+
+    void soundingLineShowsOctavesOrNames()
+    {
+        PcKeyButton key(nullptr);
+        key.setKeyPitchClass(8); // G#
+        QCOMPARE(key.soundingText(1000), QString());
+
+        key.setSoundingNotes({56});
+        QCOMPARE(key.soundingText(1000), QString("3"));
+        key.setSoundingNotes({44, 56});
+        QCOMPARE(key.soundingText(1000), QString("2 3"));
+        QVERIFY(key.toolTip().contains("G#2, G#3"));
+
+        // transposed by a non-octave amount: the sounding name, then the octaves
+        key.setSoundingNotes({49, 61});
+        QCOMPARE(key.soundingText(1000), QString("C# 3 4"));
+        // different names (e.g. one channel a fifth up): full names
+        key.setSoundingNotes({44, 51});
+        QCOMPARE(key.soundingText(1000), QString("G#2 D#3"));
+
+        // too long for the key: lowest ... highest
+        key.setSoundingNotes({44, 56, 68, 80});
+        QCOMPARE(key.soundingText(1000), QString("2 3 4 5"));
+        const int narrow = QFontMetrics(key.font()).horizontalAdvance(QString("2") + QChar(0x2026) + "5");
+        QCOMPARE(key.soundingText(narrow), QString("2") + QChar(0x2026) + "5");
+    }
+
+    void soundingNotesReachTheKeys()
+    {
+        KeyboardPC pc;
+        const QList<PcKeyButton*> keys = pc.findChildren<PcKeyButton*>();
+        QHash<int, QList<int>> sounding;
+        sounding.insert(8, {44, 56});
+        pc.setSoundingNotes(sounding);
+        // both keys of note 8 (first and fourth row)
+        QCOMPARE(keys.at(0)->soundingNotes(), (QList<int>{44, 56}));
+        QCOMPARE(keys.at(14 + 14 + 13)->soundingNotes(), (QList<int>{44, 56}));
+        QVERIFY(keys.at(1)->soundingNotes().isEmpty());
+    }
+
+    void soundingLineCanBeSwitchedOff()
+    {
+        KeyboardPC pc;
+        const QList<PcKeyButton*> keys = pc.findChildren<PcKeyButton*>();
+        QVERIFY(pc.showSoundingNotes());
+        const int tall = pc.height();
+        pc.setShowSoundingNotes(false);
+        QVERIFY(pc.height() < tall);
+        // the notes are still known (tooltip), only the line is not drawn
+        QHash<int, QList<int>> sounding;
+        sounding.insert(8, {44, 56});
+        pc.setSoundingNotes(sounding);
+        QCOMPARE(keys.at(0)->soundingNotes(), (QList<int>{44, 56}));
+        QVERIFY(keys.at(0)->toolTip().contains("G#2"));
+        pc.setShowSoundingNotes(true);
+        QCOMPARE(pc.height(), tall);
+    }
+
+    void pedalKeysWorkWithTheMouse()
+    {
+        KeyboardPC pc;
+        const QList<PcKeyButton*> keys = pc.findChildren<PcKeyButton*>();
+        const int bottom_row = 14 + 14 + 13 + 13;
+        QSignalSpy sustain(&pc, &KeyboardPC::sustain);
+        QSignalSpy pressed(&pc, &KeyboardPC::MIDIPress);
+        keys.at(bottom_row + 3)->click();
+        QCOMPARE(sustain.size(), 2);
+        QCOMPARE(sustain.at(0).at(0).toBool(), true);
+        QCOMPARE(sustain.at(1).at(0).toBool(), false);
+        QCOMPARE(pressed.size(), 0);
+
+        // the physical key only lights up the display, the pedal is MainTabs' business
+        pc.keyDownRaw(KeysRaw::Space);
+        QVERIFY(keys.at(bottom_row + 3)->isDown());
+        QCOMPARE(sustain.size(), 2);
+        pc.keyUpRaw(KeysRaw::Space);
+        QVERIFY(!keys.at(bottom_row + 3)->isDown());
+    }
+
+    void noteNamesRoundTrip()
+    {
+        QCOMPARE(Keymap::noteName(8), QString("G#2"));
+        QCOMPARE(Keymap::noteName(24), QString("C4"));     // middle C
+        QCOMPARE(Keymap::noteName(-1), QString());
+        int note = -5;
+        QVERIFY(Keymap::noteFromName("C4", &note));
+        QCOMPARE(note, 24);
+        QVERIFY(Keymap::noteFromName("eb3", &note));
+        QCOMPARE(note, 15);
+        QVERIFY(!Keymap::noteFromName("H3", &note));
+        QVERIFY(!Keymap::noteFromName("C1", &note));       // below the range
+        for (int n = Keymap::NOTE_MIN; n <= Keymap::NOTE_MAX; ++n)
+        {
+            int back = -1;
+            QVERIFY(Keymap::noteFromName(Keymap::noteName(n), &back));
+            QCOMPARE(back, n);
+        }
+    }
+
+    void defaultKeymapIsTheAccordionLayout()
+    {
+        KeyboardPC pc;
+        const Keymap keymap;
+        QCOMPARE(keymap.note(41, KeyboardForm::ISO), 8);    // left of 1: G#
+        QCOMPARE(keymap.note(28, KeyboardForm::ISO), 48);   // ISO Enter
+        QCOMPARE(keymap.note(42, KeyboardForm::ISO), 8);    // row 4 = row 1
+        QCOMPARE(pc.midiNotes().first(), 8);
+        QCOMPARE(pc.midiNotes().last(), 48);
+    }
+
+    void ansiKeepsTheKeyPositions()
+    {
+        Keymap keymap;
+        // the keys sit where they are: Z keeps its note, Enter and backslash move
+        QCOMPARE(keymap.note(44, KeyboardForm::ANSI), keymap.note(44, KeyboardForm::ISO));
+        QCOMPARE(keymap.note(86, KeyboardForm::ANSI), -1);
+        QCOMPARE(keymap.note(43, KeyboardForm::ANSI), 48);  // end of the Q row
+        QCOMPARE(keymap.note(28, KeyboardForm::ANSI), 46);  // end of the A row
+
+        KeyboardPC pc;
+        pc.setKeyboardForm(KeyboardForm::ANSI);
+        QVERIFY(!pc.keycodes().contains(86));
+        QCOMPARE(pc.findChildren<PcKeyButton*>().size(), pc.keycodes().size());
+        QSignalSpy pressed(&pc, &KeyboardPC::MIDIPress);
+        pc.keyDownRaw(28);
+        QCOMPARE(pressed.size(), 1);
+        QCOMPARE(pressed.at(0).at(0).toInt(), 46);
+    }
+
+    void jisHasItsExtraKeys()
+    {
+        KeyboardPC pc;
+        pc.setKeyboardForm(KeyboardForm::JIS);
+        QVERIFY(pc.keycodes().contains(124));
+        QVERIFY(pc.keycodes().contains(89));
+        QVERIFY(pc.isNoteKey(94));      // Muhenkan: can get a note by hand
+        QVERIFY(!pc.isNoteKey(KeysRaw::Space));
+        Keymap keymap;
+        QVERIFY(keymap.note(124, KeyboardForm::JIS) >= 0);
+        QCOMPARE(keymap.note(94, KeyboardForm::JIS), -1);
+    }
+
+    void automaticFormFollowsProvingKeys()
+    {
+        KeyboardPC pc;
+        pc.setKeyboardForm(KeyboardForm::ANSI);
+        pc.setAutoForm(true);
+        QSignalSpy detected(&pc, &KeyboardPC::keyboardFormDetected);
+        QSignalSpy pressed(&pc, &KeyboardPC::MIDIPress);
+        pc.keyDownRaw(86);      // only ISO has it
+        QCOMPARE(pc.keyboardForm(), KeyboardForm::ISO);
+        QCOMPARE(detected.size(), 1);
+        QCOMPARE(pressed.size(), 1);    // and the key plays right away
+        pc.keyUpRaw(86);
+
+        // without automatic form nothing changes
+        pc.setAutoForm(false);
+        pc.keyDownRaw(124);
+        QCOMPARE(pc.keyboardForm(), KeyboardForm::ISO);
+    }
+
+    void handSetKeysFollowTheKeyOnEveryForm()
+    {
+        Keymap keymap;
+        keymap.overrides.insert(86, 30);    // ISO only
+        keymap.overrides.insert(30, -1);    // A: silent
+        KeyboardPC pc;
+        pc.setKeymap(keymap);
+        QCOMPARE(pc.currentKeymap().note(86, KeyboardForm::ISO), 30);
+        pc.setKeyboardForm(KeyboardForm::ANSI);
+        QVERIFY(!pc.midiNotes().contains(-1));
+        pc.setKeyboardForm(KeyboardForm::ISO);
+        QSignalSpy pressed(&pc, &KeyboardPC::MIDIPress);
+        pc.keyDownRaw(86);
+        pc.keyDownRaw(30);
+        QCOMPARE(pressed.size(), 1);
+        QCOMPARE(pressed.at(0).at(0).toInt(), 30);
+    }
+
+    void keymapJsonRoundTrip()
+    {
+        Keymap keymap;
+        keymap.name = "test";
+        keymap.pattern = KeymapPattern::Piano;
+        keymap.start = 12;
+        keymap.overrides.insert(86, 30);
+        keymap.overrides.insert(30, -1);
+
+        QTemporaryDir dir;
+        QVERIFY(dir.isValid());
+        const QString path = dir.filePath("test.json");
+        QString error;
+        QVERIFY2(keymap.saveFile(path, &error), qPrintable(error));
+        Keymap loaded;
+        QVERIFY2(Keymap::loadFile(path, &loaded, &error), qPrintable(error));
+        QVERIFY(loaded == keymap);
+
+        QJsonObject broken = keymap.toJson();
+        broken.insert("pattern", "nonsense");
+        QVERIFY(!Keymap::fromJson(broken, &loaded, &error));
+    }
+
+    void patternsFillTheKeys()
+    {
+        Keymap piano;
+        piano.pattern = KeymapPattern::Piano;
+        piano.start = 12;
+        QCOMPARE(piano.note(44, KeyboardForm::ISO), 12);    // Z: C
+        QCOMPARE(piano.note(31, KeyboardForm::ISO), 13);    // S: C#
+        QCOMPARE(piano.note(16, KeyboardForm::ISO), 24);    // Q: C one octave up
+
+        Keymap none;
+        none.pattern = KeymapPattern::None;
+        QVERIFY(none.patternNotes(KeyboardForm::ISO).isEmpty());
+
+        const QList<KeymapPattern> patterns = Keymap::allPatterns();
+        for (const KeymapPattern pattern : patterns)
+        {
+            Keymap keymap;
+            keymap.pattern = pattern;
+            keymap.start = Keymap::defaultStart(pattern);
+            const QMap<int, int> notes = keymap.patternNotes(KeyboardForm::ISO);
+            for (const int note : notes)
+                QVERIFY(note >= Keymap::NOTE_MIN && note <= Keymap::NOTE_MAX);
+            if (pattern != KeymapPattern::None)
+                QVERIFY(notes.size() > 20);
+        }
+    }
+
+    void editModeSelectsInsteadOfPlaying()
+    {
+        KeyboardPC pc;
+        pc.setEditMode(true);
+        const QList<PcKeyButton*> keys = pc.findChildren<PcKeyButton*>();
+        QSignalSpy selected(&pc, &KeyboardPC::keySelected);
+        QSignalSpy pressed(&pc, &KeyboardPC::MIDIPress);
+        QSignalSpy sustain(&pc, &KeyboardPC::sustain);
+        keys.at(0)->click();
+        keys.at(14 + 14 + 13 + 13 + 3)->click();    // space bar
+        QCOMPARE(selected.size(), 2);
+        QCOMPARE(selected.at(0).at(0).toInt(), 41);
+        QCOMPARE(selected.at(1).at(0).toInt(), int(KeysRaw::Space));
+        QCOMPARE(pressed.size(), 0);
+        QCOMPARE(sustain.size(), 0);
     }
 
     void sparseMappingKeepsOnlyAssignedKeys()

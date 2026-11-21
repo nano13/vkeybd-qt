@@ -34,6 +34,11 @@
 #include "midi_mastervolume.h"
 
 #include <QHash>
+#include <QPointer>
+#include <QSet>
+
+#include "keymap.h"
+#include "keymap_editor.h"
 
 /*
  * One keyboard instance: its MIDI engine, its tabs (presets, one MIDI port each)
@@ -73,6 +78,11 @@ public:
 
     // lets an open channel editor follow the current tab
     void syncChannelEditorToCurrentTab();
+    
+    // the keymap editor of this keyboard (one window, raised if open already)
+    void openKeymapEditor();
+    // the sounding-notes line of the PC keyboard (a global setting, see MainWindow)
+    void setShowSoundingNotes(bool show);
 
 private:
     InterfaceAudio *interface_audio = nullptr;
@@ -139,6 +149,23 @@ private:
     bool escape_with_menu = false;
     bool escape_used_for_row = false;
     bool is_space_pressed = false;
+    
+    // What the keys play and the form of the keyboard, kept in
+    // <data dir>/keyboard-<n>.json. Form setting "auto": the guess of the
+    // system, or the form a key proved (detected_form).
+    Keymap keymap;
+    QString keyboard_form_setting = "auto";
+    QString detected_form;
+    QString keyboardStatePath() const;
+    void loadKeyboardState();
+    void saveKeyboardState();
+    void applyKeyboardState();
+    KeyboardForm autoKeyboardForm() const;
+    void keymapApplied(const Keymap &keymap, const QString &form_setting);
+    
+    // while the editor window is active, the keys of this keyboard select keys there
+    QPointer<KeymapEditor> keymap_editor;
+    QSet<int> keys_to_editor;
 
 private slots:
     void deviceNotAvailable(QString message);
@@ -148,6 +175,8 @@ signals:
     void signalKeyShiftChanged(int value, bool is_relative);
     // tab or key shift of this section changed (for the status notification)
     void signalStatusChanged();
+    // the checkbox in the keymap editor was toggled (applies to all keyboards)
+    void signalShowSoundingNotes(bool show);
 };
 
 #endif // MAINTABS_H

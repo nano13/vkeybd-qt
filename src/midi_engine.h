@@ -70,6 +70,10 @@ public:
     TabPreset preset(int tab) const;
 
     // ---- notes ----
+    // The notes a press of this PC source key would send on the tab right now
+    // (sorted, without duplicates). The same routing as noteOn(), for displays.
+    QList<int> soundingNotes(int tab, int source_key) const;
+    
     void noteOn(int tab, int source_key);
     void noteOff(int source_key);
     
@@ -104,6 +108,8 @@ signals:
     void signalSourceKey(int tab, int source_key, bool pressed);
     // emitted by setPreset(): the whole preset of a tab was replaced
     void signalPresetReplaced(int tab);
+    // the notes a key plays have changed (channels, key shifts, octaves, global key shift)
+    void signalRoutingChanged();
 
 private:
     struct NoteRoute
@@ -122,6 +128,13 @@ private:
         int master_key_shift = 0;
     };
 
+    struct RoutedNote
+    {
+        int channel;
+        int note;
+        int velocity;   // the channel's velocity setting
+    };
+
     struct SentNote
     {
         int tab;
@@ -134,6 +147,9 @@ private:
     void ensureTab(int tab);
     void recompile(int tab);
 
+    // the notes of a key on a tab: one per checked octave and activated channel in range
+    QList<RoutedNote> routeKey(int tab, int keycode) const;
+    
     // velocity < 0: use the channel's velocity setting
     void startNotes(int tab, int held_key, int keycode, int velocity);
     

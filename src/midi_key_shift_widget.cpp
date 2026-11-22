@@ -84,6 +84,13 @@ void MIDIKeyShiftWidget::setValueFromGlobal(int value)
     
     emit signalValueChanged(value);
 }
+void MIDIKeyShiftWidget::setValueSilently(int value)
+{
+    this->spin_key->blockSignals(true);
+    this->spin_key->setValue(value);
+    this->spin_key->blockSignals(false);
+    setValueStart(value);
+}
 void MIDIKeyShiftWidget::valueChanged(int value)
 {
     emit signalValueChanged(this->spin_key->value());

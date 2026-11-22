@@ -16,6 +16,15 @@
  * save files stay compatible.
  */
 
+// the velocity a channel plays when the notes come from the MIDI input or the
+// velocity pedal (PC keys without pedal always use the channel's velocity)
+enum class InputVelocity
+{
+    Fixed = 0,      // the channel's velocity, the played one is ignored
+    Scaled = 1,     // played x channel velocity / 64 (64 passes it through)
+    AsPlayed = 2    // the played velocity as it is
+};
+
 struct ChannelSettings
 {
     bool activated = false;
@@ -34,6 +43,30 @@ struct ChannelSettings
     int attack = 0;
     int release = 0;
     int tremolo = 0;
+    
+    // MIDI input: which velocity, and which controllers of the input reach this
+    // channel (false: the channel keeps its own setting). Pedals and pitch bend always.
+    InputVelocity input_velocity = InputVelocity::Scaled;
+    bool input_portamento = true;   // CC 5, 65, 84
+    bool input_attack = true;       // CC 73
+    bool input_release = true;      // CC 72
+    bool input_volume = true;       // CC 7
+    bool input_pan = true;          // CC 10
+    bool input_other = true;        // all other controllers
+
+    // whether a controller of the MIDI input reaches this channel
+    bool acceptsInputControl(int cc) const
+    {
+        switch (cc)
+        {
+            case 5: case 65: case 84: return this->input_portamento;
+            case 73: return this->input_attack;
+            case 72: return this->input_release;
+            case 7:  return this->input_volume;
+            case 10: return this->input_pan;
+            default: return this->input_other;
+        }
+    }
 
     bool operator==(const ChannelSettings &other) const
     {
@@ -52,7 +85,14 @@ struct ChannelSettings
             && this->portamento_time == other.portamento_time
             && this->attack == other.attack
             && this->release == other.release
-            && this->tremolo == other.tremolo;
+            && this->tremolo == other.tremolo
+            && this->input_velocity == other.input_velocity
+            && this->input_portamento == other.input_portamento
+            && this->input_attack == other.input_attack
+            && this->input_release == other.input_release
+            && this->input_volume == other.input_volume
+            && this->input_pan == other.input_pan
+            && this->input_other == other.input_other;
     }
     bool operator!=(const ChannelSettings &other) const { return !(*this == other); }
 };

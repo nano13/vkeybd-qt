@@ -20,6 +20,8 @@ public:
     int value();
     void setValue(int value);
     void setValueFromGlobal(int value);
+    // shows the value without emitting anything (follows a change made elsewhere)
+    void setValueSilently(int value);
     
     void valueChanged(int value);
     

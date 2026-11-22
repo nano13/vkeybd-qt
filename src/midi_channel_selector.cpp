@@ -60,7 +60,12 @@ void MIDIChannelSelector::drawGUI()
     this->grid->addWidget(label_attack, 0, 14);
     this->grid->addWidget(label_release, 0, 15);
     this->grid->addWidget(label_tremolo, 0, 16);
-    this->grid->addWidget(label_channel_b, 0, 17);
+    QLabel *label_from_input = new QLabel("From Input");
+    label_from_input->setToolTip("What the MIDI input (and the velocity pedal) gives this channel: "
+                                 "the velocity, and which controllers. Unchecked controllers keep the "
+                                 "channel's own setting.");
+    this->grid->addWidget(label_from_input, 0, 17);
+    this->grid->addWidget(label_channel_b, 0, 18);
 
     QList<QString> list_instrument_group = this->midi_sounds_list->getInstrumentGroups();
     list_instrument_group.append("[disabled]");
@@ -181,7 +186,9 @@ void MIDIChannelSelector::drawGUI()
         this->grid->addWidget(slider_attack, row, 14);
         this->grid->addWidget(slider_release, row, 15);
         this->grid->addWidget(slider_tremolo, row, 16);
-        this->grid->addWidget(check_b, row, 17);
+        InputMenu input_menu = createInputMenu(channel);
+        this->grid->addWidget(input_menu.button, row, 17);
+        this->grid->addWidget(check_b, row, 18);
 
         this->list_of_checkboxes.append(check_a);
         this->list_of_checkboxes_b.append(check_b);
@@ -200,6 +207,8 @@ void MIDIChannelSelector::drawGUI()
         this->list_of_attacks.append(slider_attack);
         this->list_of_releases.append(slider_release);
         this->list_of_tremolos.append(slider_tremolo);
+        this->list_of_input_menus.append(input_menu);
+        updateInputButton(channel);
     }
 }
 
@@ -255,6 +264,22 @@ void MIDIChannelSelector::loadChannel(int channel, const ChannelSettings &settin
     this->list_of_attacks.at(channel)->setValue(settings.attack);
     this->list_of_releases.at(channel)->setValue(settings.release);
     this->list_of_tremolos.at(channel)->setValue(settings.tremolo);
+    
+    const InputMenu &input = this->list_of_input_menus.at(channel);
+    // exclusive group: checking one unchecks the others
+    if (settings.input_velocity == InputVelocity::Fixed)
+        input.velocity_fixed->setChecked(true);
+    else if (settings.input_velocity == InputVelocity::AsPlayed)
+        input.velocity_played->setChecked(true);
+    else
+        input.velocity_scaled->setChecked(true);
+    input.portamento->setChecked(settings.input_portamento);
+    input.attack->setChecked(settings.input_attack);
+    input.release->setChecked(settings.input_release);
+    input.volume->setChecked(settings.input_volume);
+    input.pan->setChecked(settings.input_pan);
+    input.other->setChecked(settings.input_other);
+    updateInputButton(channel);
 }
 
 ChannelSettings MIDIChannelSelector::channelFromWidgets(int channel) const
@@ -277,6 +302,20 @@ ChannelSettings MIDIChannelSelector::channelFromWidgets(int channel) const
     settings.attack = this->list_of_attacks.at(channel)->value();
     settings.release = this->list_of_releases.at(channel)->value();
     settings.tremolo = this->list_of_tremolos.at(channel)->value();
+    
+    const InputMenu &input = this->list_of_input_menus.at(channel);
+    if (input.velocity_fixed->isChecked())
+        settings.input_velocity = InputVelocity::Fixed;
+    else if (input.velocity_played->isChecked())
+        settings.input_velocity = InputVelocity::AsPlayed;
+    else
+        settings.input_velocity = InputVelocity::Scaled;
+    settings.input_portamento = input.portamento->isChecked();
+    settings.input_attack = input.attack->isChecked();
+    settings.input_release = input.release->isChecked();
+    settings.input_volume = input.volume->isChecked();
+    settings.input_pan = input.pan->isChecked();
+    settings.input_other = input.other->isChecked();
 
     return settings;
 }
@@ -681,4 +720,74 @@ void MIDIChannelSelector::hideEvent(QHideEvent *ev)
 void MIDIChannelSelector::checkToggled(QCheckBox *check_master, QCheckBox *check_slave)
 {
     check_slave->setChecked(check_master->isChecked());
+}
+
+// ---------------------------------------------------------------------------
+// From Input
+
+MIDIChannelSelector::InputMenu MIDIChannelSelector::createInputMenu(int channel)
+{
+    InputMenu input;
+    input.button = new QToolButton;
+    input.button->setPopupMode(QToolButton::InstantPopup);
+    input.button->setObjectName("input_selector");
+
+    QMenu *menu = new QMenu(input.button);
+    menu->setToolTipsVisible(true);
+    menu->addSection("Velocity");
+    QActionGroup *group = new QActionGroup(menu);
+    input.velocity_fixed = menu->addAction("Fixed: the channel's velocity");
+    input.velocity_scaled = menu->addAction("Scaled: played x channel velocity / 64");
+    input.velocity_played = menu->addAction("As played");
+    for (QAction *action : {input.velocity_fixed, input.velocity_scaled, input.velocity_played})
+    {
+        action->setCheckable(true);
+        group->addAction(action);
+    }
+    input.velocity_scaled->setChecked(true);
+
+    menu->addSection("Controllers from the input");
+    input.portamento = menu->addAction("Portamento (CC 5, 65, 84)");
+    input.attack = menu->addAction("Attack (CC 73)");
+    input.release = menu->addAction("Release (CC 72)");
+    input.volume = menu->addAction("Volume (CC 7)");
+    input.pan = menu->addAction("Pan (CC 10)");
+    input.other = menu->addAction("All other controllers");
+    for (QAction *action : {input.portamento, input.attack, input.release, input.volume, input.pan, input.other})
+    {
+        action->setCheckable(true);
+        action->setChecked(true);
+    }
+    input.button->setMenu(menu);
+
+    // triggered: only changes by the user (loading sets the actions with setChecked)
+    connect(menu, &QMenu::triggered, this, [this, channel]{
+        updateInputButton(channel);
+        pushChannel(channel);
+    });
+    return input;
+}
+
+void MIDIChannelSelector::updateInputButton(int channel)
+{
+    const InputMenu &input = this->list_of_input_menus.at(channel);
+
+    QString text = input.velocity_fixed->isChecked() ? "fixed"
+                 : input.velocity_played->isChecked() ? "played" : "scaled";
+    QStringList blocked;
+    const QList<QAction*> controls = {input.portamento, input.attack, input.release, input.volume, input.pan, input.other};
+    for (QAction *action : controls)
+    {
+        if (!action->isChecked())
+            blocked.append(action->text());
+    }
+    if (blocked.size() == controls.size())
+        text += ", no CC";
+    else if (!blocked.isEmpty())
+        text += ", CC*";
+
+    input.button->setText(text);
+    input.button->setToolTip("Velocity from the input: " + text.section(",", 0, 0)
+                             + (blocked.isEmpty() ? QString("\nAll controllers of the input reach this channel")
+                                                  : "\nKept as set here: " + blocked.join(", ")));
 }

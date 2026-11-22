@@ -199,6 +199,7 @@ MidiEngine::CompiledTab MidiEngine::compile(const TabPreset &preset)
         route.key_min = channel.key_min;
         route.key_max = channel.key_max;
         route.velocity = qBound(0, channel.velocity, 127);
+        route.input_velocity = channel.input_velocity;
 
         result.routes.append(route);
     }
@@ -241,9 +242,12 @@ void MidiEngine::forwardControlChange(int tab, int cc, int value)
         return;
     
     const CompiledTab compiled_tab = this->compiled.value(tab);
+    const TabPreset preset = this->presets.value(tab);
     for (const NoteRoute &route : compiled_tab.routes)
     {
-        sendControlChange(tab, route.channel, cc, value);
+        // a channel can keep its own portamento, attack, ... (Edit Channels: From Input)
+        if (preset.channels.at(route.channel).acceptsInputControl(cc))
+            sendControlChange(tab, route.channel, cc, value);
     }
 }
 
@@ -271,6 +275,7 @@ QList<MidiEngine::RoutedNote> MidiEngine::routeKey(int tab, int keycode) const
             routed.channel = route.channel;
             routed.note = note;
             routed.velocity = route.velocity;
+            routed.input_velocity = route.input_velocity;
             result.append(routed);
         }
     }
@@ -307,14 +312,18 @@ void MidiEngine::startNotes(int tab, int held_key, int keycode, int velocity)
         sent.tab = tab;
         sent.channel = r.channel;
         sent.note = r.note;
-        if (velocity < 0)
+        if (velocity < 0 || r.input_velocity == InputVelocity::Fixed)
         {
-            // PC keyboard: the channel's velocity setting
+            // PC keyboard (no velocity pedal), or the channel ignores the played velocity
             sent.velocity = r.velocity;
+        }
+        else if (r.input_velocity == InputVelocity::AsPlayed)
+        {
+            sent.velocity = qBound(1, velocity, 127);
         }
         else
         {
-            // MIDI input: played velocity, scaled by the channel setting relative to mf (64)
+            // MIDI input / velocity pedal: scaled by the channel setting relative to mf (64)
             sent.velocity = qBound(1, velocity * r.velocity / MIDI_INPUT_NEUTRAL_VELOCITY, 127);
         }
         sent_notes.append(sent);

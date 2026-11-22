@@ -493,6 +493,8 @@ void MainWindow::globalKeyShiftValueChanged(int value, bool is_relative)
     else
         this->global_key_shift += value;
     this->global_key_shift = qBound(-MidiEngine::KEY_SHIFT_LIMIT, this->global_key_shift, MidiEngine::KEY_SHIFT_LIMIT);
+    // the window shows it, whoever changed it
+    this->global_key_shift_widget->setGlobalValue(this->global_key_shift);
     
     for (int i=0; i < this->list_of_maintabs.length(); i++)
     {

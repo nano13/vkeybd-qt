@@ -13,26 +13,32 @@ MIDIKeyShiftGlobal::MIDIKeyShiftGlobal(QWidget *parent)
         setStyleSheet(css_file.readAll());
     }
     
-    MIDIKeyShiftWidget *key_shift_absolute = new MIDIKeyShiftWidget();
-    connect(key_shift_absolute, &MIDIKeyShiftWidget::signalValueChanged, this, [this, key_shift_absolute]{ valueChanged(key_shift_absolute->value(), false); });
+    this->key_shift_absolute = new MIDIKeyShiftWidget();
+    connect(this->key_shift_absolute, &MIDIKeyShiftWidget::signalValueChanged, this, [this]{ valueChanged(this->key_shift_absolute->value(), false); });
     
-    MIDIKeyShiftWidget *key_shift_relative = new MIDIKeyShiftWidget();
-    connect(key_shift_relative, &MIDIKeyShiftWidget::signalValueChanged, this, [this, key_shift_relative]{ valueChanged(key_shift_relative->value(), true); });
+    this->key_shift_relative = new MIDIKeyShiftWidget();
+    connect(this->key_shift_relative, &MIDIKeyShiftWidget::signalValueChanged, this, [this]{ valueChanged(this->key_shift_relative->value(), true); });
     
     QFrame *line = new QFrame;
     line->setFrameShape(QFrame::HLine);
     line->setFrameShadow(QFrame::Sunken);
     
     grid->addWidget(new QLabel("Global Key Shift (absolute)"), 0, 0);
-    grid->addWidget(key_shift_absolute, 1, 0);
+    grid->addWidget(this->key_shift_absolute, 1, 0);
     grid->addWidget(line, 2, 0);
     grid->addWidget(new QLabel("Global Key Shift (relative)"), 3, 0);
-    grid->addWidget(key_shift_relative, 4, 0);
+    grid->addWidget(this->key_shift_relative, 4, 0);
+}
+
+void MIDIKeyShiftGlobal::setGlobalValue(int value)
+{
+    this->key_shift_absolute->setValueSilently(value);
+    this->key_shift_relative->setValueSilently(value);
+    this->last_relative_pitch = value;
 }
 
 void MIDIKeyShiftGlobal::valueChanged(int value, bool is_relative)
 {
-    qDebug() << value;
     if (! is_relative)
     {
         emit signalKeyShiftChanged(value, is_relative);

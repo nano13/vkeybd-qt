@@ -54,7 +54,9 @@ public:
     void closeMidiInput(int input) override;
     void renameMidiInput(int input, QString label) override;
     
-    QString NAME = "keydesk-midi";
+    // "keydesk" for the first keyboard section, "keydesk-2", ... for the others (as with JACK);
+    // the MIDI inputs are a second client with "-in"
+    QString NAME = "keydesk";
     
 private:
     snd_seq_t *seq = nullptr;     // nullptr if the sequencer could not be opened

@@ -13,7 +13,8 @@
 InterfaceAlsa::InterfaceAlsa(int id, InterfaceAudio *parent)
     : InterfaceAudio(id, parent)
 {
-    //this->label_string = label;
+    if (id > 0)
+        this->NAME = QString("keydesk-%1").arg(id + 1);
     
     int error = snd_seq_open(&this->seq, "default", SND_SEQ_OPEN_DUPLEX, 0);
     if (error < 0)

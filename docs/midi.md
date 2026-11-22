@@ -35,7 +35,7 @@ The output system is chosen with `-o` / `--output`, or by `default/output` in
 
 | Output | Clients and ports |
 |---|---|
-| `alsa` | one ALSA sequencer client `keydesk-midi` per section, one output port per tab (`1-F01-1`, ...); the MIDI inputs are ports of a client `keydesk-midi-in` |
+| `alsa` | one ALSA sequencer client per section (`keydesk`, `keydesk-2`, ...), one output port per tab (`1-F01-1`, ...); the MIDI inputs are ports of a second client (`keydesk-in`, `keydesk-2-in`, ...) |
 | `jack` | one JACK client per section (`keydesk`, `keydesk-2`, ...), one MIDI output port per tab and the MIDI input ports |
 | `libremidi` | one client per section (`keydesk`, `keydesk-2`, ...), one virtual output port per tab; see below |
 | `network` | no MIDI: the keys are sent via UDP to another KeyDeskMIDI instance |

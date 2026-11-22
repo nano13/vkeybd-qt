@@ -133,6 +133,7 @@ private:
         int key_min;
         int key_max;
         int velocity;
+        InputVelocity input_velocity;
     };
 
     struct CompiledTab
@@ -147,6 +148,7 @@ private:
         int channel;
         int note;
         int velocity;   // the channel's velocity setting
+        InputVelocity input_velocity;
     };
 
     struct SentNote

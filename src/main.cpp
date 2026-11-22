@@ -34,8 +34,6 @@ int main(int argc, char *argv[])
             QCoreApplication::translate("main", "Nubmer of Layers. '1' gives you 12 layers, '2' gives 24 layers"), "number", "-1"},
         {{"o", "output"},
             QCoreApplication::translate("main", "Which MIDI system to use: \"alsa\", \"jack\", \"libremidi\" or \"network\" (remote control another KeyDeskMIDI instance). Default: the value in config.ini (\"jack\" initially)"), "string", "config"},
-        {{"k", "keyboard-config"},
-            QCoreApplication::translate("main", "Keyboard Configs and Mappings to use"), "string", "builtin"},
         {{"q", "quicksave-path"},
             QCoreApplication::translate("main", "Path for the quicksave/quickload file"), "string", "default"}
     });

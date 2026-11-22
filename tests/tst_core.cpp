@@ -833,6 +833,67 @@ private slots:
         QCOMPARE(audio.velocities.at(1), 30);
     }
 
+    void fromInputVelocityModes()
+    {
+        class VelocityRecorder : public RecordingInterface
+        {
+        public:
+            QMap<int, int> velocity_by_channel;
+            void keyPressEvent(int port, int channel, uint8_t midicode, uint8_t velocity) override
+            {
+                RecordingInterface::keyPressEvent(port, channel, midicode, velocity);
+                this->velocity_by_channel.insert(channel, velocity);
+            }
+        };
+        VelocityRecorder audio;
+        MidiEngine engine(&audio);
+        TabPreset preset;
+        for (int c = 0; c < 3; c++)
+        {
+            preset.channels[c].activated = true;
+            preset.channels[c].velocity = 32;
+        }
+        preset.channels[0].input_velocity = InputVelocity::Fixed;
+        preset.channels[1].input_velocity = InputVelocity::Scaled;
+        preset.channels[2].input_velocity = InputVelocity::AsPlayed;
+        engine.setPreset(0, preset);
+
+        engine.midiNoteOn(0, 0, 60, 100);
+        QCOMPARE(audio.velocity_by_channel.value(0), 32);
+        QCOMPARE(audio.velocity_by_channel.value(1), 100 * 32 / 64);
+        QCOMPARE(audio.velocity_by_channel.value(2), 100);
+
+        // the PC keys without a velocity pedal: the channel velocity everywhere
+        engine.noteOn(0, KEY);
+        QCOMPARE(audio.velocity_by_channel.value(2), 32);
+    }
+
+    void fromInputControllersCanBeKept()
+    {
+        RecordingInterface audio;
+        MidiEngine engine(&audio);
+        TabPreset preset;
+        preset.channels[0].activated = true;
+        preset.channels[1].activated = true;
+        preset.channels[1].input_attack = false;
+        preset.channels[1].input_other = false;
+        engine.setPreset(0, preset);
+        audio.events.clear();
+
+        engine.forwardControlChange(0, 73, 100);    // attack: channel 0 only
+        engine.forwardControlChange(0, 7, 90);      // volume: both
+        engine.forwardControlChange(0, 1, 20);      // modulation ("other"): channel 0 only
+        QList<int> channels;
+        for (const RecordedEvent &event : audio.events)
+            channels.append(event.channel);
+        QCOMPARE(channels, (QList<int>{0, 0, 1, 0}));
+
+        // saved and loaded
+        const TabPreset restored = PresetSerializer::fromRestoreData(PresetSerializer::toRestoreData(preset));
+        QVERIFY(restored.channels[1] == preset.channels[1]);
+        QVERIFY(!restored.channels[1].input_attack);
+    }
+
     void duplicateCCEntriesDropped()
     {
         QMap<QString, QVariant> channel;

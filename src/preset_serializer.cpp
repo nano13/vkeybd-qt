@@ -156,6 +156,21 @@ ChannelSettings PresetSerializer::channelFromMap(const QMap<QString, QVariant> &
     result.attack = intValue(map, "attack", result.attack);
     result.release = intValue(map, "release", result.release);
     result.tremolo = intValue(map, "tremolo", result.tremolo);
+    // missing in older files: the defaults (scaled velocity, all controllers)
+    if (map.contains("input_velocity"))
+        result.input_velocity = static_cast<InputVelocity>(qBound(0, map.value("input_velocity").toInt(), 2));
+    if (map.contains("input_portamento"))
+        result.input_portamento = map.value("input_portamento").toBool();
+    if (map.contains("input_attack"))
+        result.input_attack = map.value("input_attack").toBool();
+    if (map.contains("input_release"))
+        result.input_release = map.value("input_release").toBool();
+    if (map.contains("input_volume"))
+        result.input_volume = map.value("input_volume").toBool();
+    if (map.contains("input_pan"))
+        result.input_pan = map.value("input_pan").toBool();
+    if (map.contains("input_other"))
+        result.input_other = map.value("input_other").toBool();
 
     // CC entries: cc_<NNN>_<field>, grouped by NNN, kept in NNN order
     QMap<int, CCSetting> cc_by_id;
@@ -224,6 +239,13 @@ QMap<QString, QVariant> PresetSerializer::channelToMap(const ChannelSettings &se
     map["attack"] = settings.attack;
     map["release"] = settings.release;
     map["tremolo"] = settings.tremolo;
+    map["input_velocity"] = static_cast<int>(settings.input_velocity);
+    map["input_portamento"] = settings.input_portamento;
+    map["input_attack"] = settings.input_attack;
+    map["input_release"] = settings.input_release;
+    map["input_volume"] = settings.input_volume;
+    map["input_pan"] = settings.input_pan;
+    map["input_other"] = settings.input_other;
 
     // same value types as the old MIDIChannelSelector::listOfChannels
     for (const CCSetting &cc : cc_entries)

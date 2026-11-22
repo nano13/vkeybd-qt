@@ -97,7 +97,6 @@ Config::Config(QObject *parent) : QObject(parent)
         this->config->setValue("default/number-of-keyboards", 1);
         this->config->setValue("default/number-of-layers", 2);
         this->config->setValue("default/output", "jack");
-        this->config->setValue("default/keyboard-config", "keyboard-default.json");
         
         QString platform = QGuiApplication::platformName();
         if (platform == "xcb" || platform == "wayland")
@@ -109,6 +108,9 @@ Config::Config(QObject *parent) : QObject(parent)
     }
     
     // added later: written into existing config files too, so it can be found there
+    // replaced by the keymaps (keyboard-N.json, keymap editor)
+    this->config->remove("default/keyboard-config");
+    
     if (!this->config->contains("default/pc-keyboard-sounding-notes"))
         this->config->setValue("default/pc-keyboard-sounding-notes", true);
 }
@@ -236,15 +238,6 @@ NotifyBackend Config::getNotifyBackend()
         return NotifyBackend::tray;
     else // also backend == none
         return NotifyBackend::none;
-}
-
-QString Config::getKeyboardConfig()
-{
-    return this->config->value("default/keyboard-config").toString();
-}
-void Config::setKeyboardConfig(QString file)
-{
-    this->config->setValue("default/keyboard-config", file);
 }
 
 QString Config::getOutputSystem()

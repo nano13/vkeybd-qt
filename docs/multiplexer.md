@@ -22,7 +22,8 @@ preset of 16 MIDI channels, and every channel can have its own:
   the left hand, strings in the right) or zones that overlap,
 * **key shift** — transpose a layer, e.g. an octave up for a string pad,
 * **velocity** — scales the incoming velocity: 64 passes it through
-  unchanged, lower values make the layer softer, higher ones louder,
+  unchanged, lower values make the layer softer, higher ones louder
+  (or, per channel: fixed or as played — see *From Input* below),
 * **volume, pan, attack, release, portamento, tremolo** and further CCs.
 
 So one key on your MIDI keyboard can sound a piano on channel 1, strings an
@@ -39,6 +40,23 @@ or plugins, each with its 16 channels.
 * **Pitch bend** and the **other controllers** are forwarded to the sounding
   tabs.
 * The notes of all 16 incoming MIDI channels are played (omni).
+
+### From Input: what a channel takes from the input
+
+In *Edit Channels*, the column **From Input** sets per channel what the MIDI
+input (and the velocity pedal) gives it:
+
+* **Velocity** — *scaled* (the default: played × channel velocity / 64),
+  *as played*, or *fixed* (the channel's own velocity; the played one is
+  ignored — e.g. an organ layer next to a velocity-sensitive piano).
+* **Controllers** — portamento (CC 5, 65, 84), attack (CC 73), release
+  (CC 72), volume (CC 7), pan (CC 10) and all other controllers can each be
+  switched off: the channel then keeps its own setting even if the input
+  sends one. The pedals (sustain, sostenuto, soft) and pitch bend always
+  reach the channel.
+
+The button shows the velocity mode, and "CC*" when some controllers are
+switched off ("no CC" when all are).
 
 ## Changing presets while you play
 

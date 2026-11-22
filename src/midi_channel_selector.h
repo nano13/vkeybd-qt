@@ -9,6 +9,10 @@
 #include <QSpinBox>
 #include <QSlider>
 #include <QPushButton>
+#include <QToolButton>
+#include <QMenu>
+#include <QAction>
+#include <QActionGroup>
 #include <QComboBox>
 #include <QLabel>
 #include <QLineEdit>
@@ -83,6 +87,24 @@ private:
     QList<QSlider*> list_of_attacks;
     QList<QSlider*> list_of_releases;
     QList<QSlider*> list_of_tremolos;
+    
+    // "From Input": what of the MIDI input reaches the channel (a button with a menu)
+    struct InputMenu
+    {
+        QToolButton *button;
+        QAction *velocity_fixed;
+        QAction *velocity_scaled;
+        QAction *velocity_played;
+        QAction *portamento;
+        QAction *attack;
+        QAction *release;
+        QAction *volume;
+        QAction *pan;
+        QAction *other;
+    };
+    QList<InputMenu> list_of_input_menus;
+    InputMenu createInputMenu(int channel);
+    void updateInputButton(int channel);
 
     QList<CCEntry> list_of_cc_entries;
 

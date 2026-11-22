@@ -17,8 +17,14 @@ class MIDIKeyShiftGlobal : public QWidget
 public:
     explicit MIDIKeyShiftGlobal(QWidget *parent = nullptr);
     
+    // the global key shift changed (Print / Pause / Scroll Lock, or this window):
+    // both fields show it, and the relative one continues from there
+    void setGlobalValue(int value);
+    
 private:
     int last_relative_pitch = 0;
+    MIDIKeyShiftWidget *key_shift_absolute;
+    MIDIKeyShiftWidget *key_shift_relative;
     
     void valueChanged(int value, bool is_relative);
     

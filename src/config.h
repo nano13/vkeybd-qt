@@ -54,11 +54,8 @@ public:
     QString getOutputSystem();
     void setOutputSystem(QString output);
     
-    QString getKeyboardConfig();
-    
     // the folder of config.ini (keyboard states, keymaps)
     QString dataDir() const;
-    void setKeyboardConfig(QString file);
     
 private:
     QDir *config_dir;
